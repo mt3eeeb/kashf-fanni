@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>كشف فني</title>
+
+<style>
+body{font-family:Arial;direction:rtl;background:#f5f5f5;padding:15px}
+h2{background:#2c7;color:#fff;padding:10px}
+.section{background:#fff;padding:15px;margin-bottom:15px;border-radius:8px}
+label{display:block;margin-top:8px}
+input,textarea,button{width:100%;padding:6px;margin-top:4px}
+.row{display:flex;gap:5px;margin-top:5px}
+.row input{flex:1}
+button{background:#2c7;color:#fff;border:none;margin-top:8px}
+.add{background:#555}
+.item{border:1px dashed #ccc;padding:8px;margin-top:8px}
+.small{font-size:12px;color:#666}
+</style>
+</head>
+
+<body>
+
+<h2>كشف فني</h2>
+
+<!-- بيانات -->
+<div class="section">
+<label>اسم العميل</label><input>
+<label>رقم الطلب</label><input>
+<label>تاريخ الزيارة</label><input type="date">
+</div>
+
+<!-- الموقع -->
+<div class="section">
+<h3>الموقع</h3>
+<div class="row coord">
+  <input placeholder="Lat قبل الفاصلة">
+  <input placeholder="Lat بعد الفاصلة">
+  <input placeholder="Lng قبل الفاصلة">
+  <input placeholder="Lng بعد الفاصلة">
+</div>
+<button onclick="openGoogle(this)">Google Maps</button>
+<button onclick="openGarmin(this)">Garmin</button>
+</div>
+
+<!-- إحداثية البوابة -->
+<div class="section">
+<h3>إحداثية البوابة</h3>
+<div class="row coord">
+  <input placeholder="Lat قبل الفاصلة">
+  <input placeholder="Lat بعد الفاصلة">
+  <input placeholder="Lng قبل الفاصلة">
+  <input placeholder="Lng بعد الفاصلة">
+</div>
+<button onclick="openGoogle(this)">Google Maps</button>
+<button onclick="openGarmin(this)">Garmin</button>
+</div>
+
+<!-- الزوايا -->
+<div class="section">
+<h3>زوايا المزرعة</h3>
+<div id="corners"></div>
+<button class="add" onclick="addCorner()">+ إضافة زاوية</button>
+<button onclick="calcArea()">احسب المساحة</button>
+<input id="area" readonly placeholder="المساحة التقريبية (م²)">
+</div>
+
+<!-- الآبار -->
+<div class="section">
+<h3>الآبار</h3>
+<div id="wells"></div>
+<button class="add" onclick="addWell()">+ إضافة بئر</button>
+</div>
+
+<!-- نظام الري -->
+<div class="section">
+<h3>نظام الري – رشاش محوري</h3>
+<div id="pivots"></div>
+<button class="add" onclick="addPivot()">+ إضافة محور</button>
+</div>
+
+<!-- المزروعات -->
+<div class="section">
+<h3>المزروعات</h3>
+
+<h4>نخيل</h4>
+<div class="row"><input placeholder="العدد"><input placeholder="المساحة"></div>
+
+<h4>مصدات رياح</h4>
+<div class="row"><input placeholder="العدد"><input placeholder="المساحة"></div>
+
+<h4>أخرى</h4>
+<div id="crops"></div>
+<button class="add" onclick="addCrop()">+ إضافة صنف</button>
+</div>
+
+<!-- الموجودات -->
+<div class="section">
+<h3>الموجودات (مباني)</h3>
+<div id="buildings"></div>
+<button class="add" onclick="addBuilding()">+ إضافة مبنى</button>
+</div>
+
+<!-- توقيع -->
+<div class="section">
+<label>التوقيع</label><input>
+</div>
+
+<button onclick="window.print()">طباعة / PDF</button>
+
+<script>
+function getCoord(btn){
+  let r = btn.previousElementSibling;
+  let i = r.querySelectorAll("input");
+  let lat = i[0].value + "." + i[1].value;
+  let lng = i[2].value + "." + i[3].value;
+  return lat + "," + lng;
+}
+
+function openGoogle(btn){
+  let c = getCoord(btn);
+  window.open("https://maps.google.com/?q=" + c);
+}
+
+function openGarmin(btn){
+  let c = getCoord(btn).split(",");
+  window.open(`https://explore.garmin.com/map?lat=${c[0]}&lng=${c[1]}`);
+}
+
+function addCorner(){
+  corners.insertAdjacentHTML("beforeend",`
+    <div class="item row coord">
+      <input placeholder="Lat قبل">
+      <input placeholder="Lat بعد">
+      <input placeholder="Lng قبل">
+      <input placeholder="Lng بعد">
+    </div>
+  `);
+}
+
+function addWell(){
+  wells.insertAdjacentHTML("beforeend",`
+    <div class="item">
+      <h4>بئر</h4>
+      <div class="row coord">
+        <input placeholder="Lat قبل">
+        <input placeholder="Lat بعد">
+        <input placeholder="Lng قبل">
+        <input placeholder="Lng بعد">
+      </div>
+      <label>رأس كهرب</label><input>
+      <label>غطاس</label><input>
+      <label>مكينة + مضخة</label><input>
+    </div>
+  `);
+}
+
+function addPivot(){
+  pivots.insertAdjacentHTML("beforeend",`
+    <div class="item">
+      <input placeholder="رقم / اسم المحور">
+      <input placeholder="ملاحظات">
+    </div>
+  `);
+}
+
+function addCrop(){
+  crops.insertAdjacentHTML("beforeend",`
+    <div class="item">
+      <input placeholder="وصف الصنف">
+      <div class="row">
+        <input placeholder="العدد">
+        <input placeholder="المساحة">
+      </div>
+    </div>
+  `);
+}
+
+function addBuilding(){
+  buildings.insertAdjacentHTML("beforeend",`
+    <div class="item">
+      <input placeholder="نوع المبنى (سكن عمال / مستودع / بركة / أخرى)">
+      <div class="row">
+        <input placeholder="العدد">
+        <input placeholder="المساحة">
+      </div>
+      <input placeholder="وصف">
+    </div>
+  `);
+}
+
+function calcArea(){
+  alert("حسبة المساحة تقريبية ويمكن تطويرها لاحقًا حسب GIS");
+}
+</script>
+
+</body>
+</html>
