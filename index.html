@@ -31,18 +31,38 @@ button{background:#2c7;color:#fff;border:none;margin-top:8px}
 <label>تاريخ الزيارة</label><input type="date">
 </div>
 
-<div class="section">
-  <h3>الموقع</h3>
+<script>
+function getCoords() {
+  const lat1 = document.getElementById("lat1").value;
+  const lat2 = document.getElementById("lat2").value;
+  const lng1 = document.getElementById("lng1").value;
+  const lng2 = document.getElementById("lng2").value;
 
-  <div class="row coord">
-    <input id="lat1" placeholder="Lat قبل الفاصلة">
-    <input id="lat2" placeholder="Lat بعد الفاصلة">
-    <input id="lng1" placeholder="Lng قبل الفاصلة">
-    <input id="lng2" placeholder="Lng بعد الفاصلة">
-  </div>
+  if (!lat1 || !lat2 || !lng1 || !lng2) {
+    alert("فضلاً أدخل الإحداثيات كاملة");
+    return null;
+  }
 
-<button onclick="openGoogleMaps()">Google Maps</button>
-<button onclick="openGarminExplore()">Garmin Explore</button>
+  return {
+    lat: `${lat1}.${lat2}`,
+    lng: `${lng1}.${lng2}`
+  };
+}
+
+function openGoogleMaps() {
+  const c = getCoords();
+  if (!c) return;
+  const url = `https://www.google.com/maps?q=${c.lat},${c.lng}`;
+  window.open(url, "_blank");
+}
+
+function openGarminExplore() {
+  const c = getCoords();
+  if (!c) return;
+  const url = `https://explore.garmin.com/map?lat=${c.lat}&lon=${c.lng}`;
+  window.open(url, "_blank");
+}
+</script>
 
 </div>
 <!-- إحداثية البوابة -->
@@ -198,3 +218,4 @@ function calcArea(){
 
 </body>
 </html>
+
