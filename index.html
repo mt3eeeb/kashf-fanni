@@ -31,19 +31,20 @@ button{background:#2c7;color:#fff;border:none;margin-top:8px}
 <label>تاريخ الزيارة</label><input type="date">
 </div>
 
-<!-- الموقع -->
 <div class="section">
-<h3>الموقع</h3>
-<div class="row coord">
-  <input placeholder="Lat قبل الفاصلة">
-  <input placeholder="Lat بعد الفاصلة">
-  <input placeholder="Lng قبل الفاصلة">
-  <input placeholder="Lng بعد الفاصلة">
-</div>
-<button onclick="openGoogle(this)">Google Maps</button>
-<button onclick="openGarmin(this)">Garmin</button>
-</div>
+  <h3>الموقع</h3>
 
+  <div class="row coord">
+    <input id="lat1" placeholder="Lat قبل الفاصلة">
+    <input id="lat2" placeholder="Lat بعد الفاصلة">
+    <input id="lng1" placeholder="Lng قبل الفاصلة">
+    <input id="lng2" placeholder="Lng بعد الفاصلة">
+  </div>
+
+<button onclick="openGoogleMaps()">Google Maps</button>
+<button onclick="openGarminExplore()">Garmin Explore</button>
+
+</div>
 <!-- إحداثية البوابة -->
 <div class="section">
 <h3>إحداثية البوابة</h3>
@@ -53,8 +54,8 @@ button{background:#2c7;color:#fff;border:none;margin-top:8px}
   <input placeholder="Lng قبل الفاصلة">
   <input placeholder="Lng بعد الفاصلة">
 </div>
-<button onclick="openGoogle(this)">Google Maps</button>
-<button onclick="openGarmin(this)">Garmin</button>
+<button onclick="openGoogleMaps()">Google Maps</button>
+<button onclick="openGarminExplore()">Garmin Explore</button>
 </div>
 
 <!-- الزوايا -->
