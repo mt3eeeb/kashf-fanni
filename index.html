@@ -17,6 +17,7 @@ button{background:#2c7;color:#fff;border:none;margin-top:8px}
 .add{background:#555}
 .item{border:1px dashed #ccc;padding:8px;margin-top:8px}
 .small{font-size:12px;color:#666}
+.actions{display:flex;gap:5px;flex-wrap:wrap}
 </style>
 </head>
 
@@ -26,38 +27,42 @@ button{background:#2c7;color:#fff;border:none;margin-top:8px}
 
 <!-- بيانات -->
 <div class="section">
-<label>اسم العميل</label><input>
-<label>رقم الطلب</label><input>
-<label>تاريخ الزيارة</label><input type="date">
+<label>اسم العميل</label>
+<input id="client">
+<label>رقم الطلب</label>
+<input id="order">
+<label>تاريخ الزيارة</label>
+<input type="date" id="date">
 </div>
 
+<!-- الموقع -->
 <div class="section">
-  <h3>الموقع</h3>
-
-  <div class="row coord">
-    <input id="lat1" placeholder="Lat قبل الفاصلة">
-    <input id="lat2" placeholder="Lat بعد الفاصلة">
-    <input id="lng1" placeholder="Lng قبل الفاصلة">
-    <input id="lng2" placeholder="Lng بعد الفاصلة">
-  </div>
-
-  <button onclick="openGoogleMaps()">Google Maps</button>
-  <button onclick="openGarminExplore()">Garmin</button>
+<h3>الموقع</h3>
+<div class="row coord">
+  <input placeholder="Lat قبل" data-save>
+  <input placeholder="Lat بعد" data-save>
+  <input placeholder="Lng قبل" data-save>
+  <input placeholder="Lng بعد" data-save>
 </div>
-</script>
-
+<div class="actions">
+<button onclick="openGoogle(this)">Google Maps</button>
+<button onclick="openGarmin(this)">Garmin</button>
 </div>
+</div>
+
 <!-- إحداثية البوابة -->
 <div class="section">
 <h3>إحداثية البوابة</h3>
 <div class="row coord">
-  <input placeholder="Lat قبل الفاصلة">
-  <input placeholder="Lat بعد الفاصلة">
-  <input placeholder="Lng قبل الفاصلة">
-  <input placeholder="Lng بعد الفاصلة">
+  <input placeholder="Lat قبل" data-save>
+  <input placeholder="Lat بعد" data-save>
+  <input placeholder="Lng قبل" data-save>
+  <input placeholder="Lng بعد" data-save>
 </div>
-<button onclick="openGoogleMaps()">Google Maps</button>
-<button onclick="openGarminExplore()">Garmin Explore</button>
+<div class="actions">
+<button onclick="openGoogle(this)">Google Maps</button>
+<button onclick="openGarmin(this)">Garmin</button>
+</div>
 </div>
 
 <!-- الزوايا -->
@@ -65,8 +70,6 @@ button{background:#2c7;color:#fff;border:none;margin-top:8px}
 <h3>زوايا المزرعة</h3>
 <div id="corners"></div>
 <button class="add" onclick="addCorner()">+ إضافة زاوية</button>
-<button onclick="calcArea()">احسب المساحة</button>
-<input id="area" readonly placeholder="المساحة التقريبية (م²)">
 </div>
 
 <!-- الآبار -->
@@ -88,10 +91,10 @@ button{background:#2c7;color:#fff;border:none;margin-top:8px}
 <h3>المزروعات</h3>
 
 <h4>نخيل</h4>
-<div class="row"><input placeholder="العدد"><input placeholder="المساحة"></div>
+<div class="row"><input placeholder="العدد" data-save><input placeholder="المساحة" data-save></div>
 
 <h4>مصدات رياح</h4>
-<div class="row"><input placeholder="العدد"><input placeholder="المساحة"></div>
+<div class="row"><input placeholder="العدد" data-save><input placeholder="المساحة" data-save></div>
 
 <h4>أخرى</h4>
 <div id="crops"></div>
@@ -105,96 +108,100 @@ button{background:#2c7;color:#fff;border:none;margin-top:8px}
 <button class="add" onclick="addBuilding()">+ إضافة مبنى</button>
 </div>
 
-<!-- توقيع -->
+<!-- أزرار التصدير -->
 <div class="section">
-<label>التوقيع</label><input>
+<h3>حفظ وتصدير</h3>
+<div class="actions">
+<button onclick="exportPDF()">تصدير PDF</button>
+<button onclick="exportCSV()">تصدير Excel</button>
+</div>
 </div>
 
-<button onclick="window.print()">طباعة / PDF</button>
-
 <script>
+/* ========= حفظ تلقائي ========= */
+document.querySelectorAll("input, textarea").forEach(el=>{
+  let key = el.placeholder || el.id;
+  if(localStorage[key]) el.value = localStorage[key];
+  el.addEventListener("input",()=>localStorage[key]=el.value);
+});
+
+/* ========= إحداثيات ========= */
 function getCoord(btn){
-  let r = btn.previousElementSibling;
-  let i = r.querySelectorAll("input");
-  let lat = i[0].value + "." + i[1].value;
-  let lng = i[2].value + "." + i[3].value;
-  return lat + "," + lng;
+  let r=btn.parentElement.previousElementSibling;
+  let i=r.querySelectorAll("input");
+  return i[0].value+"."+i[1].value+","+i[2].value+"."+i[3].value;
 }
-
 function openGoogle(btn){
-  let c = getCoord(btn);
-  window.open("https://maps.google.com/?q=" + c);
+  let c=getCoord(btn);
+  window.open("https://maps.google.com/?q="+c);
 }
-
 function openGarmin(btn){
-  let c = getCoord(btn).split(",");
+  let c=getCoord(btn).split(",");
   window.open(`https://explore.garmin.com/map?lat=${c[0]}&lng=${c[1]}`);
 }
 
+/* ========= الإضافات ========= */
 function addCorner(){
   corners.insertAdjacentHTML("beforeend",`
-    <div class="item row coord">
-      <input placeholder="Lat قبل">
-      <input placeholder="Lat بعد">
-      <input placeholder="Lng قبل">
-      <input placeholder="Lng بعد">
-    </div>
-  `);
+  <div class="item row coord">
+    <input placeholder="Lat قبل"><input placeholder="Lat بعد">
+    <input placeholder="Lng قبل"><input placeholder="Lng بعد">
+  </div>`);
 }
-
 function addWell(){
   wells.insertAdjacentHTML("beforeend",`
-    <div class="item">
-      <h4>بئر</h4>
-      <div class="row coord">
-        <input placeholder="Lat قبل">
-        <input placeholder="Lat بعد">
-        <input placeholder="Lng قبل">
-        <input placeholder="Lng بعد">
-      </div>
-      <label>رأس كهرب</label><input>
-      <label>غطاس</label><input>
-      <label>مكينة + مضخة</label><input>
+  <div class="item">
+    <h4>بئر</h4>
+    <div class="row coord">
+      <input placeholder="Lat قبل"><input placeholder="Lat بعد">
+      <input placeholder="Lng قبل"><input placeholder="Lng بعد">
     </div>
-  `);
+    <label>رأس كهرب</label><input>
+    <label>غطاس</label><input>
+    <label>مكينة + مضخة</label><input>
+  </div>`);
 }
-
 function addPivot(){
   pivots.insertAdjacentHTML("beforeend",`
-    <div class="item">
-      <input placeholder="رقم / اسم المحور">
-      <input placeholder="ملاحظات">
-    </div>
-  `);
+  <div class="item">
+    <input placeholder="رقم / اسم المحور">
+    <input placeholder="ملاحظات">
+  </div>`);
 }
-
 function addCrop(){
   crops.insertAdjacentHTML("beforeend",`
-    <div class="item">
-      <input placeholder="وصف الصنف">
-      <div class="row">
-        <input placeholder="العدد">
-        <input placeholder="المساحة">
-      </div>
-    </div>
-  `);
+  <div class="item">
+    <input placeholder="الوصف">
+    <div class="row"><input placeholder="العدد"><input placeholder="المساحة"></div>
+  </div>`);
 }
-
 function addBuilding(){
   buildings.insertAdjacentHTML("beforeend",`
-    <div class="item">
-      <input placeholder="نوع المبنى (سكن عمال / مستودع / بركة / أخرى)">
-      <div class="row">
-        <input placeholder="العدد">
-        <input placeholder="المساحة">
-      </div>
-      <input placeholder="وصف">
-    </div>
-  `);
+  <div class="item">
+    <input placeholder="نوع المبنى">
+    <div class="row"><input placeholder="العدد"><input placeholder="المساحة"></div>
+    <input placeholder="وصف">
+  </div>`);
 }
 
-function calcArea(){
-  alert("حسبة المساحة تقريبية ويمكن تطويرها لاحقًا حسب GIS");
+/* ========= PDF ========= */
+function exportPDF(){
+  let name = document.getElementById("client").value || "بدون_اسم";
+  document.title = "كشف_فني_"+name;
+  window.print();
+}
+
+/* ========= CSV ========= */
+function exportCSV(){
+  let rows=[];
+  document.querySelectorAll("input, textarea").forEach(i=>{
+    if(i.value) rows.push(`"${i.placeholder || i.id}","${i.value}"`);
+  });
+  let csv="data:text/csv;charset=utf-8,"+rows.join("\n");
+  let a=document.createElement("a");
+  a.href=encodeURI(csv);
+  a.download="كشف_فني.csv";
+  a.click();
 }
 </script>
 
