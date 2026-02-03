@@ -44,17 +44,12 @@ button{padding:8px;border:none;cursor:pointer;}
 .result{
     background:#eee;
     padding:8px;
-    page-break-inside: avoid;
+    page-break-inside: avoid; /* يمنع انكسار النتيجة */
 }
 
 @media print{
   button{display:none;}
   .page-break{page-break-before:always;}
-
-  /* إخفاء الخانات الفاضية */
-  input:placeholder-shown{
-    display:none;
-  }
 }
 </style>
 </head>
