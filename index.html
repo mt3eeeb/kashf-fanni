@@ -17,18 +17,14 @@ body{
     padding:15px;
 }
 .header{
-    position:relative;
     text-align:center;
     margin-bottom:20px;
 }
-.logo{
-    position:absolute;
-    right:10px;
-    top:5px;
-    text-align:center;
+.header small{
+    display:block;
+    font-size:13px;
+    margin-bottom:5px;
 }
-.logo img{width:60px;}
-.logo small{display:block;font-size:11px;}
 .section{margin-bottom:20px;}
 .section h3{
     background:#2ecc71;
@@ -45,8 +41,10 @@ button{padding:8px;border:none;cursor:pointer;}
 .small-btn{width:100%;}
 .result{background:#eee;padding:8px;}
 .center{text-align:center;}
+
 @media print{
-    button{display:none;}
+  button{display:none;}
+  .page-break{page-break-before:always;}
 }
 </style>
 </head>
@@ -54,17 +52,13 @@ button{padding:8px;border:none;cursor:pointer;}
 <body>
 <div class="container">
 
-<!-- ===== الهيدر ===== -->
+<!-- ===== العنوان ===== -->
 <div class="header">
-    <div class="logo">
-        <!-- شعار صندوق التنمية الزراعية (ثابت) -->
-        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACWCAYAAAA8AXHiAAA..." />
-        <small>مكتب محافظة قرية العليا</small>
-    </div>
+    <small>مكتب محافظة قرية العليا</small>
     <h1>كشف فني</h1>
 </div>
 
-<!-- ===== البيانات العامة ===== -->
+<!-- ===== الصفحة الأولى ===== -->
 <div class="section">
 <h3>البيانات العامة</h3>
 <input placeholder="اسم العميل">
@@ -72,7 +66,6 @@ button{padding:8px;border:none;cursor:pointer;}
 <input type="date">
 </div>
 
-<!-- ===== إحداثيات السجل ===== -->
 <div class="section">
 <h3>إحداثيات السجل</h3>
 <div class="row">
@@ -84,7 +77,6 @@ button{padding:8px;border:none;cursor:pointer;}
 <button class="gray small-btn" onclick="openMaps(this)">فتح Google Maps</button>
 </div>
 
-<!-- ===== إحداثيات البوابة (تحت السجل) ===== -->
 <div class="section">
 <h3>إحداثيات البوابة</h3>
 <div class="row">
@@ -97,7 +89,6 @@ button{padding:8px;border:none;cursor:pointer;}
 <button class="gray small-btn" onclick="copyGarmin(this)">نسخ Garmin</button>
 </div>
 
-<!-- ===== زوايا المزرعة ===== -->
 <div class="section">
 <h3>زوايا المزرعة</h3>
 <div id="corners"></div>
@@ -106,41 +97,38 @@ button{padding:8px;border:none;cursor:pointer;}
 <div id="areaResult" class="result"></div>
 </div>
 
-<!-- ===== الآبار ===== -->
+<div class="page-break"></div>
+
+<!-- ===== الصفحة الثانية ===== -->
 <div class="section">
 <h3>الآبار</h3>
 <div id="wells"></div>
 <button class="add small-btn" onclick="addWell()">+ إضافة بئر</button>
 </div>
 
-<!-- ===== نظام الري ===== -->
 <div class="section">
 <h3>نظام الري</h3>
 <div id="irrigation"></div>
 <button class="add small-btn" onclick="addIrrigation()">+ إضافة نظام ري</button>
 </div>
 
-<!-- ===== المزروعات ===== -->
 <div class="section">
 <h3>المزروعات</h3>
 <div id="crops"></div>
 <button class="add small-btn" onclick="addCrop()">+ إضافة مزروع</button>
 </div>
 
-<!-- ===== الموجودات (تصوير) ===== -->
 <div class="section">
 <h3>الموجودات</h3>
 <div id="assets"></div>
 <button class="add small-btn" onclick="addAsset()">+ إضافة موجود</button>
 </div>
 
-<!-- ===== اسم الباحث ===== -->
 <div class="section">
 <h3>اسم الباحث</h3>
 <input id="researcher" placeholder="اسم الباحث">
 </div>
 
-<!-- ===== الأزرار ===== -->
 <div class="section center">
 <button class="gray" onclick="saveReport()">💾 حفظ كشف</button>
 <button class="gray" onclick="loadReport()">📂 تحميل كشف</button>
@@ -187,7 +175,6 @@ assets.innerHTML+=`
 <div class="row">
 <input placeholder="الموجود">
 <input placeholder="الوصف">
-<input type="file" accept="image/*" capture="environment">
 <button class="del" onclick="this.parentElement.remove()">−</button>
 </div>`;
 }
@@ -206,7 +193,7 @@ r[0].value+"."+r[1].value+", "+r[2].value+"."+r[3].value
 alert("تم النسخ");
 }
 
-// Haversine
+// حساب المسافات والمساحة
 function dist(a,b,c,d){
 const R=6371000;
 let dLat=(c-a)*Math.PI/180;
