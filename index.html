@@ -1,188 +1,263 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <title>كشف فني</title>
 
 <style>
-body{font-family:Arial;direction:rtl;background:#f5f5f5;padding:15px}
-h2{background:#2c7;color:#fff;padding:10px}
-.box{background:#fff;padding:15px;margin-bottom:20px;border-radius:8px}
-input,textarea,button{width:100%;margin:5px 0;padding:6px}
-.row{display:flex;gap:5px}
-.row input{flex:1}
-.add{background:#2c7;color:#fff}
-.remove{background:#e74c3c;color:#fff}
-.small{font-size:13px;color:#555}
-.item{border:1px dashed #ccc;padding:8px;margin:8px 0;border-radius:6px}
+body{
+    font-family: Tahoma, Arial;
+    background:#f4f4f4;
+    margin:0;
+}
+.container{
+    max-width:900px;
+    margin:auto;
+    background:#fff;
+    padding:15px;
+}
+.header{
+    position:relative;
+    text-align:center;
+    margin-bottom:20px;
+}
+.logo{
+    position:absolute;
+    right:10px;
+    top:5px;
+    text-align:center;
+}
+.logo img{width:60px;}
+.logo small{display:block;font-size:11px;}
+.section{margin-bottom:20px;}
+.section h3{
+    background:#2ecc71;
+    color:#fff;
+    padding:8px;
+    margin:0 0 10px;
+}
+.row{display:flex;gap:5px;margin-bottom:5px;}
+input{flex:1;padding:6px;}
+button{padding:8px;border:none;cursor:pointer;}
+.add{background:#2ecc71;color:#fff;}
+.del{background:#e74c3c;color:#fff;}
+.gray{background:#ddd;}
+.small-btn{width:100%;}
+.result{background:#eee;padding:8px;}
+.center{text-align:center;}
+@media print{
+    button{display:none;}
+}
 </style>
 </head>
 
 <body>
+<div class="container">
 
-<h2>كشف فني</h2>
-
-<!-- بيانات عامة -->
-<div class="box">
-<label>اسم العميل</label><input>
-<label>رقم الطلب</label><input>
-<label>تاريخ الزيارة</label><input type="date">
+<!-- ===== الهيدر ===== -->
+<div class="header">
+    <div class="logo">
+        <!-- شعار صندوق التنمية الزراعية (ثابت) -->
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACWCAYAAAA8AXHiAAA..." />
+        <small>مكتب محافظة قرية العليا</small>
+    </div>
+    <h1>كشف فني</h1>
 </div>
 
-<!-- إحداثيات السجل -->
-<div class="box">
+<!-- ===== البيانات العامة ===== -->
+<div class="section">
+<h3>البيانات العامة</h3>
+<input placeholder="اسم العميل">
+<input placeholder="رقم الطلب">
+<input type="date">
+</div>
+
+<!-- ===== إحداثيات السجل ===== -->
+<div class="section">
 <h3>إحداثيات السجل</h3>
 <div class="row">
-<input id="reg_lat1" placeholder="Lat قبل">
-<input id="reg_lat2" placeholder="Lat بعد">
-<input id="reg_lng1" placeholder="Lng قبل">
-<input id="reg_lng2" placeholder="Lng بعد">
+<input placeholder="Lat قبل">
+<input placeholder="Lat بعد">
+<input placeholder="Lng قبل">
+<input placeholder="Lng بعد">
 </div>
-<button onclick="openGoogle()">فتح Google Maps</button>
-<button onclick="openGarmin()">فتح Garmin</button>
+<button class="gray small-btn" onclick="openMaps(this)">فتح Google Maps</button>
 </div>
 
-<!-- زوايا المزرعة -->
-<div class="box">
+<!-- ===== إحداثيات البوابة (تحت السجل) ===== -->
+<div class="section">
+<h3>إحداثيات البوابة</h3>
+<div class="row">
+<input placeholder="Lat قبل">
+<input placeholder="Lat بعد">
+<input placeholder="Lng قبل">
+<input placeholder="Lng بعد">
+</div>
+<button class="gray small-btn" onclick="openMaps(this)">فتح Google Maps</button>
+<button class="gray small-btn" onclick="copyGarmin(this)">نسخ Garmin</button>
+</div>
+
+<!-- ===== زوايا المزرعة ===== -->
+<div class="section">
 <h3>زوايا المزرعة</h3>
 <div id="corners"></div>
-<button class="add" onclick="addCorner()">+ إضافة زاوية</button>
-<p id="areaResult" class="small"></p>
+<button class="add small-btn" onclick="addCorner()">+ إضافة زاوية</button>
+<button class="gray small-btn" onclick="calcArea()">احسب المساحة</button>
+<div id="areaResult" class="result"></div>
 </div>
 
-<!-- الآبار -->
-<div class="box">
-<h3>الآبار (إحداثيات)</h3>
+<!-- ===== الآبار ===== -->
+<div class="section">
+<h3>الآبار</h3>
 <div id="wells"></div>
-<button class="add" onclick="addWell()">+ إضافة بئر</button>
+<button class="add small-btn" onclick="addWell()">+ إضافة بئر</button>
 </div>
 
-<!-- نظام الري -->
-<div class="box">
+<!-- ===== نظام الري ===== -->
+<div class="section">
 <h3>نظام الري</h3>
 <div id="irrigation"></div>
-<button class="add" onclick="addIrrigation()">+ إضافة نظام ري</button>
+<button class="add small-btn" onclick="addIrrigation()">+ إضافة نظام ري</button>
 </div>
 
-<!-- المزروعات -->
-<div class="box">
+<!-- ===== المزروعات ===== -->
+<div class="section">
 <h3>المزروعات</h3>
 <div id="crops"></div>
-<button class="add" onclick="addCrop()">+ إضافة مزروع</button>
+<button class="add small-btn" onclick="addCrop()">+ إضافة مزروع</button>
 </div>
 
-<!-- الموجودات -->
-<div class="box">
+<!-- ===== الموجودات (تصوير) ===== -->
+<div class="section">
 <h3>الموجودات</h3>
 <div id="assets"></div>
-<button class="add" onclick="addAsset()">+ إضافة موجود</button>
+<button class="add small-btn" onclick="addAsset()">+ إضافة موجود</button>
 </div>
 
-<!-- الباحث -->
-<div class="box">
-<label>اسم الباحث</label>
-<input>
+<!-- ===== اسم الباحث ===== -->
+<div class="section">
+<h3>اسم الباحث</h3>
+<input id="researcher" placeholder="اسم الباحث">
 </div>
 
-<button onclick="window.print()">🖨️ طباعة / PDF</button>
+<!-- ===== الأزرار ===== -->
+<div class="section center">
+<button class="gray" onclick="saveReport()">💾 حفظ كشف</button>
+<button class="gray" onclick="loadReport()">📂 تحميل كشف</button>
+<button class="gray" onclick="window.print()">🖨️ طباعة PDF</button>
+</div>
+
+</div>
 
 <script>
-function openGoogle(){
- const lat=reg_lat1.value+"."+reg_lat2.value;
- const lng=reg_lng1.value+"."+reg_lng2.value;
- window.open(`https://maps.google.com/?q=${lat},${lng}`);
-}
-
-function openGarmin(){
- const lat=reg_lat1.value+"."+reg_lat2.value;
- const lng=reg_lng1.value+"."+reg_lng2.value;
- window.open(`https://explore.garmin.com/map?lat=${lat}&lng=${lng}`);
+function coordRow(){
+return `
+<div class="row">
+<input placeholder="Lat قبل">
+<input placeholder="Lat بعد">
+<input placeholder="Lng قبل">
+<input placeholder="Lng بعد">
+<button class="del" onclick="this.parentElement.remove()">−</button>
+</div>`;
 }
 
 function addCorner(){
- const d=document.createElement("div");
- d.className="item";
- d.innerHTML=`
- <div class="row">
-  <input placeholder="Lat قبل">
-  <input placeholder="Lat بعد">
-  <input placeholder="Lng قبل">
-  <input placeholder="Lng بعد">
- </div>
- <button class="remove" onclick="this.parentElement.remove();calcArea()">− حذف</button>
- `;
- corners.appendChild(d);
+corners.innerHTML+=`<div><b>زاوية ${corners.children.length+1}</b>${coordRow()}</div>`;
 }
-
-function addWell(){
- const d=document.createElement("div");
- d.className="item";
- d.innerHTML=`
- <div class="row">
-  <input placeholder="Lat قبل">
-  <input placeholder="Lat بعد">
-  <input placeholder="Lng قبل">
-  <input placeholder="Lng بعد">
- </div>
- <button class="remove" onclick="this.parentElement.remove()">− حذف</button>
- `;
- wells.appendChild(d);
-}
-
+function addWell(){wells.innerHTML+=coordRow();}
 function addIrrigation(){
- const d=document.createElement("div");
- d.className="item";
- d.innerHTML=`
- <input placeholder="نوع النظام (رشاش محوري / تنقيط / غمر)">
- <input placeholder="عدد / محاور">
- <input placeholder="المساحة">
- <button class="remove" onclick="this.parentElement.remove()">− حذف</button>
- `;
- irrigation.appendChild(d);
+irrigation.innerHTML+=`
+<div class="row">
+<input placeholder="نوع الري">
+<input placeholder="عدد النقاط / الرشاشات">
+<input placeholder="المحصول">
+<button class="del" onclick="this.parentElement.remove()">−</button>
+</div>`;
 }
-
 function addCrop(){
- const d=document.createElement("div");
- d.className="item";
- d.innerHTML=`
- <input placeholder="نوع المزروع">
- <input placeholder="العدد">
- <input placeholder="المساحة">
- <button class="remove" onclick="this.parentElement.remove()">− حذف</button>
- `;
- crops.appendChild(d);
+crops.innerHTML+=`
+<div class="row">
+<input placeholder="اسم المزروع">
+<input placeholder="المساحة">
+<button class="del" onclick="this.parentElement.remove()">−</button>
+</div>`;
+}
+function addAsset(){
+assets.innerHTML+=`
+<div class="row">
+<input placeholder="الموجود">
+<input placeholder="الوصف">
+<input type="file" accept="image/*" capture="environment">
+<button class="del" onclick="this.parentElement.remove()">−</button>
+</div>`;
 }
 
-function addAsset(){
- const d=document.createElement("div");
- d.className="item";
- d.innerHTML=`
- <input placeholder="اسم الموجود">
- <textarea placeholder="وصف / ملاحظات"></textarea>
- <button class="remove" onclick="this.parentElement.remove()">− حذف</button>
- `;
- assets.appendChild(d);
+function openMaps(btn){
+let r=btn.previousElementSibling.querySelectorAll("input");
+let lat=r[0].value+"."+r[1].value;
+let lng=r[2].value+"."+r[3].value;
+window.open(`https://www.google.com/maps?q=${lat},${lng}`);
+}
+function copyGarmin(btn){
+let r=btn.previousElementSibling.previousElementSibling.querySelectorAll("input");
+navigator.clipboard.writeText(
+r[0].value+"."+r[1].value+", "+r[2].value+"."+r[3].value
+);
+alert("تم النسخ");
+}
+
+// Haversine
+function dist(a,b,c,d){
+const R=6371000;
+let dLat=(c-a)*Math.PI/180;
+let dLng=(d-b)*Math.PI/180;
+let x=Math.sin(dLat/2)**2+
+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*
+Math.sin(dLng/2)**2;
+return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
 }
 
 function calcArea(){
- let pts=[];
- document.querySelectorAll("#corners .row").forEach(r=>{
-  const i=r.querySelectorAll("input");
-  if(i[0].value&&i[1].value&&i[2].value&&i[3].value){
-   pts.push([
-    parseFloat(i[0].value+"."+i[1].value),
-    parseFloat(i[2].value+"."+i[3].value)
-   ]);
-  }
- });
- if(pts.length<3){areaResult.innerText="";return;}
- let area=0;
- for(let i=0;i<pts.length;i++){
-  let j=(i+1)%pts.length;
-  area+=pts[i][0]*pts[j][1]-pts[j][0]*pts[i][1];
- }
- area=Math.abs(area/2)*111000*111000;
- areaResult.innerText="المساحة التقريبية: "+Math.round(area)+" م²";
+let pts=[];
+document.querySelectorAll("#corners .row").forEach(r=>{
+let i=r.querySelectorAll("input");
+pts.push([
+parseFloat(i[0].value+"."+i[1].value),
+parseFloat(i[2].value+"."+i[3].value)
+]);
+});
+if(pts.length<3){areaResult.innerHTML="أدخل 3 زوايا";return;}
+
+let txt="";
+for(let i=0;i<pts.length;i++){
+let j=(i+1)%pts.length;
+txt+=`المسافة بين زاوية ${i+1} و ${j+1}: ${dist(
+pts[i][0],pts[i][1],pts[j][0],pts[j][1]
+).toFixed(1)} م<br>`;
+}
+
+let area=0;
+for(let i=0;i<pts.length;i++){
+let j=(i+1)%pts.length;
+area+=pts[i][0]*pts[j][1]-pts[j][0]*pts[i][1];
+}
+area=Math.abs(area/2)*111000*111000;
+
+areaResult.innerHTML=
+txt+`<hr>
+المساحة: ${area.toFixed(1)} م²<br>
+الهكتار: ${(area/10000).toFixed(3)}<br>
+الدونم: ${(area/1000).toFixed(2)}`;
+}
+
+function saveReport(){
+if(!researcher.value){alert("اكتب اسم الباحث");return;}
+localStorage.setItem("report_"+Date.now(),document.body.innerHTML);
+alert("تم الحفظ");
+}
+function loadReport(){
+let k=Object.keys(localStorage).pop();
+if(k)document.body.innerHTML=localStorage.getItem(k);
 }
 </script>
 
