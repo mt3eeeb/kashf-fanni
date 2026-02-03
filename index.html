@@ -39,12 +39,22 @@ button{padding:8px;border:none;cursor:pointer;}
 .del{background:#e74c3c;color:#fff;}
 .gray{background:#ddd;}
 .small-btn{width:100%;}
-.result{background:#eee;padding:8px;}
 .center{text-align:center;}
+
+.result{
+    background:#eee;
+    padding:8px;
+    page-break-inside: avoid;
+}
 
 @media print{
   button{display:none;}
   .page-break{page-break-before:always;}
+
+  /* إخفاء الخانات الفاضية */
+  input:placeholder-shown{
+    display:none;
+  }
 }
 </style>
 </head>
@@ -126,12 +136,10 @@ button{padding:8px;border:none;cursor:pointer;}
 
 <div class="section">
 <h3>اسم الباحث</h3>
-<input id="researcher" placeholder="اسم الباحث">
+<input placeholder="اسم الباحث">
 </div>
 
 <div class="section center">
-<button class="gray" onclick="saveReport()">💾 حفظ كشف</button>
-<button class="gray" onclick="loadReport()">📂 تحميل كشف</button>
 <button class="gray" onclick="window.print()">🖨️ طباعة PDF</button>
 </div>
 
@@ -213,7 +221,7 @@ parseFloat(i[0].value+"."+i[1].value),
 parseFloat(i[2].value+"."+i[3].value)
 ]);
 });
-if(pts.length<3){areaResult.innerHTML="أدخل 3 زوايا";return;}
+if(pts.length<3){areaResult.innerHTML="أدخل 3 زوايا على الأقل";return;}
 
 let txt="";
 for(let i=0;i<pts.length;i++){
@@ -235,16 +243,6 @@ txt+`<hr>
 المساحة: ${area.toFixed(1)} م²<br>
 الهكتار: ${(area/10000).toFixed(3)}<br>
 الدونم: ${(area/1000).toFixed(2)}`;
-}
-
-function saveReport(){
-if(!researcher.value){alert("اكتب اسم الباحث");return;}
-localStorage.setItem("report_"+Date.now(),document.body.innerHTML);
-alert("تم الحفظ");
-}
-function loadReport(){
-let k=Object.keys(localStorage).pop();
-if(k)document.body.innerHTML=localStorage.getItem(k);
 }
 </script>
 
