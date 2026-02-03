@@ -16,8 +16,15 @@ body{
     background:#fff;
     padding:15px;
 }
-.header{text-align:center;margin-bottom:20px;}
-.header small{display:block;font-size:13px;margin-bottom:5px;}
+.header{
+    text-align:center;
+    margin-bottom:20px;
+}
+.header small{
+    display:block;
+    font-size:13px;
+    margin-bottom:5px;
+}
 .section{margin-bottom:20px;}
 .section h3{
     background:#2ecc71;
@@ -33,15 +40,21 @@ button{padding:8px;border:none;cursor:pointer;}
 .gray{background:#ddd;}
 .small-btn{width:100%;}
 .center{text-align:center;}
+
 .result{
     background:#eee;
     padding:8px;
-    page-break-inside:avoid;
+    page-break-inside: avoid;
 }
 
 @media print{
   button{display:none;}
   .page-break{page-break-before:always;}
+
+  /* إخفاء الخانات الفاضية */
+  input:placeholder-shown{
+    display:none;
+  }
 }
 </style>
 </head>
@@ -49,12 +62,13 @@ button{padding:8px;border:none;cursor:pointer;}
 <body>
 <div class="container">
 
+<!-- ===== العنوان ===== -->
 <div class="header">
     <small>مكتب محافظة قرية العليا</small>
     <h1>كشف فني</h1>
 </div>
 
-<!-- الصفحة 1 -->
+<!-- ===== الصفحة الأولى ===== -->
 <div class="section">
 <h3>البيانات العامة</h3>
 <input placeholder="اسم العميل">
@@ -70,7 +84,7 @@ button{padding:8px;border:none;cursor:pointer;}
 <input placeholder="Lng قبل">
 <input placeholder="Lng بعد">
 </div>
-<button class="gray small-btn">فتح Google Maps</button>
+<button class="gray small-btn" onclick="openMaps(this)">فتح Google Maps</button>
 </div>
 
 <div class="section">
@@ -81,6 +95,8 @@ button{padding:8px;border:none;cursor:pointer;}
 <input placeholder="Lng قبل">
 <input placeholder="Lng بعد">
 </div>
+<button class="gray small-btn" onclick="openMaps(this)">فتح Google Maps</button>
+<button class="gray small-btn" onclick="copyGarmin(this)">نسخ Garmin</button>
 </div>
 
 <div class="section">
@@ -93,7 +109,7 @@ button{padding:8px;border:none;cursor:pointer;}
 
 <div class="page-break"></div>
 
-<!-- الصفحة 2 -->
+<!-- ===== الصفحة الثانية ===== -->
 <div class="section">
 <h3>الآبار</h3>
 <div id="wells"></div>
@@ -124,42 +140,109 @@ button{padding:8px;border:none;cursor:pointer;}
 </div>
 
 <div class="section center">
-<button class="gray" onclick="beforePrint()">🖨️ طباعة PDF</button>
+<button class="gray" onclick="window.print()">🖨️ طباعة PDF</button>
 </div>
 
 </div>
 
 <script>
 function coordRow(){
-return `<div class="row">
-<input><input><input><input>
+return `
+<div class="row">
+<input placeholder="Lat قبل">
+<input placeholder="Lat بعد">
+<input placeholder="Lng قبل">
+<input placeholder="Lng بعد">
 <button class="del" onclick="this.parentElement.remove()">−</button>
 </div>`;
 }
-function addCorner(){corners.innerHTML+=coordRow();}
+
+function addCorner(){
+corners.innerHTML+=`<div><b>زاوية ${corners.children.length+1}</b>${coordRow()}</div>`;
+}
 function addWell(){wells.innerHTML+=coordRow();}
-function addIrrigation(){irrigation.innerHTML+=`<div class="row"><input><input><input></div>`;}
-function addCrop(){crops.innerHTML+=`<div class="row"><input><input></div>`;}
-function addAsset(){assets.innerHTML+=`<div class="row"><input><input></div>`;}
+function addIrrigation(){
+irrigation.innerHTML+=`
+<div class="row">
+<input placeholder="نوع الري">
+<input placeholder="عدد النقاط / الرشاشات">
+<input placeholder="المحصول">
+<button class="del" onclick="this.parentElement.remove()">−</button>
+</div>`;
+}
+function addCrop(){
+crops.innerHTML+=`
+<div class="row">
+<input placeholder="اسم المزروع">
+<input placeholder="المساحة">
+<button class="del" onclick="this.parentElement.remove()">−</button>
+</div>`;
+}
+function addAsset(){
+assets.innerHTML+=`
+<div class="row">
+<input placeholder="الموجود">
+<input placeholder="الوصف">
+<button class="del" onclick="this.parentElement.remove()">−</button>
+</div>`;
+}
 
-function beforePrint(){
-document.querySelectorAll(".row").forEach(r=>{
-    let filled=false;
-    r.querySelectorAll("input").forEach(i=>{
-        if(i.value.trim()!=="") filled=true;
-    });
-    if(!filled) r.style.display="none";
+function openMaps(btn){
+let r=btn.previousElementSibling.querySelectorAll("input");
+let lat=r[0].value+"."+r[1].value;
+let lng=r[2].value+"."+r[3].value;
+window.open(`https://www.google.com/maps?q=${lat},${lng}`);
+}
+function copyGarmin(btn){
+let r=btn.previousElementSibling.previousElementSibling.querySelectorAll("input");
+navigator.clipboard.writeText(
+r[0].value+"."+r[1].value+", "+r[2].value+"."+r[3].value
+);
+alert("تم النسخ");
+}
+
+// حساب المسافات والمساحة
+function dist(a,b,c,d){
+const R=6371000;
+let dLat=(c-a)*Math.PI/180;
+let dLng=(d-b)*Math.PI/180;
+let x=Math.sin(dLat/2)**2+
+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*
+Math.sin(dLng/2)**2;
+return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+}
+
+function calcArea(){
+let pts=[];
+document.querySelectorAll("#corners .row").forEach(r=>{
+let i=r.querySelectorAll("input");
+pts.push([
+parseFloat(i[0].value+"."+i[1].value),
+parseFloat(i[2].value+"."+i[3].value)
+]);
 });
+if(pts.length<3){areaResult.innerHTML="أدخل 3 زوايا على الأقل";return;}
 
-document.querySelectorAll(".section").forEach(sec=>{
-    let hasVisible=false;
-    sec.querySelectorAll(".row, input").forEach(e=>{
-        if(e.offsetParent!==null && e.value?.trim()!=="") hasVisible=true;
-    });
-    if(!hasVisible && !sec.querySelector("h3")) sec.style.display="none";
-});
+let txt="";
+for(let i=0;i<pts.length;i++){
+let j=(i+1)%pts.length;
+txt+=`المسافة بين زاوية ${i+1} و ${j+1}: ${dist(
+pts[i][0],pts[i][1],pts[j][0],pts[j][1]
+).toFixed(1)} م<br>`;
+}
 
-window.print();
+let area=0;
+for(let i=0;i<pts.length;i++){
+let j=(i+1)%pts.length;
+area+=pts[i][0]*pts[j][1]-pts[j][0]*pts[i][1];
+}
+area=Math.abs(area/2)*111000*111000;
+
+areaResult.innerHTML=
+txt+`<hr>
+المساحة: ${area.toFixed(1)} م²<br>
+الهكتار: ${(area/10000).toFixed(3)}<br>
+الدونم: ${(area/1000).toFixed(2)}`;
 }
 </script>
 
