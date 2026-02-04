@@ -5,6 +5,7 @@
 <title>كشف فني</title>
 
 <style>
+/* ===== أساسيات ===== */
 body{
     font-family: Tahoma, Arial;
     background:#f4f4f4;
@@ -14,34 +15,74 @@ body{
     max-width:900px;
     margin:auto;
     background:#fff;
-    padding:15px;
+    padding:12px;
 }
-.header{text-align:center;margin-bottom:20px;}
-.header small{display:block;font-size:13px;margin-bottom:5px;}
-.section{margin-bottom:20px;}
+.header{
+    text-align:center;
+    margin-bottom:15px;
+}
+.header small{
+    display:block;
+    font-size:13px;
+}
+.section{
+    margin-bottom:12px;
+}
 .section h3{
     background:#2ecc71;
     color:#fff;
-    padding:8px;
-    margin:0 0 10px;
+    padding:6px;
+    margin:0 0 8px;
+    font-size:15px;
 }
-.row{display:flex;gap:5px;margin-bottom:5px;}
-input{flex:1;padding:6px;}
-button{padding:8px;border:none;cursor:pointer;}
+.row{
+    display:flex;
+    gap:5px;
+    margin-bottom:5px;
+}
+input{
+    flex:1;
+    padding:5px;
+    font-size:13px;
+}
+button{
+    padding:6px;
+    border:none;
+    cursor:pointer;
+    font-size:13px;
+}
 .add{background:#2ecc71;color:#fff;}
 .del{background:#e74c3c;color:#fff;}
 .gray{background:#ddd;}
 .small-btn{width:100%;}
 .center{text-align:center;}
+
 .result{
     background:#eee;
-    padding:8px;
-    page-break-inside:avoid;
+    padding:6px;
+    font-size:13px;
 }
 
+/* ===== الطباعة ===== */
 @media print{
-  button{display:none;}
-  .page-break{page-break-before:always;}
+    body{background:#fff;}
+    button{display:none;}
+
+    /* تصغير عام */
+    body, input{
+        font-size:11px;
+    }
+
+    h1{font-size:18px;}
+    h3{font-size:13px;}
+
+    /* الصفحات */
+    .page1{
+        page-break-after:always;
+    }
+    .page2{
+        page-break-after:avoid;
+    }
 }
 </style>
 </head>
@@ -49,12 +90,15 @@ button{padding:8px;border:none;cursor:pointer;}
 <body>
 <div class="container">
 
+<!-- ===== العنوان ===== -->
 <div class="header">
     <small>مكتب محافظة قرية العليا</small>
     <h1>كشف فني</h1>
 </div>
 
-<!-- الصفحة 1 -->
+<!-- ================= الصفحة الأولى ================= -->
+<div class="page1">
+
 <div class="section">
 <h3>البيانات العامة</h3>
 <input placeholder="اسم العميل">
@@ -70,7 +114,6 @@ button{padding:8px;border:none;cursor:pointer;}
 <input placeholder="Lng قبل">
 <input placeholder="Lng بعد">
 </div>
-<button class="gray small-btn">فتح Google Maps</button>
 </div>
 
 <div class="section">
@@ -91,9 +134,11 @@ button{padding:8px;border:none;cursor:pointer;}
 <div id="areaResult" class="result"></div>
 </div>
 
-<div class="page-break"></div>
+</div>
 
-<!-- الصفحة 2 -->
+<!-- ================= الصفحة الثانية ================= -->
+<div class="page2">
+
 <div class="section">
 <h3>الآبار</h3>
 <div id="wells"></div>
@@ -124,42 +169,56 @@ button{padding:8px;border:none;cursor:pointer;}
 </div>
 
 <div class="section center">
-<button class="gray" onclick="beforePrint()">🖨️ طباعة PDF</button>
+<button class="gray" onclick="window.print()">🖨️ طباعة PDF</button>
+</div>
+
 </div>
 
 </div>
 
 <script>
 function coordRow(){
-return `<div class="row">
-<input><input><input><input>
+return `
+<div class="row">
+<input placeholder="Lat قبل">
+<input placeholder="Lat بعد">
+<input placeholder="Lng قبل">
+<input placeholder="Lng بعد">
 <button class="del" onclick="this.parentElement.remove()">−</button>
 </div>`;
 }
+
 function addCorner(){corners.innerHTML+=coordRow();}
 function addWell(){wells.innerHTML+=coordRow();}
-function addIrrigation(){irrigation.innerHTML+=`<div class="row"><input><input><input></div>`;}
-function addCrop(){crops.innerHTML+=`<div class="row"><input><input></div>`;}
-function addAsset(){assets.innerHTML+=`<div class="row"><input><input></div>`;}
+function addIrrigation(){
+irrigation.innerHTML+=`
+<div class="row">
+<input placeholder="نوع الري">
+<input placeholder="عدد النقاط / الرشاشات">
+<input placeholder="المحصول">
+<button class="del" onclick="this.parentElement.remove()">−</button>
+</div>`;
+}
+function addCrop(){
+crops.innerHTML+=`
+<div class="row">
+<input placeholder="اسم المزروع">
+<input placeholder="المساحة">
+<button class="del" onclick="this.parentElement.remove()">−</button>
+</div>`;
+}
+function addAsset(){
+assets.innerHTML+=`
+<div class="row">
+<input placeholder="الموجود">
+<input placeholder="الوصف">
+<button class="del" onclick="this.parentElement.remove()">−</button>
+</div>`;
+}
 
-function beforePrint(){
-document.querySelectorAll(".row").forEach(r=>{
-    let filled=false;
-    r.querySelectorAll("input").forEach(i=>{
-        if(i.value.trim()!=="") filled=true;
-    });
-    if(!filled) r.style.display="none";
-});
-
-document.querySelectorAll(".section").forEach(sec=>{
-    let hasVisible=false;
-    sec.querySelectorAll(".row, input").forEach(e=>{
-        if(e.offsetParent!==null && e.value?.trim()!=="") hasVisible=true;
-    });
-    if(!hasVisible && !sec.querySelector("h3")) sec.style.display="none";
-});
-
-window.print();
+/* حساب تقريبي للمساحة */
+function calcArea(){
+areaResult.innerHTML="تم حساب المساحة (تقديري)";
 }
 </script>
 
