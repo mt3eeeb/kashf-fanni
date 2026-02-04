@@ -14,47 +14,34 @@ body{
     max-width:900px;
     margin:auto;
     background:#fff;
-    padding:12px;
+    padding:15px;
 }
 .header{text-align:center;margin-bottom:15px;}
-.header small{display:block;font-size:13px;margin-bottom:4px;}
+.header small{display:block;font-size:13px;}
 .section{margin-bottom:15px;}
 .section h3{
     background:#2ecc71;
     color:#fff;
-    padding:6px;
-    margin:0 0 8px;
+    padding:8px;
+    margin:0 0 10px;
     font-size:15px;
 }
-.row{display:flex;gap:4px;margin-bottom:4px;}
-input{
-    flex:1;
-    padding:5px;
-    font-size:13px;
-}
-button{
-    padding:7px;
-    border:none;
-    cursor:pointer;
-    font-size:13px;
-}
+.row{display:flex;gap:5px;margin-bottom:5px;}
+input{flex:1;padding:6px;font-size:14px;}
+button{padding:8px;border:none;cursor:pointer;font-size:14px;}
 .add{background:#2ecc71;color:#fff;}
 .del{background:#e74c3c;color:#fff;}
 .gray{background:#ddd;}
 .small-btn{width:100%;}
 .center{text-align:center;}
+.result{background:#eee;padding:8px;}
 
-.result{
-    background:#eee;
-    padding:8px;
-    font-size:13px;
-    page-break-inside:avoid;
-}
+.page-break{display:none;}
 
 @media print{
-  body{background:#fff;}
-  button{display:none;}
-  .page-break{page-break-before:always;}
+    body{background:#fff;}
+    button{display:none;}
+    .page-break{display:block;page-break-before:always;}
 }
 </style>
 </head>
@@ -65,10 +52,10 @@ button{
 <!-- العنوان -->
 <div class="header">
     <small>مكتب محافظة قرية العليا</small>
-    <h1 style="margin:5px 0">كشف فني</h1>
+    <h2>كشف فني</h2>
 </div>
 
-<!-- ===== الصفحة 1 ===== -->
+<!-- الصفحة الأولى -->
 <div class="section">
 <h3>البيانات العامة</h3>
 <input placeholder="اسم العميل">
@@ -80,8 +67,6 @@ button{
 <h3>إحداثيات السجل</h3>
 <div class="row">
 <input placeholder="Lat">
-<input placeholder="Lat">
-<input placeholder="Lng">
 <input placeholder="Lng">
 </div>
 <button class="gray small-btn" onclick="getLocation(this)">📍 تحديد الموقع</button>
@@ -91,8 +76,6 @@ button{
 <h3>إحداثيات البوابة</h3>
 <div class="row">
 <input placeholder="Lat">
-<input placeholder="Lat">
-<input placeholder="Lng">
 <input placeholder="Lng">
 </div>
 <button class="gray small-btn" onclick="getLocation(this)">📍 تحديد الموقع</button>
@@ -102,14 +85,13 @@ button{
 <h3>زوايا المزرعة</h3>
 <div id="corners"></div>
 <button class="add small-btn" onclick="addCorner()">+ إضافة زاوية</button>
-<button class="gray small-btn" onclick="checkCorners()">فحص الزوايا</button>
 <button class="gray small-btn" onclick="calcArea()">احسب المساحة</button>
 <div id="areaResult" class="result"></div>
 </div>
 
 <div class="page-break"></div>
 
-<!-- ===== الصفحة 2 ===== -->
+<!-- الصفحة الثانية -->
 <div class="section">
 <h3>الآبار</h3>
 <div id="wells"></div>
@@ -146,71 +128,58 @@ button{
 </div>
 
 <script>
+// ===== تحديد الموقع =====
+function getLocation(btn){
+if(!navigator.geolocation){
+    alert("GPS غير مدعوم");
+    return;
+}
+navigator.geolocation.getCurrentPosition(
+(pos)=>{
+    let lat=pos.coords.latitude.toFixed(6);
+    let lng=pos.coords.longitude.toFixed(6);
+    let inputs=btn.previousElementSibling.querySelectorAll("input");
+    inputs[0].value=lat;
+    inputs[1].value=lng;
+},
+()=>alert("لم يتم السماح بالموقع"),
+{enableHighAccuracy:true}
+);
+}
+
+// ===== الزوايا =====
 function coordRow(){
-return `
-<div class="row">
-<input>
-<input>
-<input>
-<input>
+return `<div class="row">
+<input placeholder="Lat">
+<input placeholder="Lng">
 <button class="del" onclick="this.parentElement.remove()">−</button>
 </div>`;
 }
-
-function addCorner(){
-corners.innerHTML+=`<div><b>زاوية ${corners.children.length+1}</b>${coordRow()}</div>`;
-}
+function addCorner(){corners.innerHTML+=coordRow();}
 function addWell(){wells.innerHTML+=coordRow();}
 function addIrrigation(){
-irrigation.innerHTML+=`
-<div class="row">
+irrigation.innerHTML+=`<div class="row">
 <input placeholder="نوع الري">
-<input placeholder="عدد النقاط">
-<input placeholder="المحصول">
+<input placeholder="العدد">
 <button class="del" onclick="this.parentElement.remove()">−</button>
 </div>`;
 }
 function addCrop(){
-crops.innerHTML+=`
-<div class="row">
+crops.innerHTML+=`<div class="row">
 <input placeholder="اسم المزروع">
 <input placeholder="المساحة">
 <button class="del" onclick="this.parentElement.remove()">−</button>
 </div>`;
 }
 function addAsset(){
-assets.innerHTML+=`
-<div class="row">
+assets.innerHTML+=`<div class="row">
 <input placeholder="الموجود">
 <input placeholder="الوصف">
 <button class="del" onclick="this.parentElement.remove()">−</button>
 </div>`;
 }
 
-/* ===== GPS ===== */
-function getLocation(btn){
-if(!navigator.geolocation){alert("GPS غير مدعوم");return;}
-navigator.geolocation.getCurrentPosition(p=>{
-let lat=p.coords.latitude.toFixed(6).split(".");
-let lng=p.coords.longitude.toFixed(6).split(".");
-let row=btn.previousElementSibling;
-let i=row.querySelectorAll("input");
-i[0].value=lat[0]; i[1].value=lat[1];
-i[2].value=lng[0]; i[3].value=lng[1];
-},{enableHighAccuracy:true});
-}
-
-/* ===== فحص الزوايا ===== */
-function checkCorners(){
-let ok=true;
-document.querySelectorAll("#corners input").forEach(i=>{
-i.style.border="";
-if(i.value.trim()===""){i.style.border="2px solid red";ok=false;}
-});
-alert(ok?"✅ الزوايا سليمة":"❌ يوجد نقص في الزوايا");
-}
-
-/* ===== حساب المساحة ===== */
+// ===== حساب المسافات والمساحة =====
 function dist(a,b,c,d){
 const R=6371000;
 let dLat=(c-a)*Math.PI/180;
@@ -225,17 +194,18 @@ function calcArea(){
 let pts=[];
 document.querySelectorAll("#corners .row").forEach(r=>{
 let i=r.querySelectorAll("input");
-pts.push([
-parseFloat(i[0].value+"."+i[1].value),
-parseFloat(i[2].value+"."+i[3].value)
-]);
+if(i[0].value&&i[1].value)
+pts.push([parseFloat(i[0].value),parseFloat(i[1].value)]);
 });
-if(pts.length<3){areaResult.innerHTML="أدخل 3 زوايا على الأقل";return;}
+if(pts.length<3){
+areaResult.innerHTML="أدخل 3 زوايا على الأقل";
+return;
+}
 
 let txt="";
 for(let i=0;i<pts.length;i++){
 let j=(i+1)%pts.length;
-txt+=`المسافة ${i+1}-${j+1}: ${dist(
+txt+=`المسافة بين زاوية ${i+1} و ${j+1}: ${dist(
 pts[i][0],pts[i][1],pts[j][0],pts[j][1]
 ).toFixed(1)} م<br>`;
 }
