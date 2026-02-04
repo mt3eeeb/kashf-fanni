@@ -5,43 +5,26 @@
 <title>كشف فني</title>
 
 <style>
-body{
-    font-family: Tahoma, Arial;
-    background:#f4f4f4;
-    margin:0;
-}
-.container{
-    max-width:900px;
-    margin:auto;
-    background:#fff;
-    padding:15px;
-}
-.header{text-align:center;margin-bottom:15px;}
-.header small{display:block;font-size:13px;}
-.section{margin-bottom:15px;}
-.section h3{
-    background:#2ecc71;
-    color:#fff;
-    padding:8px;
-    margin:0 0 10px;
-    font-size:15px;
-}
-.row{display:flex;gap:5px;margin-bottom:5px;}
-input{flex:1;padding:6px;font-size:14px;}
-button{padding:8px;border:none;cursor:pointer;font-size:14px;}
-.add{background:#2ecc71;color:#fff;}
-.del{background:#e74c3c;color:#fff;}
-.gray{background:#ddd;}
-.small-btn{width:100%;}
-.center{text-align:center;}
-.result{background:#eee;padding:8px;}
-
-.page-break{display:none;}
+body{font-family:Tahoma,Arial;background:#f4f4f4;margin:0}
+.container{max-width:900px;margin:auto;background:#fff;padding:15px}
+.header{text-align:center;margin-bottom:15px}
+.header small{display:block;font-size:13px}
+.section{margin-bottom:15px}
+.section h3{background:#2ecc71;color:#fff;padding:8px;margin:0 0 10px;font-size:15px}
+.row{display:flex;gap:5px;margin-bottom:5px}
+input{flex:1;padding:6px;font-size:14px}
+button{padding:8px;border:none;cursor:pointer;font-size:14px}
+.add{background:#2ecc71;color:#fff}
+.del{background:#e74c3c;color:#fff}
+.gray{background:#ddd}
+.small-btn{width:100%}
+.result{background:#eee;padding:8px}
+.page-break{display:none}
 
 @media print{
-    body{background:#fff;}
-    button{display:none;}
-    .page-break{display:block;page-break-before:always;}
+ body{background:#fff}
+ button{display:none}
+ .page-break{display:block;page-break-before:always}
 }
 </style>
 </head>
@@ -49,10 +32,9 @@ button{padding:8px;border:none;cursor:pointer;font-size:14px;}
 <body>
 <div class="container">
 
-<!-- العنوان -->
 <div class="header">
-    <small>مكتب محافظة قرية العليا</small>
-    <h2>كشف فني</h2>
+<small>مكتب محافظة قرية العليا</small>
+<h2>كشف فني</h2>
 </div>
 
 <!-- الصفحة الأولى -->
@@ -66,19 +48,24 @@ button{padding:8px;border:none;cursor:pointer;font-size:14px;}
 <div class="section">
 <h3>إحداثيات السجل</h3>
 <div class="row">
-<input placeholder="Lat">
-<input placeholder="Lng">
+<input placeholder="Lat قبل">
+<input placeholder="Lat بعد">
+<input placeholder="Lng قبل">
+<input placeholder="Lng بعد">
 </div>
-<button class="gray small-btn" onclick="getLocation(this)">📍 تحديد الموقع</button>
+<button class="gray small-btn" onclick="openMaps(this)">فتح Google Maps</button>
 </div>
 
 <div class="section">
 <h3>إحداثيات البوابة</h3>
 <div class="row">
-<input placeholder="Lat">
-<input placeholder="Lng">
+<input placeholder="Lat قبل">
+<input placeholder="Lat بعد">
+<input placeholder="Lng قبل">
+<input placeholder="Lng بعد">
 </div>
 <button class="gray small-btn" onclick="getLocation(this)">📍 تحديد الموقع</button>
+<button class="gray small-btn" onclick="openMaps(this)">فتح Google Maps</button>
 </div>
 
 <div class="section">
@@ -128,34 +115,40 @@ button{padding:8px;border:none;cursor:pointer;font-size:14px;}
 </div>
 
 <script>
-// ===== تحديد الموقع =====
-function getLocation(btn){
-if(!navigator.geolocation){
-    alert("GPS غير مدعوم");
-    return;
-}
-navigator.geolocation.getCurrentPosition(
-(pos)=>{
-    let lat=pos.coords.latitude.toFixed(6);
-    let lng=pos.coords.longitude.toFixed(6);
-    let inputs=btn.previousElementSibling.querySelectorAll("input");
-    inputs[0].value=lat;
-    inputs[1].value=lng;
-},
-()=>alert("لم يتم السماح بالموقع"),
-{enableHighAccuracy:true}
-);
+// فتح الخريطة
+function openMaps(btn){
+let r=btn.previousElementSibling.querySelectorAll("input");
+let lat=r[0].value+"."+r[1].value;
+let lng=r[2].value+"."+r[3].value;
+window.open(`https://www.google.com/maps?q=${lat},${lng}`);
 }
 
-// ===== الزوايا =====
+// تحديد الموقع (للبوابة فقط)
+function getLocation(btn){
+navigator.geolocation.getCurrentPosition(p=>{
+let lat=p.coords.latitude.toFixed(6).split(".");
+let lng=p.coords.longitude.toFixed(6).split(".");
+let i=btn.previousElementSibling.querySelectorAll("input");
+i[0].value=lat[0]; i[1].value=lat[1];
+i[2].value=lng[0]; i[3].value=lng[1];
+});
+}
+
+// صف إحداثيات
 function coordRow(){
 return `<div class="row">
-<input placeholder="Lat">
-<input placeholder="Lng">
+<input placeholder="Lat قبل">
+<input placeholder="Lat بعد">
+<input placeholder="Lng قبل">
+<input placeholder="Lng بعد">
 <button class="del" onclick="this.parentElement.remove()">−</button>
 </div>`;
 }
-function addCorner(){corners.innerHTML+=coordRow();}
+
+function addCorner(){
+corners.innerHTML+=`<div><b>زاوية ${corners.children.length+1}</b>${coordRow()}
+<button class="gray small-btn" onclick="openMaps(this)">فتح Google Maps</button></div>`;
+}
 function addWell(){wells.innerHTML+=coordRow();}
 function addIrrigation(){
 irrigation.innerHTML+=`<div class="row">
@@ -179,7 +172,7 @@ assets.innerHTML+=`<div class="row">
 </div>`;
 }
 
-// ===== حساب المسافات والمساحة =====
+// حساب المسافات والمساحة
 function dist(a,b,c,d){
 const R=6371000;
 let dLat=(c-a)*Math.PI/180;
@@ -194,9 +187,12 @@ function calcArea(){
 let pts=[];
 document.querySelectorAll("#corners .row").forEach(r=>{
 let i=r.querySelectorAll("input");
-if(i[0].value&&i[1].value)
-pts.push([parseFloat(i[0].value),parseFloat(i[1].value)]);
+pts.push([
+parseFloat(i[0].value+"."+i[1].value),
+parseFloat(i[2].value+"."+i[3].value)
+]);
 });
+
 if(pts.length<3){
 areaResult.innerHTML="أدخل 3 زوايا على الأقل";
 return;
