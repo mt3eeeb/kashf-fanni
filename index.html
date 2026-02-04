@@ -17,8 +17,8 @@ body{
     padding:12px;
 }
 .header{text-align:center;margin-bottom:15px;}
-.header small{display:block;font-size:13px;}
-.section{margin-bottom:14px;}
+.header small{display:block;font-size:13px;margin-bottom:4px;}
+.section{margin-bottom:15px;}
 .section h3{
     background:#2ecc71;
     color:#fff;
@@ -26,11 +26,7 @@ body{
     margin:0 0 8px;
     font-size:15px;
 }
-.row{
-    display:flex;
-    gap:4px;
-    margin-bottom:4px;
-}
+.row{display:flex;gap:4px;margin-bottom:4px;}
 input{
     flex:1;
     padding:5px;
@@ -47,6 +43,7 @@ button{
 .gray{background:#ddd;}
 .small-btn{width:100%;}
 .center{text-align:center;}
+
 .result{
     background:#eee;
     padding:8px;
@@ -54,21 +51,10 @@ button{
     page-break-inside:avoid;
 }
 
-.bad-corner input{
-    background:#ffe6e6;
-    border:1px solid #e74c3c;
-}
-.good-corner input{
-    background:#eaffea;
-}
-
 @media print{
-    body{background:#fff;}
-    button{display:none;}
-    .page-break{page-break-before:always;}
-    input{font-size:11px;}
-    h1{font-size:18px;}
-    h3{font-size:14px;}
+  body{background:#fff;}
+  button{display:none;}
+  .page-break{page-break-before:always;}
 }
 </style>
 </head>
@@ -79,10 +65,10 @@ button{
 <!-- العنوان -->
 <div class="header">
     <small>مكتب محافظة قرية العليا</small>
-    <h1>كشف فني</h1>
+    <h1 style="margin:5px 0">كشف فني</h1>
 </div>
 
-<!-- الصفحة 1 -->
+<!-- ===== الصفحة 1 ===== -->
 <div class="section">
 <h3>البيانات العامة</h3>
 <input placeholder="اسم العميل">
@@ -93,21 +79,23 @@ button{
 <div class="section">
 <h3>إحداثيات السجل</h3>
 <div class="row">
-<input placeholder="Lat قبل">
-<input placeholder="Lat بعد">
-<input placeholder="Lng قبل">
-<input placeholder="Lng بعد">
+<input placeholder="Lat">
+<input placeholder="Lat">
+<input placeholder="Lng">
+<input placeholder="Lng">
 </div>
+<button class="gray small-btn" onclick="getLocation(this)">📍 تحديد الموقع</button>
 </div>
 
 <div class="section">
 <h3>إحداثيات البوابة</h3>
 <div class="row">
-<input placeholder="Lat قبل">
-<input placeholder="Lat بعد">
-<input placeholder="Lng قبل">
-<input placeholder="Lng بعد">
+<input placeholder="Lat">
+<input placeholder="Lat">
+<input placeholder="Lng">
+<input placeholder="Lng">
 </div>
+<button class="gray small-btn" onclick="getLocation(this)">📍 تحديد الموقع</button>
 </div>
 
 <div class="section">
@@ -121,7 +109,7 @@ button{
 
 <div class="page-break"></div>
 
-<!-- الصفحة 2 -->
+<!-- ===== الصفحة 2 ===== -->
 <div class="section">
 <h3>الآبار</h3>
 <div id="wells"></div>
@@ -161,10 +149,10 @@ button{
 function coordRow(){
 return `
 <div class="row">
-<input placeholder="Lat قبل">
-<input placeholder="Lat بعد">
-<input placeholder="Lng قبل">
-<input placeholder="Lng بعد">
+<input>
+<input>
+<input>
+<input>
 <button class="del" onclick="this.parentElement.remove()">−</button>
 </div>`;
 }
@@ -199,60 +187,57 @@ assets.innerHTML+=`
 </div>`;
 }
 
-/* مسافة دقيقة */
-function distance(lat1,lng1,lat2,lng2){
-const R=6371000;
-let dLat=(lat2-lat1)*Math.PI/180;
-let dLng=(lng2-lng1)*Math.PI/180;
-let a=Math.sin(dLat/2)**2+
-Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
-Math.sin(dLng/2)**2;
-return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+/* ===== GPS ===== */
+function getLocation(btn){
+if(!navigator.geolocation){alert("GPS غير مدعوم");return;}
+navigator.geolocation.getCurrentPosition(p=>{
+let lat=p.coords.latitude.toFixed(6).split(".");
+let lng=p.coords.longitude.toFixed(6).split(".");
+let row=btn.previousElementSibling;
+let i=row.querySelectorAll("input");
+i[0].value=lat[0]; i[1].value=lat[1];
+i[2].value=lng[0]; i[3].value=lng[1];
+},{enableHighAccuracy:true});
 }
 
-/* فحص الزوايا */
+/* ===== فحص الزوايا ===== */
 function checkCorners(){
-let rows=document.querySelectorAll("#corners .row");
-rows.forEach(r=>r.classList.remove("bad-corner","good-corner"));
-let pts=[];
-rows.forEach(r=>{
-let i=r.querySelectorAll("input");
-let lat=parseFloat(i[0].value+"."+i[1].value);
-let lng=parseFloat(i[2].value+"."+i[3].value);
-if(!isNaN(lat)&&!isNaN(lng)) pts.push({lat,lng,row:r});
-else r.classList.add("bad-corner");
+let ok=true;
+document.querySelectorAll("#corners input").forEach(i=>{
+i.style.border="";
+if(i.value.trim()===""){i.style.border="2px solid red";ok=false;}
 });
-pts.forEach((p,i)=>{
-let prev=pts[(i-1+pts.length)%pts.length];
-let next=pts[(i+1)%pts.length];
-let d1=distance(prev.lat,prev.lng,p.lat,p.lng);
-let d2=distance(p.lat,p.lng,next.lat,next.lng);
-if(d1<5||d2<5) p.row.classList.add("bad-corner");
-else p.row.classList.add("good-corner");
-});
+alert(ok?"✅ الزوايا سليمة":"❌ يوجد نقص في الزوايا");
 }
 
-/* حساب المساحة */
+/* ===== حساب المساحة ===== */
+function dist(a,b,c,d){
+const R=6371000;
+let dLat=(c-a)*Math.PI/180;
+let dLng=(d-b)*Math.PI/180;
+let x=Math.sin(dLat/2)**2+
+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*
+Math.sin(dLng/2)**2;
+return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+}
+
 function calcArea(){
 let pts=[];
 document.querySelectorAll("#corners .row").forEach(r=>{
 let i=r.querySelectorAll("input");
-let lat=parseFloat(i[0].value+"."+i[1].value);
-let lng=parseFloat(i[2].value+"."+i[3].value);
-if(!isNaN(lat)&&!isNaN(lng)) pts.push([lat,lng]);
+pts.push([
+parseFloat(i[0].value+"."+i[1].value),
+parseFloat(i[2].value+"."+i[3].value)
+]);
 });
-if(pts.length<3){
-areaResult.innerHTML="أدخل 3 زوايا على الأقل";
-return;
-}
+if(pts.length<3){areaResult.innerHTML="أدخل 3 زوايا على الأقل";return;}
 
 let txt="";
 for(let i=0;i<pts.length;i++){
 let j=(i+1)%pts.length;
-let d=Math.round(distance(
+txt+=`المسافة ${i+1}-${j+1}: ${dist(
 pts[i][0],pts[i][1],pts[j][0],pts[j][1]
-));
-txt+=`المسافة بين زاوية ${i+1} و ${j+1}: ${d} م<br>`;
+).toFixed(1)} م<br>`;
 }
 
 let area=0;
