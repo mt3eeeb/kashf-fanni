@@ -5,7 +5,6 @@
 <title>كشف فني</title>
 
 <style>
-/* ===== أساسيات ===== */
 body{
     font-family: Tahoma, Arial;
     background:#f4f4f4;
@@ -17,17 +16,9 @@ body{
     background:#fff;
     padding:12px;
 }
-.header{
-    text-align:center;
-    margin-bottom:15px;
-}
-.header small{
-    display:block;
-    font-size:13px;
-}
-.section{
-    margin-bottom:12px;
-}
+.header{text-align:center;margin-bottom:15px;}
+.header small{display:block;font-size:13px;}
+.section{margin-bottom:14px;}
 .section h3{
     background:#2ecc71;
     color:#fff;
@@ -37,8 +28,8 @@ body{
 }
 .row{
     display:flex;
-    gap:5px;
-    margin-bottom:5px;
+    gap:4px;
+    margin-bottom:4px;
 }
 input{
     flex:1;
@@ -46,7 +37,7 @@ input{
     font-size:13px;
 }
 button{
-    padding:6px;
+    padding:7px;
     border:none;
     cursor:pointer;
     font-size:13px;
@@ -56,33 +47,28 @@ button{
 .gray{background:#ddd;}
 .small-btn{width:100%;}
 .center{text-align:center;}
-
 .result{
     background:#eee;
-    padding:6px;
+    padding:8px;
     font-size:13px;
+    page-break-inside:avoid;
 }
 
-/* ===== الطباعة ===== */
+.bad-corner input{
+    background:#ffe6e6;
+    border:1px solid #e74c3c;
+}
+.good-corner input{
+    background:#eaffea;
+}
+
 @media print{
     body{background:#fff;}
     button{display:none;}
-
-    /* تصغير عام */
-    body, input{
-        font-size:11px;
-    }
-
+    .page-break{page-break-before:always;}
+    input{font-size:11px;}
     h1{font-size:18px;}
-    h3{font-size:13px;}
-
-    /* الصفحات */
-    .page1{
-        page-break-after:always;
-    }
-    .page2{
-        page-break-after:avoid;
-    }
+    h3{font-size:14px;}
 }
 </style>
 </head>
@@ -90,15 +76,13 @@ button{
 <body>
 <div class="container">
 
-<!-- ===== العنوان ===== -->
+<!-- العنوان -->
 <div class="header">
     <small>مكتب محافظة قرية العليا</small>
     <h1>كشف فني</h1>
 </div>
 
-<!-- ================= الصفحة الأولى ================= -->
-<div class="page1">
-
+<!-- الصفحة 1 -->
 <div class="section">
 <h3>البيانات العامة</h3>
 <input placeholder="اسم العميل">
@@ -130,15 +114,14 @@ button{
 <h3>زوايا المزرعة</h3>
 <div id="corners"></div>
 <button class="add small-btn" onclick="addCorner()">+ إضافة زاوية</button>
+<button class="gray small-btn" onclick="checkCorners()">فحص الزوايا</button>
 <button class="gray small-btn" onclick="calcArea()">احسب المساحة</button>
 <div id="areaResult" class="result"></div>
 </div>
 
-</div>
+<div class="page-break"></div>
 
-<!-- ================= الصفحة الثانية ================= -->
-<div class="page2">
-
+<!-- الصفحة 2 -->
 <div class="section">
 <h3>الآبار</h3>
 <div id="wells"></div>
@@ -174,8 +157,6 @@ button{
 
 </div>
 
-</div>
-
 <script>
 function coordRow(){
 return `
@@ -188,13 +169,15 @@ return `
 </div>`;
 }
 
-function addCorner(){corners.innerHTML+=coordRow();}
+function addCorner(){
+corners.innerHTML+=`<div><b>زاوية ${corners.children.length+1}</b>${coordRow()}</div>`;
+}
 function addWell(){wells.innerHTML+=coordRow();}
 function addIrrigation(){
 irrigation.innerHTML+=`
 <div class="row">
 <input placeholder="نوع الري">
-<input placeholder="عدد النقاط / الرشاشات">
+<input placeholder="عدد النقاط">
 <input placeholder="المحصول">
 <button class="del" onclick="this.parentElement.remove()">−</button>
 </div>`;
@@ -216,9 +199,74 @@ assets.innerHTML+=`
 </div>`;
 }
 
-/* حساب تقريبي للمساحة */
+/* مسافة دقيقة */
+function distance(lat1,lng1,lat2,lng2){
+const R=6371000;
+let dLat=(lat2-lat1)*Math.PI/180;
+let dLng=(lng2-lng1)*Math.PI/180;
+let a=Math.sin(dLat/2)**2+
+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
+Math.sin(dLng/2)**2;
+return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+/* فحص الزوايا */
+function checkCorners(){
+let rows=document.querySelectorAll("#corners .row");
+rows.forEach(r=>r.classList.remove("bad-corner","good-corner"));
+let pts=[];
+rows.forEach(r=>{
+let i=r.querySelectorAll("input");
+let lat=parseFloat(i[0].value+"."+i[1].value);
+let lng=parseFloat(i[2].value+"."+i[3].value);
+if(!isNaN(lat)&&!isNaN(lng)) pts.push({lat,lng,row:r});
+else r.classList.add("bad-corner");
+});
+pts.forEach((p,i)=>{
+let prev=pts[(i-1+pts.length)%pts.length];
+let next=pts[(i+1)%pts.length];
+let d1=distance(prev.lat,prev.lng,p.lat,p.lng);
+let d2=distance(p.lat,p.lng,next.lat,next.lng);
+if(d1<5||d2<5) p.row.classList.add("bad-corner");
+else p.row.classList.add("good-corner");
+});
+}
+
+/* حساب المساحة */
 function calcArea(){
-areaResult.innerHTML="تم حساب المساحة (تقديري)";
+let pts=[];
+document.querySelectorAll("#corners .row").forEach(r=>{
+let i=r.querySelectorAll("input");
+let lat=parseFloat(i[0].value+"."+i[1].value);
+let lng=parseFloat(i[2].value+"."+i[3].value);
+if(!isNaN(lat)&&!isNaN(lng)) pts.push([lat,lng]);
+});
+if(pts.length<3){
+areaResult.innerHTML="أدخل 3 زوايا على الأقل";
+return;
+}
+
+let txt="";
+for(let i=0;i<pts.length;i++){
+let j=(i+1)%pts.length;
+let d=Math.round(distance(
+pts[i][0],pts[i][1],pts[j][0],pts[j][1]
+));
+txt+=`المسافة بين زاوية ${i+1} و ${j+1}: ${d} م<br>`;
+}
+
+let area=0;
+for(let i=0;i<pts.length;i++){
+let j=(i+1)%pts.length;
+area+=pts[i][0]*pts[j][1]-pts[j][0]*pts[i][1];
+}
+area=Math.abs(area/2)*111000*111000;
+
+areaResult.innerHTML=
+txt+`<hr>
+المساحة: ${area.toFixed(1)} م²<br>
+الهكتار: ${(area/10000).toFixed(3)}<br>
+الدونم: ${(area/1000).toFixed(2)}`;
 }
 </script>
 
