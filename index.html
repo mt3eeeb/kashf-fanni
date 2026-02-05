@@ -136,3 +136,34 @@ function printPage() {
   window.print();
 }
 </script>
+<style>
+.header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.office-name {
+  font-size: 20px;
+  font-weight: bold;
+  color: #1B5E20;
+}
+
+.report-title {
+  font-size: 26px;
+  font-weight: bold;
+  margin-top: 6px;
+  color: #000;
+}
+
+.divider {
+  width: 70%;
+  margin: 12px auto 0;
+  border-bottom: 2px solid #1B5E20;
+}
+
+@media print {
+  button {
+    display: none;
+  }
+}
+</style>
