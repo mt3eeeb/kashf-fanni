@@ -1,283 +1,116 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<title>كشف فني</title>
+<section id="farm-corners">
+  <h3>زوايا المزرعة</h3>
 
-<style>
-  body {
-    font-family: "Tahoma", Arial;
-    background: #f4f8f5;
-    margin: 0;
-    padding: 20px;
-    color: #1f2933;
-  }
+  <div id="corners"></div>
 
-  .page {
-    background: #ffffff;
-    padding: 25px;
-    max-width: 900px;
-    margin: auto;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.08);
-  }
+  <button type="button" onclick="addCorner()">+ إضافة زاوية</button>
+  <button type="button" onclick="calculatePolygon()">حساب الأطوال والمساحة</button>
 
-  /* ===== العنوان ===== */
-  .header {
-    text-align: center;
-    margin-bottom: 25px;
-  }
-
-  .header h1 {
-    margin: 0;
-    font-size: 22px;
-    color: #2e7d32; /* أخضر */
-  }
-
-  .header h2 {
-    margin: 8px 0 0;
-    font-size: 18px;
-    color: #355f3b;
-  }
-
-  /* ===== العناوين ===== */
-  h3 {
-    border-bottom: 2px solid #2e7d32;
-    padding-bottom: 5px;
-    margin-bottom: 15px;
-    font-size: 16px;
-    color: #2e7d32;
-  }
-
-  .row {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-
-  input {
-    padding: 8px;
-    font-size: 14px;
-    min-width: 200px;
-    border: 1px solid #a5d6a7;
-    border-radius: 4px;
-  }
-
-  input:focus {
-    outline: none;
-    border-color: #2e7d32;
-    box-shadow: 0 0 0 2px rgba(46,125,50,0.15);
-  }
-
-  @media print {
-    body {
-      background: white;
-      padding: 0;
-    }
-    .page {
-      box-shadow: none;
-      border-radius: 0;
-    }
-  }
-</style>
-</head>
-
-<body>
-
-<div class="page">
-
-  <!-- ===== بداية الصفحة ===== -->
-  <div class="header">
-    <h1>مكتب صندوق التنمية الزراعية بمحافظة قرية العليا</h1>
-    <h2>كشف فني</h2>
-  </div>
-
-  <!-- ===== بند 1: البيانات العامة ===== -->
-  <section id="generalData">
-    <h3>البيانات العامة</h3>
-
-    <div class="row">
-      <input type="text" id="clientName" placeholder="اسم العميل">
-      <input type="text" id="orderNumber" placeholder="رقم الطلب">
-      <input type="date" id="visitDate">
-    </div>
-  </section>
-
-</div>
+  <div id="results" style="margin-top:15px"></div>
+</section>
 
 <script>
-/* ===== حفظ تلقائي – بند 1 ===== */
+// ===============================
+// أدوات التحويل WGS84 → UTM
+// ===============================
+function latLonToUTM(lat, lon) {
+  const a = 6378137.0;
+  const f = 1 / 298.257223563;
+  const k0 = 0.9996;
+  const e = Math.sqrt(f * (2 - f));
 
-const fields = ["clientName", "orderNumber", "visitDate"];
+  const zone = 38; // السعودية
+  const λ0 = ((zone - 1) * 6 - 180 + 3) * Math.PI / 180;
 
-document.addEventListener("DOMContentLoaded", () => {
-  fields.forEach(id => {
-    const saved = localStorage.getItem(id);
-    if (saved) document.getElementById(id).value = saved;
-  });
-});
+  const φ = lat * Math.PI / 180;
+  const λ = lon * Math.PI / 180;
 
-fields.forEach(id => {
-  document.addEventListener("input", e => {
-    if (e.target.id === id) {
-      localStorage.setItem(id, e.target.value);
-    }
-  });
-});
-</script>
+  const N = a / Math.sqrt(1 - e * e * Math.sin(φ) ** 2);
+  const T = Math.tan(φ) ** 2;
+  const C = (e * e / (1 - e * e)) * Math.cos(φ) ** 2;
+  const A = Math.cos(φ) * (λ - λ0);
 
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="ar">
-<head>
-<meta charset="UTF-8">
-<title>كشف فني</title>
-
-<style>
-  body {
-    font-family: Tahoma, Arial;
-    direction: rtl;
-    background: #f4f8f4;
-    margin: 0;
-    padding: 0;
-  }
-
-  .page {
-    width: 90%;
-    margin: 20px auto;
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    border-top: 6px solid #1b7f3a;
-  }
-
-  h1, h2, h3 {
-    color: #1b7f3a;
-    margin-top: 0;
-  }
-
-  .header {
-    text-align: center;
-    margin-bottom: 25px;
-  }
-
-  .row {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-
-  input {
-    padding: 6px;
-    width: 160px;
-  }
-
-  button {
-    padding: 6px 10px;
-    background: #1b7f3a;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
-  button:hover {
-    opacity: 0.85;
-  }
-</style>
-</head>
-
-<body>
-
-<div class="page">
-
-  <!-- ===== مقدمة الصفحة ===== -->
-  <div class="header">
-    <h1>مكتب صندوق التنمية الزراعية بمحافظة قرية العليا</h1>
-    <h2>كشف فني</h2>
-  </div>
-
-  <!-- ===== بند 2: إحداثيات السجل ===== -->
-  <section id="recordCoords">
-    <h3>بند 2: إحداثيات السجل</h3>
-
-    <div class="row">
-      <input type="number" step="any" id="recordLat" placeholder="Latitude">
-      <input type="number" step="any" id="recordLng" placeholder="Longitude">
-
-      <button type="button" onclick="locateRecord()">📍 تحديد الموقع</button>
-      <button type="button" onclick="openRecordMap()">🗺️ الوصول</button>
-      <button type="button" onclick="clearRecord()">✖ حذف</button>
-    </div>
-  </section>
-
-</div>
-
-<script>
-/* ===== بند 2: إحداثيات السجل ===== */
-
-const recordLat = document.getElementById("recordLat");
-const recordLng = document.getElementById("recordLng");
-
-// تحميل البيانات
-document.addEventListener("DOMContentLoaded", function () {
-  if (localStorage.getItem("recordLat"))
-    recordLat.value = localStorage.getItem("recordLat");
-
-  if (localStorage.getItem("recordLng"))
-    recordLng.value = localStorage.getItem("recordLng");
-});
-
-// حفظ تلقائي
-recordLat.addEventListener("input", function () {
-  localStorage.setItem("recordLat", recordLat.value);
-});
-
-recordLng.addEventListener("input", function () {
-  localStorage.setItem("recordLng", recordLng.value);
-});
-
-// تحديد الموقع
-function locateRecord() {
-  if (!navigator.geolocation) {
-    alert("المتصفح لا يدعم تحديد الموقع");
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(function (pos) {
-    recordLat.value = pos.coords.latitude.toFixed(6);
-    recordLng.value = pos.coords.longitude.toFixed(6);
-    localStorage.setItem("recordLat", recordLat.value);
-    localStorage.setItem("recordLng", recordLng.value);
-  });
-}
-
-// فتح Google Maps
-function openRecordMap() {
-  if (!recordLat.value || !recordLng.value) {
-    alert("أدخل الإحداثيات أولاً");
-    return;
-  }
-
-  window.open(
-    "https://www.google.com/maps?q=" +
-      recordLat.value +
-      "," +
-      recordLng.value,
-    "_blank"
+  const M = a * (
+    (1 - e*e/4 - 3*e**4/64 - 5*e**6/256) * φ
+    - (3*e*e/8 + 3*e**4/32 + 45*e**6/1024) * Math.sin(2*φ)
+    + (15*e**4/256 + 45*e**6/1024) * Math.sin(4*φ)
   );
+
+  const easting = k0 * N * (
+    A + (1 - T + C) * A**3 / 6
+  ) + 500000;
+
+  const northing = k0 * (M + N * Math.tan(φ) * A**2 / 2);
+
+  return { x: easting, y: northing };
 }
 
-// حذف
-function clearRecord() {
-  recordLat.value = "";
-  recordLng.value = "";
-  localStorage.removeItem("recordLat");
-  localStorage.removeItem("recordLng");
+// ===============================
+// إضافة / حذف زوايا
+// ===============================
+function addCorner(lat = "", lon = "") {
+  const div = document.createElement("div");
+  div.className = "corner";
+  div.innerHTML = `
+    Latitude <input type="number" step="any" value="${lat}">
+    Longitude <input type="number" step="any" value="${lon}">
+    <button type="button" onclick="this.parentNode.remove()">−</button>
+  `;
+  document.getElementById("corners").appendChild(div);
+}
+
+// زوايا افتراضية (تقدر تحذفها)
+addCorner(27.90670, 47.65737);
+addCorner(27.89539, 47.63094);
+addCorner(27.87591, 47.64401);
+addCorner(27.88323, 47.67417);
+
+// ===============================
+// حساب الأطوال والمساحة
+// ===============================
+function calculatePolygon() {
+  const rows = document.querySelectorAll(".corner");
+  let points = [];
+
+  rows.forEach(r => {
+    const lat = parseFloat(r.children[0].value);
+    const lon = parseFloat(r.children[1].value);
+    if (!isNaN(lat) && !isNaN(lon)) {
+      points.push(latLonToUTM(lat, lon));
+    }
+  });
+
+  if (points.length < 3) {
+    alert("أدخل 3 زوايا على الأقل");
+    return;
+  }
+
+  let distances = "";
+  let area = 0;
+
+  for (let i = 0; i < points.length; i++) {
+    const p1 = points[i];
+    const p2 = points[(i + 1) % points.length];
+
+    const d = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+    distances += `المسافة ${i+1} → ${i+2}: ${d.toFixed(2)} م<br>`;
+
+    area += (p1.x * p2.y - p2.x * p1.y);
+  }
+
+  area = Math.abs(area / 2);
+
+  const hectares = area / 10000;
+  const dunum = area / 1000;
+
+  document.getElementById("results").innerHTML = `
+    <hr>
+    <strong>الأطوال:</strong><br>${distances}
+    <hr>
+    <strong>المساحة:</strong><br>
+    ${area.toFixed(2)} م²<br>
+    ${hectares.toFixed(2)} هكتار<br>
+    ${dunum.toFixed(2)} دونم
+  `;
 }
 </script>
-
-</body>
-</html>
