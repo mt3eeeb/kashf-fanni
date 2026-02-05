@@ -1,4 +1,134 @@
 <!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>كشف فني</title>
+
+<style>
+  body {
+    font-family: "Tahoma", Arial;
+    background: #f4f8f5;
+    margin: 0;
+    padding: 20px;
+    color: #1f2933;
+  }
+
+  .page {
+    background: #ffffff;
+    padding: 25px;
+    max-width: 900px;
+    margin: auto;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.08);
+  }
+
+  /* ===== العنوان ===== */
+  .header {
+    text-align: center;
+    margin-bottom: 25px;
+  }
+
+  .header h1 {
+    margin: 0;
+    font-size: 22px;
+    color: #2e7d32; /* أخضر */
+  }
+
+  .header h2 {
+    margin: 8px 0 0;
+    font-size: 18px;
+    color: #355f3b;
+  }
+
+  /* ===== العناوين ===== */
+  h3 {
+    border-bottom: 2px solid #2e7d32;
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+    font-size: 16px;
+    color: #2e7d32;
+  }
+
+  .row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  input {
+    padding: 8px;
+    font-size: 14px;
+    min-width: 200px;
+    border: 1px solid #a5d6a7;
+    border-radius: 4px;
+  }
+
+  input:focus {
+    outline: none;
+    border-color: #2e7d32;
+    box-shadow: 0 0 0 2px rgba(46,125,50,0.15);
+  }
+
+  @media print {
+    body {
+      background: white;
+      padding: 0;
+    }
+    .page {
+      box-shadow: none;
+      border-radius: 0;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+<div class="page">
+
+  <!-- ===== بداية الصفحة ===== -->
+  <div class="header">
+    <h1>مكتب صندوق التنمية الزراعية بمحافظة قرية العليا</h1>
+    <h2>كشف فني</h2>
+  </div>
+
+  <!-- ===== بند 1: البيانات العامة ===== -->
+  <section id="generalData">
+    <h3>البيانات العامة</h3>
+
+    <div class="row">
+      <input type="text" id="clientName" placeholder="اسم العميل">
+      <input type="text" id="orderNumber" placeholder="رقم الطلب">
+      <input type="date" id="visitDate">
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ===== حفظ تلقائي – بند 1 ===== */
+
+const fields = ["clientName", "orderNumber", "visitDate"];
+
+document.addEventListener("DOMContentLoaded", () => {
+  fields.forEach(id => {
+    const saved = localStorage.getItem(id);
+    if (saved) document.getElementById(id).value = saved;
+  });
+});
+
+fields.forEach(id => {
+  document.addEventListener("input", e => {
+    if (e.target.id === id) {
+      localStorage.setItem(id, e.target.value);
+    }
+  });
+});
+</script>
+
+</body>
+</html>
+<!DOCTYPE html>
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
