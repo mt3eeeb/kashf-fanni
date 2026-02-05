@@ -1,216 +1,120 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <title>كشف فني</title>
 
 <style>
-body{
-  direction:rtl;
-  font-family:Tahoma, Arial;
-  background:#f2f4f7;
-  margin:20px;
-}
-h1,h2{text-align:center;margin:6px 0}
-.section{
-  background:#fff;
-  padding:12px;
-  margin-bottom:15px;
-  border-radius:8px;
-  box-shadow:0 0 6px #ccc;
-}
-.row{display:flex;flex-wrap:wrap;gap:8px}
-input,select,textarea,button{
-  padding:6px;
-  border-radius:4px;
-  border:1px solid #aaa;
-}
-button{cursor:pointer}
-textarea{width:100%}
-.small{width:120px}
-.medium{width:180px}
+  body {
+    font-family: "Tahoma", Arial;
+    background: #f5f7fa;
+    margin: 0;
+    padding: 20px;
+    color: #222;
+  }
+
+  .page {
+    background: #fff;
+    padding: 25px;
+    max-width: 900px;
+    margin: auto;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.08);
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 25px;
+  }
+
+  .header h1 {
+    margin: 0;
+    font-size: 22px;
+    color: #0b5ed7;
+  }
+
+  .header h2 {
+    margin: 8px 0 0;
+    font-size: 18px;
+    color: #333;
+  }
+
+  h3 {
+    border-bottom: 2px solid #0b5ed7;
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+    font-size: 16px;
+  }
+
+  .row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  input {
+    padding: 8px;
+    font-size: 14px;
+    min-width: 200px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  @media print {
+    body {
+      background: white;
+      padding: 0;
+    }
+    .page {
+      box-shadow: none;
+      border-radius: 0;
+    }
+  }
 </style>
 </head>
 
 <body>
 
-<h1>مكتب صندوق التنمية الزراعية بمحافظة قرية العليا</h1>
-<h2>كشف فني</h2>
+<div class="page">
 
-<!-- ================== 1 البيانات العامة ================== -->
-<div class="section">
-<h3>1️⃣ البيانات العامة</h3>
-<div class="row">
-<input class="medium" placeholder="اسم العميل" data-key="client">
-<input class="small" placeholder="رقم الطلب" data-key="order">
-<input type="date" data-key="date">
-</div>
-</div>
+  <!-- ===== بداية الصفحة ===== -->
+  <div class="header">
+    <h1>مكتب صندوق التنمية الزراعية بمحافظة قرية العليا</h1>
+    <h2>كشف فني</h2>
+  </div>
 
-<!-- ================== 2 السجل ================== -->
-<div class="section">
-<h3>2️⃣ إحداثيات السجل</h3>
-<input placeholder="Latitude" id="regLat">
-<input placeholder="Longitude" id="regLng">
-<button onclick="openMap('regLat','regLng')">🗺️</button>
-</div>
+  <!-- ===== بند 1: البيانات العامة ===== -->
+  <section id="generalData">
+    <h3>البيانات العامة</h3>
 
-<!-- ================== 3 البوابة ================== -->
-<div class="section">
-<h3>3️⃣ إحداثيات البوابة</h3>
-<input placeholder="Latitude" id="gateLat">
-<input placeholder="Longitude" id="gateLng">
-<button onclick="locate('gateLat','gateLng')">📍</button>
-<button onclick="openMap('gateLat','gateLng')">🗺️</button>
-</div>
+    <div class="row">
+      <input type="text" id="clientName" placeholder="اسم العميل">
+      <input type="text" id="orderNumber" placeholder="رقم الطلب">
+      <input type="date" id="visitDate">
+    </div>
+  </section>
 
-<!-- ================== 4 زوايا المزرعة ================== -->
-<div class="section">
-<h3>4️⃣ زوايا المزرعة</h3>
-<div id="corners"></div>
-<button onclick="addCorner()">➕ إضافة زاوية</button>
 </div>
-
-<!-- ================== 5 الآبار ================== -->
-<div class="section">
-<h3>5️⃣ الآبار</h3>
-<div id="wells"></div>
-<button onclick="addWell()">➕ إضافة بئر</button>
-</div>
-
-<!-- ================== 6 نظام الري ================== -->
-<div class="section">
-<h3>6️⃣ نظام الري</h3>
-عدد الأبراج <input id="towers">
-طول البرج <input id="towerLen">
-<select id="crop">
-  <option>قمح</option>
-  <option>أعلاف خضره</option>
-  <option>آخر</option>
-</select>
-<input id="cropOther" placeholder="نوع آخر" style="display:none">
-<p id="irrigResult"></p>
-</div>
-
-<!-- ================== 7 المزروعات ================== -->
-<div class="section">
-<h3>7️⃣ المزروعات</h3>
-<div id="plants"></div>
-<button onclick="addPlant()">➕ إضافة</button>
-</div>
-
-<!-- ================== 8 الموجودات ================== -->
-<div class="section">
-<h3>8️⃣ الموجودات</h3>
-<div id="assets"></div>
-<button onclick="addAsset()">➕ إضافة</button>
-</div>
-
-<!-- ================== 9 الباحث ================== -->
-<div class="section">
-<h3>9️⃣ اسم الباحث</h3>
-<input placeholder="اسم الباحث" data-key="researcher">
-</div>
-
-<button onclick="window.print()">🖨️ طباعة PDF</button>
 
 <script>
-/* ===== حفظ عام ===== */
-document.querySelectorAll("[data-key]").forEach(el=>{
-  el.value=localStorage.getItem(el.dataset.key)||""
-  el.oninput=()=>localStorage.setItem(el.dataset.key,el.value)
-})
+/* ===== حفظ تلقائي – بند 1 ===== */
 
-/* ===== خرائط ===== */
-function openMap(a,b){
- const la=document.getElementById(a).value
- const ln=document.getElementById(b).value
- if(!la||!ln)return alert("أدخل الإحداثيات")
- open(`https://www.google.com/maps?q=${la},${ln}`)
-}
-function locate(a,b){
- navigator.geolocation.getCurrentPosition(p=>{
-  document.getElementById(a).value=p.coords.latitude.toFixed(6)
-  document.getElementById(b).value=p.coords.longitude.toFixed(6)
- })
-}
+const fields = ["clientName", "orderNumber", "visitDate"];
 
-/* ===== بند 4 ===== */
-let corners=JSON.parse(localStorage.getItem("corners")||"[]")
-function addCorner(){corners.push({});saveC();drawC()}
-function saveC(){localStorage.setItem("corners",JSON.stringify(corners))}
-function drawC(){
- const c=document.getElementById("corners"); c.innerHTML=""
- corners.forEach((o,i)=>{
-  c.innerHTML+=`
-   <input placeholder="Lat" oninput="corners[${i}].lat=this.value;saveC()">
-   <input placeholder="Lng" oninput="corners[${i}].lng=this.value;saveC()">
-   <button onclick="corners.splice(${i},1);saveC();drawC()">−</button><br>`
- })
-}
-drawC()
+document.addEventListener("DOMContentLoaded", () => {
+  fields.forEach(id => {
+    const saved = localStorage.getItem(id);
+    if (saved) document.getElementById(id).value = saved;
+  });
+});
 
-/* ===== بند 5 ===== */
-let wells=JSON.parse(localStorage.getItem("wells")||"[]")
-function addWell(){wells.push({});saveW();drawW()}
-function saveW(){localStorage.setItem("wells",JSON.stringify(wells))}
-function drawW(){
- const w=document.getElementById("wells"); w.innerHTML=""
- wells.forEach((o,i)=>{
-  w.innerHTML+=`
-   <input placeholder="Lat" oninput="wells[${i}].lat=this.value;saveW()">
-   <input placeholder="Lng" oninput="wells[${i}].lng=this.value;saveW()">
-   <button onclick="open(\`https://maps.google.com?q=\${wells[i].lat},\${wells[i].lng}\`)">🗺️</button>
-   <button onclick="navigator.geolocation.getCurrentPosition(p=>{wells[${i}].lat=p.coords.latitude.toFixed(6);wells[${i}].lng=p.coords.longitude.toFixed(6);saveW();drawW()})">📍</button>
-   <button onclick="wells.splice(${i},1);saveW();drawW()">−</button><br>`
- })
-}
-drawW()
-
-/* ===== بند 6 ===== */
-crop.onchange=()=>cropOther.style.display=crop.value==="آخر"?"inline":"none"
-function calcIrr(){
- const t=+towers.value||0,l=+towerLen.value||0
- const m=t*l
- irrigResult.innerText=
- `المساحة: ${m} م² | ${(m/10000).toFixed(2)} هكتار | ${(m/1000).toFixed(2)} دونم`
-}
-towers.oninput=towerLen.oninput=calcIrr
-
-/* ===== بند 7 ===== */
-let plants=JSON.parse(localStorage.getItem("plants")||"[]")
-function addPlant(){plants.push({});saveP();drawP()}
-function saveP(){localStorage.setItem("plants",JSON.stringify(plants))}
-function drawP(){
- const p=document.getElementById("plants"); p.innerHTML=""
- plants.forEach((o,i)=>{
-  p.innerHTML+=`
-   <select onchange="plants[${i}].t=this.value;saveP()">
-    <option>نخيل</option><option>مصدات رياح</option><option>حمضيات</option><option>آخر</option>
-   </select>
-   <input placeholder="عدد الشتلات" oninput="plants[${i}].n=this.value;saveP()">
-   <button onclick="plants.splice(${i},1);saveP();drawP()">−</button><br>`
- })
-}
-drawP()
-
-/* ===== بند 8 ===== */
-let assets=JSON.parse(localStorage.getItem("assets")||"[]")
-function addAsset(){assets.push({});saveA();drawA()}
-function saveA(){localStorage.setItem("assets",JSON.stringify(assets))}
-function drawA(){
- const a=document.getElementById("assets"); a.innerHTML=""
- assets.forEach((o,i)=>{
-  a.innerHTML+=`
-   <select onchange="assets[${i}].t=this.value;saveA()">
-    <option>مباني</option><option>خزانات</option><option>مولدات</option><option>أخرى</option>
-   </select>
-   <input placeholder="العدد" oninput="assets[${i}].n=this.value;saveA()">
-   <input placeholder="ملاحظات" oninput="assets[${i}].m=this.value;saveA()">
-   <button onclick="assets.splice(${i},1);saveA();drawA()">−</button><br>`
- })
-}
-drawA()
+fields.forEach(id => {
+  document.addEventListener("input", e => {
+    if (e.target.id === id) {
+      localStorage.setItem(id, e.target.value);
+    }
+  });
+});
 </script>
 
 </body>
