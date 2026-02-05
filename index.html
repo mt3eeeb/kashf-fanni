@@ -16,16 +16,8 @@ body{
     background:#fff;
     padding:12px;
 }
-.header{
-    text-align:center;
-    margin-bottom:15px;
-}
-.header small{
-    display:block;
-    font-size:13px;
-}
-h1{margin:5px 0;}
-
+.header{text-align:center;margin-bottom:15px;}
+.header small{display:block;font-size:13px;}
 .section{margin-bottom:15px;}
 .section h3{
     background:#2ecc71;
@@ -42,13 +34,13 @@ h1{margin:5px 0;}
 input{
     flex:1;
     padding:6px;
-    font-size:14px;
+    font-size:13px;
 }
 button{
-    padding:8px;
+    padding:7px;
     border:none;
     cursor:pointer;
-    font-size:14px;
+    font-size:13px;
 }
 .add{background:#2ecc71;color:#fff;}
 .del{background:#e74c3c;color:#fff;}
@@ -58,13 +50,14 @@ button{
 .result{
     background:#eee;
     padding:8px;
-    font-size:14px;
+    font-size:13px;
+    page-break-inside:avoid;
 }
 
 @media print{
-    button{display:none;}
-    .page-break{page-break-before:always;}
-    body{background:#fff;}
+  button{display:none;}
+  .page-break{page-break-before:always;}
+  body{background:#fff;}
 }
 </style>
 </head>
@@ -72,9 +65,10 @@ button{
 <body>
 <div class="container">
 
+<!-- العنوان -->
 <div class="header">
     <small>مكتب محافظة قرية العليا</small>
-    <h1>كشف فني</h1>
+    <h2>كشف فني</h2>
 </div>
 
 <!-- الصفحة الأولى -->
@@ -110,7 +104,21 @@ button{
 <h3>زوايا المزرعة</h3>
 <div id="corners"></div>
 <button class="add small-btn" onclick="addCorner()">+ إضافة زاوية</button>
-<button class="gray small-btn" onclick="calcLandArea()">احسب مساحة الأرض</button>
+<button class="gray small-btn" onclick="calcDistances()">حساب المسافات</button>
+<div id="cornerResult" class="result"></div>
+</div>
+
+<div class="section">
+<h3>مساحة الأرض (حسب الكروكي)</h3>
+<div class="row">
+<input id="a" placeholder="الضلع 1 (م)">
+<input id="b" placeholder="الضلع 2 (م)">
+</div>
+<div class="row">
+<input id="c" placeholder="الضلع 3 (م)">
+<input id="d" placeholder="الضلع 4 (م)">
+</div>
+<button class="gray small-btn" onclick="calcLand()">احسب المساحة</button>
 <div id="landResult" class="result"></div>
 </div>
 
@@ -118,11 +126,15 @@ button{
 
 <!-- الصفحة الثانية -->
 <div class="section">
-<h3>نظام الري (المحاور)</h3>
-<div id="pivots"></div>
-<button class="add small-btn" onclick="addPivot()">+ إضافة محور</button>
-<button class="gray small-btn" onclick="calcPivots()">احسب مساحة المحاور</button>
-<div id="pivotResult" class="result"></div>
+<h3>الآبار</h3>
+<div id="wells"></div>
+<button class="add small-btn" onclick="addWell()">+ إضافة بئر</button>
+</div>
+
+<div class="section">
+<h3>نظام الري (المزروع)</h3>
+<div id="irrigation"></div>
+<button class="add small-btn" onclick="addIrrigation()">+ إضافة مزروع</button>
 </div>
 
 <div class="section">
@@ -149,15 +161,6 @@ button{
 </div>
 
 <script>
-/* ---------- أدوات عامة ---------- */
-function openMaps(btn){
-    let r = btn.previousElementSibling.querySelectorAll("input");
-    let lat = r[0].value+"."+r[1].value;
-    let lng = r[2].value+"."+r[3].value;
-    window.open(`https://www.google.com/maps?q=${lat},${lng}`);
-}
-
-/* ---------- زوايا المزرعة ---------- */
 function coordRow(){
 return `
 <div class="row">
@@ -169,102 +172,87 @@ return `
 </div>`;
 }
 
-function addCorner(){
-    corners.innerHTML += `<div><b>زاوية ${corners.children.length+1}</b>${coordRow()}</div>`;
+function addCorner(){corners.innerHTML+=coordRow();}
+function addWell(){wells.innerHTML+=coordRow();}
+
+function addIrrigation(){
+irrigation.innerHTML+=`
+<div class="row">
+<input placeholder="اسم المزروع">
+<button class="del" onclick="this.parentElement.remove()">−</button>
+</div>`;
 }
 
-function dist(a,b,c,d){
-    const R=6371000;
-    let dLat=(c-a)*Math.PI/180;
-    let dLng=(d-b)*Math.PI/180;
-    let x=Math.sin(dLat/2)**2+
-    Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*
-    Math.sin(dLng/2)**2;
-    return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
-}
-
-function calcLandArea(){
-    let pts=[];
-    document.querySelectorAll("#corners .row").forEach(r=>{
-        let i=r.querySelectorAll("input");
-        pts.push([
-            parseFloat(i[0].value+"."+i[1].value),
-            parseFloat(i[2].value+"."+i[3].value)
-        ]);
-    });
-    if(pts.length<3){
-        landResult.innerHTML="أدخل 3 زوايا على الأقل";
-        return;
-    }
-
-    let txt="";
-    for(let i=0;i<pts.length;i++){
-        let j=(i+1)%pts.length;
-        txt+=`المسافة بين زاوية ${i+1} و ${j+1}: ${dist(
-        pts[i][0],pts[i][1],pts[j][0],pts[j][1]
-        ).toFixed(1)} م<br>`;
-    }
-
-    let area=0;
-    for(let i=0;i<pts.length;i++){
-        let j=(i+1)%pts.length;
-        area+=pts[i][0]*pts[j][1]-pts[j][0]*pts[i][1];
-    }
-    area=Math.abs(area/2)*111000*111000;
-
-    landResult.innerHTML =
-    txt+`<hr>
-    مساحة الأرض: ${area.toFixed(1)} م²<br>
-    الهكتار: ${(area/10000).toFixed(3)}<br>
-    الدونم: ${(area/1000).toFixed(2)}`;
-}
-
-/* ---------- المحاور ---------- */
-function addPivot(){
-    pivots.innerHTML+=`
-    <div class="row">
-    <input placeholder="نصف القطر (م)">
-    <select>
-        <option value="1">محور كامل</option>
-        <option value="0.5">نصف محور</option>
-        <option value="0.25">ربع محور</option>
-    </select>
-    <button class="del" onclick="this.parentElement.remove()">−</button>
-    </div>`;
-}
-
-function calcPivots(){
-    let total=0;
-    pivots.querySelectorAll(".row").forEach(r=>{
-        let radius=parseFloat(r.children[0].value);
-        let factor=parseFloat(r.children[1].value);
-        if(radius>0){
-            total += Math.PI * radius * radius * factor;
-        }
-    });
-    pivotResult.innerHTML=
-    `إجمالي مساحة المحاور:<br>
-     ${total.toFixed(1)} م²<br>
-     ${(total/10000).toFixed(3)} هكتار<br>
-     ${(total/1000).toFixed(2)} دونم`;
-}
-
-/* ---------- أخرى ---------- */
 function addCrop(){
-    crops.innerHTML+=`
-    <div class="row">
-    <input placeholder="اسم المزروع">
-    <input placeholder="المساحة">
-    <button class="del" onclick="this.parentElement.remove()">−</button>
-    </div>`;
+crops.innerHTML+=`
+<div class="row">
+<input placeholder="اسم المزروع">
+<input placeholder="المساحة">
+<button class="del" onclick="this.parentElement.remove()">−</button>
+</div>`;
 }
+
 function addAsset(){
-    assets.innerHTML+=`
-    <div class="row">
-    <input placeholder="الموجود">
-    <input placeholder="الوصف">
-    <button class="del" onclick="this.parentElement.remove()">−</button>
-    </div>`;
+assets.innerHTML+=`
+<div class="row">
+<input placeholder="الموجود">
+<input placeholder="الوصف">
+<button class="del" onclick="this.parentElement.remove()">−</button>
+</div>`;
+}
+
+function openMaps(btn){
+let r=btn.previousElementSibling.querySelectorAll("input");
+let lat=r[0].value+"."+r[1].value;
+let lng=r[2].value+"."+r[3].value;
+window.open(`https://www.google.com/maps?q=${lat},${lng}`);
+}
+
+// حساب المسافات بين الزوايا
+function dist(a,b,c,d){
+const R=6371000;
+let dLat=(c-a)*Math.PI/180;
+let dLng=(d-b)*Math.PI/180;
+let x=Math.sin(dLat/2)**2+
+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*
+Math.sin(dLng/2)**2;
+return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+}
+
+function calcDistances(){
+let pts=[];
+document.querySelectorAll("#corners .row").forEach(r=>{
+let i=r.querySelectorAll("input");
+pts.push([
+parseFloat(i[0].value+"."+i[1].value),
+parseFloat(i[2].value+"."+i[3].value)
+]);
+});
+if(pts.length<2){cornerResult.innerHTML="أدخل زاويتين على الأقل";return;}
+let txt="";
+for(let i=0;i<pts.length;i++){
+let j=(i+1)%pts.length;
+txt+=`المسافة بين زاوية ${i+1} و ${j+1}: ${dist(
+pts[i][0],pts[i][1],pts[j][0],pts[j][1]
+).toFixed(1)} م<br>`;
+}
+cornerResult.innerHTML=txt;
+}
+
+// مساحة الأرض من الأضلاع
+function calcLand(){
+let a1=+a.value,b1=+b.value,c1=+c.value,d1=+d.value;
+if(!a1||!b1||!c1||!d1){
+ landResult.innerHTML="أدخل جميع الأضلاع";
+ return;
+}
+let s=(a1+b1+c1+d1)/2;
+let area=Math.sqrt((s-a1)*(s-b1)*(s-c1)*(s-d1));
+
+landResult.innerHTML=
+`المساحة: ${area.toFixed(1)} م²<br>
+الهكتار: ${(area/10000).toFixed(3)}<br>
+الدونم: ${(area/1000).toFixed(2)}`;
 }
 </script>
 
