@@ -1,8 +1,12 @@
 <script>
 /* ===== بند 5: الآبار ===== */
 
-// تحميل من التخزين أو إنشاء مصفوفة
-let wells = JSON.parse(localStorage.getItem("wells")) || [];
+let wells = [];
+
+document.addEventListener("DOMContentLoaded", () => {
+  wells = JSON.parse(localStorage.getItem("wells")) || [];
+  renderWells();
+});
 
 // حفظ
 function saveWells() {
@@ -23,7 +27,7 @@ function removeWell(index) {
   renderWells();
 }
 
-// تحديث قيمة
+// تحديث
 function updateWell(index, field, value) {
   wells[index][field] = value;
   saveWells();
@@ -37,17 +41,18 @@ function openWellMap(index) {
     return;
   }
   window.open(
-    `https://www.google.com/maps?q=${w.lat},${w.lng}`,
+    "https://www.google.com/maps?q=" + w.lat + "," + w.lng,
     "_blank"
   );
 }
 
-// تحديد الموقع الحالي
+// تحديد الموقع
 function locateWell(index) {
   if (!navigator.geolocation) {
     alert("المتصفح لا يدعم تحديد الموقع");
     return;
   }
+
   navigator.geolocation.getCurrentPosition(pos => {
     wells[index].lat = pos.coords.latitude.toFixed(6);
     wells[index].lng = pos.coords.longitude.toFixed(6);
@@ -56,9 +61,11 @@ function locateWell(index) {
   });
 }
 
-// عرض الآبار
+// عرض
 function renderWells() {
   const c = document.getElementById("wellsContainer");
+  if (!c) return;
+
   c.innerHTML = "";
 
   wells.forEach((w, i) => {
@@ -77,7 +84,4 @@ function renderWells() {
     `;
   });
 }
-
-// تحميل أولي
-renderWells();
 </script>
