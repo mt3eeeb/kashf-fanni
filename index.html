@@ -1,165 +1,100 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
 <meta charset="UTF-8">
 <title>كشف فني زراعي</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-body{font-family:Tahoma;background:#f4f4f4;margin:0}
-.container{max-width:900px;margin:auto;background:#fff;padding:12px}
-h2{text-align:center}
-.section{margin-bottom:15px}
-.section h3{background:#2ecc71;color:#fff;padding:7px;margin:0 0 8px}
-.row{display:flex;gap:5px;margin-bottom:5px}
-input,select{flex:1;padding:6px}
-button{padding:6px;border:none;cursor:pointer}
-.add{background:#2ecc71;color:#fff}
-.del{background:#e74c3c;color:#fff}
-.gray{background:#ddd}
-.result{background:#eee;padding:8px;font-size:14px}
-.small{font-size:12px;color:#555}
-@media print{
- button{display:none}
- .page-break{page-break-before:always}
-}
+body{font-family:Arial;direction:rtl;background:#f5f5f5;margin:0}
+.section{background:#2ecc71;color:#fff;padding:10px;font-weight:bold}
+.box{background:#fff;padding:10px;margin-bottom:10px}
+input,select,button{width:100%;padding:6px;margin:4px 0}
+.row{display:flex;gap:5px}
+.row input{flex:1}
+.btn{background:#27ae60;color:#fff;border:0;padding:8px}
+.btn-red{background:#e74c3c}
+.small{font-size:13px;color:#555}
 </style>
 </head>
 
 <body>
-<div class="container">
 
-<h2>مكتب محافظة قرية العليا<br>كشف فني زراعي</h2>
-
-<!-- البيانات -->
-<div class="section">
-<h3>البيانات العامة</h3>
-<input placeholder="اسم المالك">
-<input placeholder="اسم المزرعة">
+<!-- بيانات العميل -->
+<div class="section">بيانات العميل</div>
+<div class="box">
+<input placeholder="اسم العميل">
 <input placeholder="رقم الطلب">
 <input type="date">
 </div>
 
-<!-- زوايا -->
-<div class="section">
-<h3>زوايا المزرعة</h3>
-<div id="corners"></div>
-<button class="add" onclick="addCorner()">+ إضافة زاوية</button>
-<button class="gray" onclick="calcCorners()">حساب الأطوال والمساحة</button>
-<div class="result" id="cornerResult"></div>
-<div class="small">زر الدليلة / قوقل ماب لكل زاوية</div>
+<!-- زوايا المزرعة -->
+<div class="section">زوايا المزرعة</div>
+<div class="box" id="points">
 </div>
+<button class="btn" onclick="addPoint()">+ إضافة زاوية</button>
 
-<div class="page-break"></div>
+<br>
+
+<button class="btn" onclick="openMaps()">فتح قوقل ماب</button>
+<button class="btn" onclick="openDalilah()">فتح الدليلة</button>
+
+<br><br>
+
+<button class="btn" onclick="calcDistances()">حساب الأطوال والمساحة</button>
+
+<div class="box" id="results"></div>
 
 <!-- نظام الري -->
-<div class="section">
-<h3>نظام الري</h3>
-<div id="irrigation"></div>
-<button class="add" onclick="addIrrigation()">+ إضافة نظام ري</button>
+<div class="section">نظام الري</div>
+<div class="box">
+<select id="irrigation">
+<option value="">اختر نوع الري</option>
+<option>رش محوري</option>
+<option>تنقيط</option>
+<option>غمر</option>
+</select>
+
+<div id="pivotBox" style="display:none">
+<input type="number" id="towers" placeholder="عدد الأبراج">
+<div class="small">طول البرج ثابت = 50 م</div>
 </div>
 
-<!-- المزروعات -->
-<div class="section">
-<h3>المزروعات</h3>
-<div id="crops"></div>
-<button class="add" onclick="addCrop()">+ إضافة مزروع</button>
-</div>
-
-<!-- أزرار -->
-<div class="section">
-<button class="gray" onclick="saveData()">💾 حفظ</button>
-<button class="gray" onclick="clearData()">🗑️ مسح الكل</button>
-<button class="gray" onclick="window.print()">🖨️ طباعة</button>
-</div>
-
-</div>
-
-<script>
-/* حفظ تلقائي */
-window.onload=()=>{if(localStorage.data)document.body.innerHTML=localStorage.data}
-function saveData(){localStorage.data=document.body.innerHTML;alert("تم الحفظ")}
-function clearData(){if(confirm("مسح كل البيانات؟")){localStorage.clear();location.reload()}}
-
-/* خرائط */
-function openMap(lat,lng){window.open(`https://www.google.com/maps?q=${lat},${lng}`)}
-function openDalilah(lat,lng){
-  navigator.clipboard.writeText(lat+","+lng);
-  alert("تم نسخ الإحداثية – الصقها في الدليلة");
-}
-
-/* الزوايا */
-function addCorner(){
-corners.innerHTML+=`
-<div class="row">
-<input placeholder="Lat">
-<input placeholder="Lng">
-<button onclick="openMap(this.previousElementSibling.previousElementSibling.value,this.previousElementSibling.value)">🗺️</button>
-<button onclick="openDalilah(this.previousElementSibling.previousElementSibling.previousElementSibling.value,this.previousElementSibling.previousElementSibling.value)">🧭</button>
-<button class="del" onclick="this.parentElement.remove()">−</button>
-</div>`;
-}
-
-function dist(a,b,c,d){
-const R=6371000;
-let dLat=(c-a)*Math.PI/180;
-let dLng=(d-b)*Math.PI/180;
-let x=Math.sin(dLat/2)**2+
-Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*
-Math.sin(dLng/2)**2;
-return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
-}
-
-function calcCorners(){
-let pts=[];
-document.querySelectorAll("#corners .row").forEach(r=>{
-let i=r.querySelectorAll("input");
-if(i[0].value&&i[1].value)pts.push([+i[0].value,+i[1].value]);
-});
-if(pts.length<3){cornerResult.innerHTML="أدخل 3 زوايا على الأقل";return;}
-
-let txt="";
-let area=0;
-for(let i=0;i<pts.length;i++){
-let j=(i+1)%pts.length;
-txt+=`المسافة ${i+1}-${j+1}: ${dist(pts[i][0],pts[i][1],pts[j][0],pts[j][1]).toFixed(1)} م<br>`;
-area+=pts[i][0]*pts[j][1]-pts[j][0]*pts[i][1];
-}
-area=Math.abs(area/2)*111000*111000;
-cornerResult.innerHTML=txt+`<hr>
-المساحة: ${area.toFixed(1)} م²<br>
-هكتار: ${(area/10000).toFixed(3)}<br>
-دونم: ${(area/1000).toFixed(2)}`;
-}
-
-/* الري */
-function addIrrigation(){
-irrigation.innerHTML+=`
-<div class="result">
-<input placeholder="عدد الأبراج" oninput="calcPivot(this)">
 <select>
 <option>قمح</option>
 <option>أعلاف خضراء</option>
 <option>أخرى</option>
 </select>
-<div class="res"></div>
-<button class="del" onclick="this.parentElement.remove()">−</button>
-</div>`;
-}
-function calcPivot(el){
-let n=+el.value;
-if(!n)return;
-let r=n*50;
-let a=Math.PI*r*r;
-el.parentElement.querySelector(".res").innerHTML=
-`المساحة م²: ${a.toFixed(1)}<br>
-هكتار: ${(a/10000).toFixed(2)}<br>
-دونم: ${(a/1000).toFixed(1)}`;
+
+<button class="btn" onclick="calcPivot()">حساب مساحة البرج</button>
+
+<div class="box" id="pivotResult"></div>
+</div>
+
+<!-- المزروعات -->
+<div class="section">المزروعات</div>
+<div class="box" id="plants"></div>
+<button class="btn" onclick="addPlant()">+ إضافة مزروع</button>
+
+<br><br>
+
+<button class="btn" onclick="saveData()">💾 حفظ</button>
+<button class="btn btn-red" onclick="clearData()">🗑 حذف الكل</button>
+
+<script>
+/* حفظ تلقائي */
+window.onload=()=>{loadData();addPoint();addPlant()}
+
+function addPoint(lat='',lng=''){
+let d=document.createElement('div')
+d.className='row'
+d.innerHTML=`<input placeholder="Longitude" value="${lng}">
+<input placeholder="Latitude" value="${lat}">`
+document.getElementById('points').appendChild(d)
 }
 
-/* المزروعات */
-function addCrop(){
-crops.innerHTML+=`
-<div class="row">
+function addPlant(){
+let d=document.createElement('div')
+d.innerHTML=`
 <select>
 <option>نخيل</option>
 <option>مصدات رياح</option>
@@ -168,9 +103,76 @@ crops.innerHTML+=`
 </select>
 <input placeholder="العدد">
 <input placeholder="النوع">
-<button class="del" onclick="this.parentElement.remove()">−</button>
-</div>`;
+<hr>`
+document.getElementById('plants').appendChild(d)
+}
+
+document.getElementById('irrigation').onchange=e=>{
+document.getElementById('pivotBox').style.display=
+e.target.value==='رش محوري'?'block':'none'
+}
+
+function calcPivot(){
+let n=+document.getElementById('towers').value
+if(!n)return
+let r=n*50
+let area=Math.PI*r*r
+document.getElementById('pivotResult').innerHTML=
+`المساحة م²: ${area.toFixed(1)}<br>
+هكتار: ${(area/10000).toFixed(2)}<br>
+دونم: ${(area/1000).toFixed(1)}`
+}
+
+function calcDistances(){
+let pts=[...document.querySelectorAll('#points .row')]
+.map(r=>({
+lng:+r.children[0].value,
+lat:+r.children[1].value
+}))
+if(pts.length<3)return
+let res=''
+let area=0
+for(let i=0;i<pts.length;i++){
+let j=(i+1)%pts.length
+let dx=(pts[j].lng-pts[i].lng)*111000
+let dy=(pts[j].lat-pts[i].lat)*111000
+let d=Math.sqrt(dx*dx+dy*dy)
+res+=`المسافة ${i+1}-${j+1}: ${d.toFixed(1)} م<br>`
+area+=pts[i].lng*pts[j].lat-pts[j].lng*pts[i].lat
+}
+area=Math.abs(area)/2*111000*111000
+res+=`<hr>المساحة م²: ${area.toFixed(1)}
+<br>هكتار: ${(area/10000).toFixed(2)}
+<br>دونم: ${(area/1000).toFixed(1)}`
+document.getElementById('results').innerHTML=res
+}
+
+function openMaps(){
+let r=document.querySelector('#points .row')
+if(!r)return
+window.open(`https://maps.google.com/?q=${r.children[1].value},${r.children[0].value}`)
+}
+
+function openDalilah(){
+let r=document.querySelector('#points .row')
+if(!r)return
+window.location=`dalilah://?lat=${r.children[1].value}&lng=${r.children[0].value}`
+}
+
+/* حفظ */
+function saveData(){
+localStorage.setItem('form',document.body.innerHTML)
+alert('تم الحفظ')
+}
+function loadData(){
+let d=localStorage.getItem('form')
+if(d)document.body.innerHTML=d
+}
+function clearData(){
+localStorage.clear()
+location.reload()
 }
 </script>
+
 </body>
 </html>
