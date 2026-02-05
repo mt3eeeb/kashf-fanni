@@ -3,69 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>كشف فني زراعي</title>
+<title>كشف فني</title>
 
 <style>
-body{
-    font-family: Tahoma, Arial;
-    background:#f2f2f2;
-    margin:0;
-}
-.container{
-    max-width:900px;
-    margin:auto;
-    background:#fff;
-    padding:12px;
-}
-.header{
-    text-align:center;
-    margin-bottom:15px;
-}
-.header h1{margin:5px 0;}
-.section{
-    margin-bottom:15px;
-}
-.section h3{
-    background:#2ecc71;
-    color:#fff;
-    padding:8px;
-    margin:0 0 8px;
-    font-size:15px;
-}
-.row{
-    display:flex;
-    gap:5px;
-    margin-bottom:5px;
-    flex-wrap:wrap;
-}
-input{
-    flex:1;
-    padding:6px;
-    font-size:13px;
-}
-button{
-    padding:6px 8px;
-    border:none;
-    cursor:pointer;
-    font-size:12px;
-}
-.add{background:#2ecc71;color:#fff;}
-.del{background:#e74c3c;color:#fff;}
-.map{background:#3498db;color:#fff;}
-.gaia{background:#8e44ad;color:#fff;}
-.gray{background:#ddd;}
-.result{
-    background:#eee;
-    padding:8px;
-    font-size:13px;
-    margin-top:5px;
-}
-.center{text-align:center;}
-
+body{font-family:Tahoma;background:#f2f2f2;margin:0}
+.container{max-width:900px;margin:auto;background:#fff;padding:10px}
+h1{text-align:center;margin:5px 0}
+.section{margin-bottom:15px}
+.section h3{background:#2ecc71;color:#fff;padding:6px;margin:0 0 8px;font-size:15px}
+.row{display:flex;gap:5px;margin-bottom:5px;flex-wrap:wrap}
+input{flex:1;padding:6px;font-size:13px}
+button{padding:6px;font-size:13px;border:none;cursor:pointer}
+.add{background:#2ecc71;color:#fff}
+.del{background:#e74c3c;color:#fff}
+.gray{background:#ddd}
+.mapbtn{background:#3498db;color:#fff}
+.gaiabtn{background:#2c3e50;color:#fff}
+.result{background:#eee;padding:6px;font-size:13px;margin-top:5px}
 @media print{
-  button{display:none;}
-  .page-break{page-break-before:always;}
-  body{background:#fff;}
+ button{display:none}
+ body{background:#fff}
 }
 </style>
 </head>
@@ -73,13 +30,9 @@ button{
 <body>
 <div class="container">
 
-<div class="header">
-    <small>مكتب محافظة قرية العليا</small>
-    <h1>كشف فني</h1>
-</div>
+<h1>كشف فني</h1>
 
-<!-- ================= الصفحة 1 ================= -->
-
+<!-- البيانات العامة -->
 <div class="section">
 <h3>البيانات العامة</h3>
 <input placeholder="اسم العميل">
@@ -87,58 +40,74 @@ button{
 <input type="date">
 </div>
 
+<!-- إحداثيات السجل -->
 <div class="section">
 <h3>إحداثيات السجل</h3>
 <div class="row">
-<input class="lat" placeholder="Latitude">
-<input class="lng" placeholder="Longitude">
-<button class="map" onclick="openMap(this)">Google</button>
-<button class="gaia" onclick="openGaia(this)">Gaia</button>
+<input id="regLat" placeholder="Latitude">
+<input id="regLng" placeholder="Longitude">
+</div>
+<div class="row">
+<button class="mapbtn" onclick="openGoogle(regLat.value,regLng.value)">Google Maps</button>
+<button class="gaiabtn" onclick="openGaia(regLat.value,regLng.value)">Gaia GPS</button>
 </div>
 </div>
 
+<!-- إحداثيات البوابة -->
 <div class="section">
 <h3>إحداثيات البوابة</h3>
 <div class="row">
-<input class="lat" placeholder="Latitude">
-<input class="lng" placeholder="Longitude">
-<button class="gray" onclick="getLocation(this)">📍 تحديد</button>
-<button class="map" onclick="openMap(this)">Google</button>
-<button class="gaia" onclick="openGaia(this)">Gaia</button>
+<input id="gateLat" placeholder="Latitude">
+<input id="gateLng" placeholder="Longitude">
+</div>
+<div class="row">
+<button class="gray" onclick="getLocation('gateLat','gateLng')">📍 تحديد الموقع</button>
+<button class="mapbtn" onclick="openGoogle(gateLat.value,gateLng.value)">Google Maps</button>
+<button class="gaiabtn" onclick="openGaia(gateLat.value,gateLng.value)">Gaia GPS</button>
 </div>
 </div>
 
+<!-- الزوايا -->
 <div class="section">
-<h3>زوايا الأرض (حساب المساحة)</h3>
+<h3>زوايا الأرض (فحص ومسافات)</h3>
 <div id="corners"></div>
 <button class="add" onclick="addCorner()">+ إضافة زاوية</button>
+<button class="gray" onclick="calcDistances()">فحص المسافات</button>
+<div id="cornerResult" class="result"></div>
+</div>
+
+<!-- مساحة الكروكي -->
+<div class="section">
+<h3>مساحة الأرض (من الكروكي)</h3>
 <button class="gray" onclick="calcArea()">احسب المساحة</button>
 <div id="areaResult" class="result"></div>
 </div>
 
-<div class="page-break"></div>
-
-<!-- ================= الصفحة 2 ================= -->
-
+<!-- الآبار -->
 <div class="section">
 <h3>الآبار</h3>
 <div id="wells"></div>
 <button class="add" onclick="addWell()">+ إضافة بئر</button>
 </div>
 
+<!-- نظام الري -->
 <div class="section">
 <h3>نظام الري</h3>
-<div id="irrigation"></div>
-<button class="add" onclick="addIrrigation()">+ إضافة نظام ري</button>
-<div id="irrigationResult" class="result"></div>
+<div class="row">
+<input id="pivotCount" placeholder="عدد المحاور">
+</div>
+<button class="gray" onclick="calcPivot()">احسب مساحة الري</button>
+<div id="pivotResult" class="result"></div>
 </div>
 
+<!-- المزروعات -->
 <div class="section">
 <h3>المزروعات</h3>
 <div id="crops"></div>
 <button class="add" onclick="addCrop()">+ إضافة مزروع</button>
 </div>
 
+<!-- الموجودات -->
 <div class="section">
 <h3>الموجودات</h3>
 <div id="assets"></div>
@@ -146,103 +115,103 @@ button{
 </div>
 
 <div class="section">
-<h3>اسم الباحث</h3>
 <input placeholder="اسم الباحث">
 </div>
 
-<div class="section center">
-<button class="gray" onclick="window.print()">🖨️ طباعة PDF</button>
-</div>
+<button class="gray" onclick="window.print()">🖨️ طباعة</button>
 
 </div>
 
 <script>
-/* ---------- الخرائط ---------- */
-function openMap(btn){
-    const row = btn.parentElement;
-    const lat = row.querySelector(".lat").value;
-    const lng = row.querySelector(".lng").value;
-    if(!lat || !lng){alert("أدخل الإحداثيات");return;}
-    window.open(`https://www.google.com/maps?q=${lat},${lng}`);
+function openGoogle(lat,lng){
+ if(!lat||!lng)return alert("أدخل الإحداثيات");
+ window.open(`https://www.google.com/maps?q=${lat},${lng}`);
 }
-function openGaia(btn){
-    const row = btn.parentElement;
-    const lat = row.querySelector(".lat").value;
-    const lng = row.querySelector(".lng").value;
-    if(!lat || !lng){alert("أدخل الإحداثيات");return;}
-    window.open(`https://www.gaiagps.com/map/?loc=${lat},${lng}`);
+function openGaia(lat,lng){
+ if(!lat||!lng)return alert("أدخل الإحداثيات");
+ window.location.href=`gaiagps://open?lat=${lat}&lon=${lng}`;
 }
-function getLocation(btn){
-    if(!navigator.geolocation){alert("غير مدعوم");return;}
-    navigator.geolocation.getCurrentPosition(pos=>{
-        const row = btn.parentElement;
-        row.querySelector(".lat").value = pos.coords.latitude.toFixed(6);
-        row.querySelector(".lng").value = pos.coords.longitude.toFixed(6);
-    });
+function getLocation(latId,lngId){
+ navigator.geolocation.getCurrentPosition(p=>{
+  document.getElementById(latId).value=p.coords.latitude.toFixed(6);
+  document.getElementById(lngId).value=p.coords.longitude.toFixed(6);
+ });
 }
 
-/* ---------- إضافة صفوف ---------- */
-function cornerRow(){
-return `
-<div class="row">
-<input class="lat" placeholder="Latitude">
-<input class="lng" placeholder="Longitude">
-<button class="map" onclick="openMap(this)">G</button>
-<button class="gaia" onclick="openGaia(this)">Gaia</button>
-<button class="del" onclick="this.parentElement.remove()">−</button>
-</div>`;
+function addCorner(){
+ corners.innerHTML+=`
+ <div class="row">
+ <input placeholder="Lat">
+ <input placeholder="Lng">
+ <button class="del" onclick="this.parentElement.remove()">−</button>
+ </div>`;
 }
-function addCorner(){corners.innerHTML+=cornerRow();}
-function addWell(){
-wells.innerHTML+=`
-<div class="row">
-<input placeholder="اسم البئر">
-<input class="lat" placeholder="Lat">
-<input class="lng" placeholder="Lng">
-<button class="gray" onclick="getLocation(this)">📍</button>
-<button class="map" onclick="openMap(this)">G</button>
-<button class="gaia" onclick="openGaia(this)">Gaia</button>
-<button class="del" onclick="this.parentElement.remove()">−</button>
-</div>`;}
-function addIrrigation(){
-irrigation.innerHTML+=`
-<div class="row">
-<input placeholder="نوع الري">
-<input class="pivot" type="number" placeholder="عدد المحاور">
-<button class="del" onclick="this.parentElement.remove()">−</button>
-</div>`;}
-function addCrop(){crops.innerHTML+=`<div class="row"><input><input><button class="del" onclick="this.parentElement.remove()">−</button></div>`;}
-function addAsset(){assets.innerHTML+=`<div class="row"><input><input><button class="del" onclick="this.parentElement.remove()">−</button></div>`;}
 
-/* ---------- حساب المساحة من الإحداثيات ---------- */
+function calcDistances(){
+ let pts=[...corners.querySelectorAll('.row')].map(r=>{
+  let i=r.querySelectorAll('input');
+  return [parseFloat(i[0].value),parseFloat(i[1].value)];
+ }).filter(p=>!isNaN(p[0]));
+ let t='';
+ for(let i=0;i<pts.length;i++){
+  let j=(i+1)%pts.length;
+  t+=`المسافة ${i+1}-${j+1}: ${dist(pts[i],pts[j]).toFixed(1)} م<br>`;
+ }
+ cornerResult.innerHTML=t||'أدخل زوايا';
+}
+
 function calcArea(){
-let pts=[];
-document.querySelectorAll("#corners .row").forEach(r=>{
-    let lat=parseFloat(r.querySelector(".lat").value);
-    let lng=parseFloat(r.querySelector(".lng").value);
-    if(!isNaN(lat)&&!isNaN(lng)) pts.push([lat,lng]);
-});
-if(pts.length<3){alert("أدخل 3 زوايا على الأقل");return;}
-
-const R=6378137;
-let area=0;
-for(let i=0;i<pts.length;i++){
- let [lat1,lng1]=pts[i];
- let [lat2,lng2]=pts[(i+1)%pts.length];
- area+=((lng2-lng1)*Math.PI/180)*
- (2+Math.sin(lat1*Math.PI/180)+Math.sin(lat2*Math.PI/180));
+ let pts=[...corners.querySelectorAll('.row')].map(r=>{
+  let i=r.querySelectorAll('input');
+  return [parseFloat(i[0].value),parseFloat(i[1].value)];
+ }).filter(p=>!isNaN(p[0]));
+ if(pts.length<3)return alert("أدخل 3 زوايا على الأقل");
+ let area=0;
+ for(let i=0;i<pts.length;i++){
+  let j=(i+1)%pts.length;
+  area+=pts[i][1]*pts[j][0]-pts[j][1]*pts[i][0];
+ }
+ area=Math.abs(area/2)*111000*111000;
+ areaResult.innerHTML=
+ `م²: ${area.toFixed(2)}<br>
+ هكتار: ${(area/10000).toFixed(3)}<br>
+ دونم: ${(area/1000).toFixed(2)}`;
 }
-area=Math.abs(area*R*R/2);
 
-let ha=area/10000;
-let dun=area/1000;
-
-areaResult.innerHTML=`
-مساحة الأرض:<br>
-${area.toFixed(2)} م²<br>
-${ha.toFixed(3)} هكتار<br>
-${dun.toFixed(2)} دنم`;
+function dist(a,b){
+ const R=6371000;
+ let dLat=(b[0]-a[0])*Math.PI/180;
+ let dLng=(b[1]-a[1])*Math.PI/180;
+ let x=Math.sin(dLat/2)**2+
+ Math.cos(a[0]*Math.PI/180)*Math.cos(b[0]*Math.PI/180)*
+ Math.sin(dLng/2)**2;
+ return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
 }
+
+function addWell(){
+ wells.innerHTML+=`
+ <div class="row">
+ <input placeholder="Lat">
+ <input placeholder="Lng">
+ <button class="mapbtn" onclick="openGoogle(this.previousElementSibling.previousElementSibling.value,this.previousElementSibling.value)">Google</button>
+ <button class="gaiabtn" onclick="openGaia(this.previousElementSibling.previousElementSibling.value,this.previousElementSibling.value)">Gaia</button>
+ <button class="gray" onclick="getLocation(this.parentElement.children[0].id,this.parentElement.children[1].id)">📍</button>
+ </div>`;
+}
+
+function calcPivot(){
+ let n=parseFloat(pivotCount.value);
+ if(isNaN(n))return;
+ let r=400;
+ let area=n*Math.PI*r*r;
+ pivotResult.innerHTML=
+ `م²: ${area.toFixed(0)}<br>
+ هكتار: ${(area/10000).toFixed(2)}<br>
+ دونم: ${(area/1000).toFixed(1)}`;
+}
+
+function addCrop(){crops.innerHTML+=`<div class="row"><input placeholder="اسم المزروع"><input placeholder="المساحة"></div>`;}
+function addAsset(){assets.innerHTML+=`<div class="row"><input placeholder="الموجود"><input placeholder="الوصف"></div>`;}
 </script>
 
 </body>
