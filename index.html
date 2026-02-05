@@ -1,128 +1,53 @@
-<h3>الموجودات</h3>
+<h3>بيانات الباحث</h3>
 
-<div id="assetsContainer"></div>
-<button onclick="addAsset()">+ إضافة موجود</button>
+<div style="border:1px solid #ccc; padding:10px; margin-bottom:15px">
+
+  اسم الباحث:
+  <input type="text" id="researcherName"
+    placeholder="اكتب اسم الباحث"
+    style="width:60%"
+    oninput="saveResearcher()">
+
+</div>
+
+<div style="margin-bottom:20px">
+  <button onclick="saveAll()">💾 حفظ البيانات</button>
+  <button onclick="clearAll()">🗑️ مسح كل البيانات</button>
+  <button onclick="printPage()">🖨️ طباعة PDF</button>
+</div>
 
 <script>
-/* ===== بند 8 : الموجودات ===== */
+/* ===== بند 9 : الباحث + الحفظ + الطباعة ===== */
 
-let assets = [];
-
+// تحميل اسم الباحث
 document.addEventListener("DOMContentLoaded", () => {
-  assets = JSON.parse(localStorage.getItem("assets")) || [];
-  renderAssets();
+  const name = localStorage.getItem("researcherName");
+  if (name) {
+    document.getElementById("researcherName").value = name;
+  }
 });
 
-function saveAssets() {
-  localStorage.setItem("assets", JSON.stringify(assets));
+// حفظ اسم الباحث
+function saveResearcher() {
+  const name = document.getElementById("researcherName").value;
+  localStorage.setItem("researcherName", name);
 }
 
-function addAsset() {
-  assets.push({
-    mainType: "",
-    subType: "",
-    otherText: "",
-    count: "",
-    notes: ""
-  });
-  saveAssets();
-  renderAssets();
+// حفظ يدوي شامل
+function saveAll() {
+  saveResearcher();
+  alert("تم حفظ جميع البيانات بنجاح ✅");
 }
 
-function removeAsset(i) {
-  assets.splice(i, 1);
-  saveAssets();
-  renderAssets();
+// مسح كل البيانات (بقرار منك)
+function clearAll() {
+  if (!confirm("هل أنت متأكد من مسح جميع بيانات الكشف؟")) return;
+  localStorage.clear();
+  location.reload();
 }
 
-// تحديث بدون إعادة رسم
-function updateAsset(i, field, val) {
-  assets[i][field] = val;
-  saveAssets();
-}
-
-// تحديث مع إعادة رسم (للقوائم فقط)
-function updateAssetAndRender(i, field, val) {
-  assets[i][field] = val;
-
-  // تصفير القيم التابعة
-  if (field === "mainType") {
-    assets[i].subType = "";
-    assets[i].otherText = "";
-  }
-  if (field === "subType") {
-    assets[i].otherText = "";
-  }
-
-  saveAssets();
-  renderAssets();
-}
-
-function renderAssets() {
-  const c = document.getElementById("assetsContainer");
-  c.innerHTML = "";
-
-  assets.forEach((a, i) => {
-    c.innerHTML += `
-      <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px">
-
-        نوع الموجود:
-        <select onchange="updateAssetAndRender(${i},'mainType',this.value)">
-          <option value="">—</option>
-          <option ${a.mainType=="مباني"?"selected":""}>مباني</option>
-          <option ${a.mainType=="خزانات"?"selected":""}>خزانات</option>
-          <option ${a.mainType=="مولدات"?"selected":""}>مولدات</option>
-          <option ${a.mainType=="أخرى"?"selected":""}>أخرى</option>
-        </select>
-
-        ${a.mainType=="مباني" ? `
-          <br>
-          نوع المبنى:
-          <select onchange="updateAssetAndRender(${i},'subType',this.value)">
-            <option value="">—</option>
-            <option ${a.subType=="مستودعات"?"selected":""}>مستودعات</option>
-            <option ${a.subType=="سكن عمال"?"selected":""}>سكن عمال</option>
-            <option ${a.subType=="استراحة"?"selected":""}>استراحة</option>
-            <option ${a.subType=="آخر"?"selected":""}>آخر</option>
-          </select>
-        ` : ""}
-
-        ${a.mainType=="مولدات" ? `
-          <br>
-          نوع المولد:
-          <select onchange="updateAsset(${i},'subType',this.value)">
-            <option value="">—</option>
-            <option ${a.subType=="راس كهرب"?"selected":""}>راس كهرب</option>
-            <option ${a.subType=="غطاس"?"selected":""}>غطاس</option>
-            <option ${a.subType=="مكنيه+غطاس"?"selected":""}>مكنيه + غطاس</option>
-          </select>
-        ` : ""}
-
-        ${(a.mainType=="أخرى" || a.subType=="آخر") ? `
-          <br>
-          الوصف:
-          <input
-            placeholder="اكتب التفاصيل"
-            value="${a.otherText}"
-            oninput="updateAsset(${i},'otherText',this.value)">
-        ` : ""}
-
-        <br>
-        العدد:
-        <input type="number"
-          value="${a.count}"
-          oninput="updateAsset(${i},'count',this.value)">
-
-        <br>
-        ملاحظات:
-        <textarea rows="2"
-          oninput="updateAsset(${i},'notes',this.value)">${a.notes}</textarea>
-
-        <br><br>
-        <button onclick="removeAsset(${i})">− حذف</button>
-
-      </div>
-    `;
-  });
+// طباعة
+function printPage() {
+  window.print();
 }
 </script>
