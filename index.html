@@ -2,26 +2,70 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>كشف فني</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>كشف فني زراعي</title>
 
 <style>
-body{font-family:Tahama,Arial;background:#f4f4f4;margin:0}
-.container{max-width:900px;margin:auto;background:#fff;padding:12px}
-h3{background:#2ecc71;color:#fff;padding:6px;margin:10px 0}
-.row{display:flex;gap:5px;margin-bottom:5px}
-input,select{flex:1;padding:6px;font-size:13px}
-button{padding:6px;border:none;cursor:pointer}
-.add{background:#2ecc71;color:#fff}
-.del{background:#e74c3c;color:#fff}
-.gray{background:#ddd}
-.small{width:100%}
-.result{background:#eee;padding:6px;font-size:13px}
-.center{text-align:center}
+body{
+    font-family: Tahoma, Arial;
+    background:#f2f2f2;
+    margin:0;
+}
+.container{
+    max-width:900px;
+    margin:auto;
+    background:#fff;
+    padding:12px;
+}
+.header{
+    text-align:center;
+    margin-bottom:15px;
+}
+.header h1{margin:5px 0;}
+.section{
+    margin-bottom:15px;
+}
+.section h3{
+    background:#2ecc71;
+    color:#fff;
+    padding:8px;
+    margin:0 0 8px;
+    font-size:15px;
+}
+.row{
+    display:flex;
+    gap:5px;
+    margin-bottom:5px;
+    flex-wrap:wrap;
+}
+input{
+    flex:1;
+    padding:6px;
+    font-size:13px;
+}
+button{
+    padding:6px 8px;
+    border:none;
+    cursor:pointer;
+    font-size:12px;
+}
+.add{background:#2ecc71;color:#fff;}
+.del{background:#e74c3c;color:#fff;}
+.map{background:#3498db;color:#fff;}
+.gaia{background:#8e44ad;color:#fff;}
+.gray{background:#ddd;}
+.result{
+    background:#eee;
+    padding:8px;
+    font-size:13px;
+    margin-top:5px;
+}
+.center{text-align:center;}
 
 @media print{
-button{display:none}
-.page-break{page-break-before:always}
-body{font-size:11px}
+  button{display:none;}
+  .page-break{page-break-before:always;}
+  body{background:#fff;}
 }
 </style>
 </head>
@@ -29,171 +73,177 @@ body{font-size:11px}
 <body>
 <div class="container">
 
-<h2 class="center">كشف فني</h2>
+<div class="header">
+    <small>مكتب محافظة قرية العليا</small>
+    <h1>كشف فني</h1>
+</div>
 
+<!-- ================= الصفحة 1 ================= -->
+
+<div class="section">
 <h3>البيانات العامة</h3>
-<div class="row">
 <input placeholder="اسم العميل">
 <input placeholder="رقم الطلب">
 <input type="date">
 </div>
 
+<div class="section">
 <h3>إحداثيات السجل</h3>
 <div class="row">
-<input placeholder="Longitude">
-<input placeholder="Latitude">
-<button class="gray" onclick="openMap(this)">خريطة</button>
+<input class="lat" placeholder="Latitude">
+<input class="lng" placeholder="Longitude">
+<button class="map" onclick="openMap(this)">Google</button>
+<button class="gaia" onclick="openGaia(this)">Gaia</button>
+</div>
 </div>
 
+<div class="section">
 <h3>إحداثيات البوابة</h3>
 <div class="row">
-<input placeholder="Longitude">
-<input placeholder="Latitude">
-<button class="gray" onclick="getLocation(this)">تحديد الموقع</button>
-<button class="gray" onclick="openMap(this)">خريطة</button>
+<input class="lat" placeholder="Latitude">
+<input class="lng" placeholder="Longitude">
+<button class="gray" onclick="getLocation(this)">📍 تحديد</button>
+<button class="map" onclick="openMap(this)">Google</button>
+<button class="gaia" onclick="openGaia(this)">Gaia</button>
+</div>
 </div>
 
-<h3>زوايا الأرض (حسب الكروكي)</h3>
+<div class="section">
+<h3>زوايا الأرض (حساب المساحة)</h3>
 <div id="corners"></div>
-<button class="add small" onclick="addCorner()">+ إضافة زاوية</button>
-<button class="gray small" onclick="calcLand()">احسب المساحة</button>
-<div id="landResult" class="result"></div>
+<button class="add" onclick="addCorner()">+ إضافة زاوية</button>
+<button class="gray" onclick="calcArea()">احسب المساحة</button>
+<div id="areaResult" class="result"></div>
+</div>
 
 <div class="page-break"></div>
 
+<!-- ================= الصفحة 2 ================= -->
+
+<div class="section">
 <h3>الآبار</h3>
 <div id="wells"></div>
-<button class="add small" onclick="addWell()">+ إضافة بئر</button>
+<button class="add" onclick="addWell()">+ إضافة بئر</button>
+</div>
 
+<div class="section">
 <h3>نظام الري</h3>
 <div id="irrigation"></div>
-<button class="add small" onclick="addIrrigation()">+ إضافة نظام ري</button>
+<button class="add" onclick="addIrrigation()">+ إضافة نظام ري</button>
+<div id="irrigationResult" class="result"></div>
+</div>
 
+<div class="section">
 <h3>المزروعات</h3>
 <div id="crops"></div>
-<button class="add small" onclick="addCrop()">+ إضافة مزروع</button>
+<button class="add" onclick="addCrop()">+ إضافة مزروع</button>
+</div>
 
+<div class="section">
 <h3>الموجودات</h3>
 <div id="assets"></div>
-<button class="add small" onclick="addAsset()">+ إضافة موجود</button>
+<button class="add" onclick="addAsset()">+ إضافة موجود</button>
+</div>
 
+<div class="section">
 <h3>اسم الباحث</h3>
 <input placeholder="اسم الباحث">
+</div>
 
-<div class="center">
+<div class="section center">
 <button class="gray" onclick="window.print()">🖨️ طباعة PDF</button>
 </div>
 
 </div>
 
 <script>
-// ------------------ أدوات ------------------
+/* ---------- الخرائط ---------- */
 function openMap(btn){
-let r=btn.parentElement.querySelectorAll("input");
-window.open(`https://maps.google.com/?q=${r[1].value},${r[0].value}`);
+    const row = btn.parentElement;
+    const lat = row.querySelector(".lat").value;
+    const lng = row.querySelector(".lng").value;
+    if(!lat || !lng){alert("أدخل الإحداثيات");return;}
+    window.open(`https://www.google.com/maps?q=${lat},${lng}`);
 }
-
+function openGaia(btn){
+    const row = btn.parentElement;
+    const lat = row.querySelector(".lat").value;
+    const lng = row.querySelector(".lng").value;
+    if(!lat || !lng){alert("أدخل الإحداثيات");return;}
+    window.open(`https://www.gaiagps.com/map/?loc=${lat},${lng}`);
+}
 function getLocation(btn){
-navigator.geolocation.getCurrentPosition(p=>{
-let r=btn.parentElement.querySelectorAll("input");
-r[0].value=p.coords.longitude.toFixed(6);
-r[1].value=p.coords.latitude.toFixed(6);
-});
+    if(!navigator.geolocation){alert("غير مدعوم");return;}
+    navigator.geolocation.getCurrentPosition(pos=>{
+        const row = btn.parentElement;
+        row.querySelector(".lat").value = pos.coords.latitude.toFixed(6);
+        row.querySelector(".lng").value = pos.coords.longitude.toFixed(6);
+    });
 }
 
-// ------------------ تحويل UTM Zone 38N ------------------
-function toUTM(lat,lon){
-const a=6378137,f=1/298.257223563,k0=0.9996;
-const zone=38,λ0=(zone*6-183)*Math.PI/180;
-lat*=Math.PI/180;lon*=Math.PI/180;
-let e=Math.sqrt(f*(2-f));
-let N=a/Math.sqrt(1-e*e*Math.sin(lat)**2);
-let T=Math.tan(lat)**2;
-let C=(e*e/(1-e*e))*Math.cos(lat)**2;
-let A=(lon-λ0)*Math.cos(lat);
-let M=a*((1-e*e/4-3*e**4/64-5*e**6/256)*lat
--(3*e*e/8+3*e**4/32+45*e**6/1024)*Math.sin(2*lat));
-let x=k0*N*(A+(1-T+C)*A**3/6)+500000;
-let y=k0*(M+N*Math.tan(lat)*(A*A/2));
-return [x,y];
-}
-
-// ------------------ الزوايا ------------------
-function addCorner(){
-corners.innerHTML+=`
+/* ---------- إضافة صفوف ---------- */
+function cornerRow(){
+return `
 <div class="row">
-<input placeholder="Longitude">
-<input placeholder="Latitude">
+<input class="lat" placeholder="Latitude">
+<input class="lng" placeholder="Longitude">
+<button class="map" onclick="openMap(this)">G</button>
+<button class="gaia" onclick="openGaia(this)">Gaia</button>
 <button class="del" onclick="this.parentElement.remove()">−</button>
 </div>`;
 }
-
-// ------------------ حساب الأرض ------------------
-function calcLand(){
-let pts=[];
-document.querySelectorAll("#corners .row").forEach(r=>{
-let i=r.querySelectorAll("input");
-if(i[0].value&&i[1].value){
-pts.push(toUTM(+i[1].value,+i[0].value));
-}
-});
-if(pts.length<3){landResult.innerHTML="أدخل 3 زوايا على الأقل";return;}
-
-let txt="",area=0;
-for(let i=0;i<pts.length;i++){
-let j=(i+1)%pts.length;
-let dx=pts[i][0]-pts[j][0],dy=pts[i][1]-pts[j][1];
-txt+=`المسافة بين زاوية ${i+1} و ${j+1}: ${Math.hypot(dx,dy).toFixed(2)} م<br>`;
-area+=pts[i][0]*pts[j][1]-pts[j][0]*pts[i][1];
-}
-area=Math.abs(area/2);
-
-landResult.innerHTML=txt+`<hr>
-<b>مساحة الأرض:</b><br>
-${area.toFixed(2)} م²<br>
-${(area/10000).toFixed(3)} هكتار<br>
-${(area/1000).toFixed(2)} دونم`;
-}
-
-// ------------------ بقية العناصر ------------------
+function addCorner(){corners.innerHTML+=cornerRow();}
 function addWell(){
 wells.innerHTML+=`
 <div class="row">
-<input placeholder="Longitude">
-<input placeholder="Latitude">
-<button class="gray" onclick="openMap(this)">خريطة</button>
+<input placeholder="اسم البئر">
+<input class="lat" placeholder="Lat">
+<input class="lng" placeholder="Lng">
+<button class="gray" onclick="getLocation(this)">📍</button>
+<button class="map" onclick="openMap(this)">G</button>
+<button class="gaia" onclick="openGaia(this)">Gaia</button>
 <button class="del" onclick="this.parentElement.remove()">−</button>
-</div>`;
-}
-
+</div>`;}
 function addIrrigation(){
 irrigation.innerHTML+=`
 <div class="row">
-<select><option>محوري</option><option>رش</option></select>
-<input placeholder="عدد المحاور">
-<input placeholder="المزروع">
-<input placeholder="أخرى">
+<input placeholder="نوع الري">
+<input class="pivot" type="number" placeholder="عدد المحاور">
 <button class="del" onclick="this.parentElement.remove()">−</button>
-</div>`;
-}
+</div>`;}
+function addCrop(){crops.innerHTML+=`<div class="row"><input><input><button class="del" onclick="this.parentElement.remove()">−</button></div>`;}
+function addAsset(){assets.innerHTML+=`<div class="row"><input><input><button class="del" onclick="this.parentElement.remove()">−</button></div>`;}
 
-function addCrop(){
-crops.innerHTML+=`
-<div class="row">
-<input placeholder="اسم المزروع">
-<input placeholder="المساحة">
-<button class="del" onclick="this.parentElement.remove()">−</button>
-</div>`;
-}
+/* ---------- حساب المساحة من الإحداثيات ---------- */
+function calcArea(){
+let pts=[];
+document.querySelectorAll("#corners .row").forEach(r=>{
+    let lat=parseFloat(r.querySelector(".lat").value);
+    let lng=parseFloat(r.querySelector(".lng").value);
+    if(!isNaN(lat)&&!isNaN(lng)) pts.push([lat,lng]);
+});
+if(pts.length<3){alert("أدخل 3 زوايا على الأقل");return;}
 
-function addAsset(){
-assets.innerHTML+=`
-<div class="row">
-<input placeholder="الموجود">
-<input placeholder="الوصف">
-<button class="del" onclick="this.parentElement.remove()">−</button>
-</div>`;
+const R=6378137;
+let area=0;
+for(let i=0;i<pts.length;i++){
+ let [lat1,lng1]=pts[i];
+ let [lat2,lng2]=pts[(i+1)%pts.length];
+ area+=((lng2-lng1)*Math.PI/180)*
+ (2+Math.sin(lat1*Math.PI/180)+Math.sin(lat2*Math.PI/180));
+}
+area=Math.abs(area*R*R/2);
+
+let ha=area/10000;
+let dun=area/1000;
+
+areaResult.innerHTML=`
+مساحة الأرض:<br>
+${area.toFixed(2)} م²<br>
+${ha.toFixed(3)} هكتار<br>
+${dun.toFixed(2)} دنم`;
 }
 </script>
+
 </body>
 </html>
