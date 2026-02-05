@@ -128,3 +128,64 @@ fields.forEach(id => {
 
 </body>
 </html>
+<script>
+/* ===== بند 2: إحداثيات السجل ===== */
+
+const recordLat = document.getElementById("recordLat");
+const recordLng = document.getElementById("recordLng");
+
+// تحميل
+document.addEventListener("DOMContentLoaded", () => {
+  if (localStorage.getItem("recordLat"))
+    recordLat.value = localStorage.getItem("recordLat");
+  if (localStorage.getItem("recordLng"))
+    recordLng.value = localStorage.getItem("recordLng");
+});
+
+// حفظ تلقائي
+recordLat.addEventListener("input", () =>
+  localStorage.setItem("recordLat", recordLat.value)
+);
+recordLng.addEventListener("input", () =>
+  localStorage.setItem("recordLng", recordLng.value)
+);
+
+// تحديد الموقع
+function locateRecord() {
+  if (!navigator.geolocation) {
+    alert("المتصفح لا يدعم تحديد الموقع");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(pos => {
+    recordLat.value = pos.coords.latitude.toFixed(6);
+    recordLng.value = pos.coords.longitude.toFixed(6);
+    localStorage.setItem("recordLat", recordLat.value);
+    localStorage.setItem("recordLng", recordLng.value);
+  });
+}
+
+// فتح Google Maps
+function openRecordMap() {
+  if (!recordLat.value || !recordLng.value) {
+    alert("أدخل الإحداثيات أولاً");
+    return;
+  }
+
+  window.open(
+    "https://www.google.com/maps?q=" +
+      recordLat.value +
+      "," +
+      recordLng.value,
+    "_blank"
+  );
+}
+
+// حذف
+function clearRecord() {
+  recordLat.value = "";
+  recordLng.value = "";
+  localStorage.removeItem("recordLat");
+  localStorage.removeItem("recordLng");
+}
+</script>
