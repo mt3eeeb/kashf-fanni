@@ -1,65 +1,83 @@
 <script>
-  // ===== بند 5 : الآبار =====
-  let wells = JSON.parse(localStorage.getItem("wells")) || [];
+/* ===== بند 5: الآبار ===== */
 
-  function addWell() {
-    wells.push({ lat: "", lng: "" });
-    saveWells();
-    renderWells();
-  }
+// تحميل من التخزين أو إنشاء مصفوفة
+let wells = JSON.parse(localStorage.getItem("wells")) || [];
 
-  function removeWell(index) {
-    wells.splice(index, 1);
-    saveWells();
-    renderWells();
-  }
+// حفظ
+function saveWells() {
+  localStorage.setItem("wells", JSON.stringify(wells));
+}
 
-  function updateWell(index, field, value) {
-    wells[index][field] = value;
-    saveWells();
-  }
-
-  function openWellMap(index) {
-    const w = wells[index];
-    if (!w.lat || !w.lng) {
-      alert("أدخل إحداثيات البئر أولاً");
-      return;
-    }
-    window.open(
-      `https://www.google.com/maps?q=${w.lat},${w.lng}`,
-      "_blank"
-    );
-  }
-
-  function saveWells() {
-    localStorage.setItem("wells", JSON.stringify(wells));
-  }
-
-  function renderWells() {
-    const container = document.getElementById("wellsContainer");
-    if (!container) return;
-
-    container.innerHTML = "";
-
-    wells.forEach((w, i) => {
-      container.innerHTML += `
-        <div style="margin-bottom:8px">
-          Lat:
-          <input type="number" step="any"
-            value="${w.lat}"
-            oninput="updateWell(${i}, 'lat', this.value)">
-
-          Lng:
-          <input type="number" step="any"
-            value="${w.lng}"
-            oninput="updateWell(${i}, 'lng', this.value)">
-
-          <button onclick="openWellMap(${i})">🗺</button>
-          <button onclick="removeWell(${i})">−</button>
-        </div>
-      `;
-    });
-  }
-
+// إضافة بئر
+function addWell() {
+  wells.push({ lat: "", lng: "" });
+  saveWells();
   renderWells();
+}
+
+// حذف بئر
+function removeWell(index) {
+  wells.splice(index, 1);
+  saveWells();
+  renderWells();
+}
+
+// تحديث قيمة
+function updateWell(index, field, value) {
+  wells[index][field] = value;
+  saveWells();
+}
+
+// فتح Google Maps
+function openWellMap(index) {
+  const w = wells[index];
+  if (!w.lat || !w.lng) {
+    alert("أدخل إحداثيات البئر أولاً");
+    return;
+  }
+  window.open(
+    `https://www.google.com/maps?q=${w.lat},${w.lng}`,
+    "_blank"
+  );
+}
+
+// تحديد الموقع الحالي
+function locateWell(index) {
+  if (!navigator.geolocation) {
+    alert("المتصفح لا يدعم تحديد الموقع");
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(pos => {
+    wells[index].lat = pos.coords.latitude.toFixed(6);
+    wells[index].lng = pos.coords.longitude.toFixed(6);
+    saveWells();
+    renderWells();
+  });
+}
+
+// عرض الآبار
+function renderWells() {
+  const c = document.getElementById("wellsContainer");
+  c.innerHTML = "";
+
+  wells.forEach((w, i) => {
+    c.innerHTML += `
+      <div style="margin-bottom:8px">
+        Lat:
+        <input type="number" step="any" value="${w.lat}"
+          oninput="updateWell(${i}, 'lat', this.value)">
+        Lng:
+        <input type="number" step="any" value="${w.lng}"
+          oninput="updateWell(${i}, 'lng', this.value)">
+        <button onclick="locateWell(${i})">📍</button>
+        <button onclick="openWellMap(${i})">🗺️</button>
+        <button onclick="removeWell(${i})">−</button>
+      </div>
+    `;
+  });
+}
+
+// تحميل أولي
+renderWells();
 </script>
