@@ -1,83 +1,60 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
 <meta charset="UTF-8">
 <title>كشف فني</title>
 
 <style>
   body {
-    font-family: "Tahoma", Arial;
-    background: #f4f8f5;
+    font-family: Tahoma, Arial;
+    direction: rtl;
+    background: #f4f8f4;
     margin: 0;
-    padding: 20px;
-    color: #1f2933;
+    padding: 0;
   }
 
   .page {
-    background: #ffffff;
-    padding: 25px;
-    max-width: 900px;
-    margin: auto;
+    width: 90%;
+    margin: 20px auto;
+    background: #fff;
+    padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.08);
+    border-top: 6px solid #1b7f3a;
   }
 
-  /* ===== العنوان ===== */
+  h1, h2, h3 {
+    color: #1b7f3a;
+    margin-top: 0;
+  }
+
   .header {
     text-align: center;
     margin-bottom: 25px;
   }
 
-  .header h1 {
-    margin: 0;
-    font-size: 22px;
-    color: #2e7d32; /* أخضر */
-  }
-
-  .header h2 {
-    margin: 8px 0 0;
-    font-size: 18px;
-    color: #355f3b;
-  }
-
-  /* ===== العناوين ===== */
-  h3 {
-    border-bottom: 2px solid #2e7d32;
-    padding-bottom: 5px;
-    margin-bottom: 15px;
-    font-size: 16px;
-    color: #2e7d32;
-  }
-
   .row {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     flex-wrap: wrap;
+    align-items: center;
   }
 
   input {
-    padding: 8px;
-    font-size: 14px;
-    min-width: 200px;
-    border: 1px solid #a5d6a7;
+    padding: 6px;
+    width: 160px;
+  }
+
+  button {
+    padding: 6px 10px;
+    background: #1b7f3a;
+    color: #fff;
+    border: none;
     border-radius: 4px;
+    cursor: pointer;
   }
 
-  input:focus {
-    outline: none;
-    border-color: #2e7d32;
-    box-shadow: 0 0 0 2px rgba(46,125,50,0.15);
-  }
-
-  @media print {
-    body {
-      background: white;
-      padding: 0;
-    }
-    .page {
-      box-shadow: none;
-      border-radius: 0;
-    }
+  button:hover {
+    opacity: 0.85;
   }
 </style>
 </head>
@@ -86,69 +63,51 @@
 
 <div class="page">
 
-  <!-- ===== بداية الصفحة ===== -->
+  <!-- ===== مقدمة الصفحة ===== -->
   <div class="header">
     <h1>مكتب صندوق التنمية الزراعية بمحافظة قرية العليا</h1>
     <h2>كشف فني</h2>
   </div>
 
-  <!-- ===== بند 1: البيانات العامة ===== -->
-  <section id="generalData">
-    <h3>البيانات العامة</h3>
+  <!-- ===== بند 2: إحداثيات السجل ===== -->
+  <section id="recordCoords">
+    <h3>بند 2: إحداثيات السجل</h3>
 
     <div class="row">
-      <input type="text" id="clientName" placeholder="اسم العميل">
-      <input type="text" id="orderNumber" placeholder="رقم الطلب">
-      <input type="date" id="visitDate">
+      <input type="number" step="any" id="recordLat" placeholder="Latitude">
+      <input type="number" step="any" id="recordLng" placeholder="Longitude">
+
+      <button type="button" onclick="locateRecord()">📍 تحديد الموقع</button>
+      <button type="button" onclick="openRecordMap()">🗺️ الوصول</button>
+      <button type="button" onclick="clearRecord()">✖ حذف</button>
     </div>
   </section>
 
 </div>
 
 <script>
-/* ===== حفظ تلقائي – بند 1 ===== */
-
-const fields = ["clientName", "orderNumber", "visitDate"];
-
-document.addEventListener("DOMContentLoaded", () => {
-  fields.forEach(id => {
-    const saved = localStorage.getItem(id);
-    if (saved) document.getElementById(id).value = saved;
-  });
-});
-
-fields.forEach(id => {
-  document.addEventListener("input", e => {
-    if (e.target.id === id) {
-      localStorage.setItem(id, e.target.value);
-    }
-  });
-});
-</script>
-
-</body>
-</html>
-<script>
 /* ===== بند 2: إحداثيات السجل ===== */
 
 const recordLat = document.getElementById("recordLat");
 const recordLng = document.getElementById("recordLng");
 
-// تحميل
-document.addEventListener("DOMContentLoaded", () => {
+// تحميل البيانات
+document.addEventListener("DOMContentLoaded", function () {
   if (localStorage.getItem("recordLat"))
     recordLat.value = localStorage.getItem("recordLat");
+
   if (localStorage.getItem("recordLng"))
     recordLng.value = localStorage.getItem("recordLng");
 });
 
 // حفظ تلقائي
-recordLat.addEventListener("input", () =>
-  localStorage.setItem("recordLat", recordLat.value)
-);
-recordLng.addEventListener("input", () =>
-  localStorage.setItem("recordLng", recordLng.value)
-);
+recordLat.addEventListener("input", function () {
+  localStorage.setItem("recordLat", recordLat.value);
+});
+
+recordLng.addEventListener("input", function () {
+  localStorage.setItem("recordLng", recordLng.value);
+});
 
 // تحديد الموقع
 function locateRecord() {
@@ -157,7 +116,7 @@ function locateRecord() {
     return;
   }
 
-  navigator.geolocation.getCurrentPosition(pos => {
+  navigator.geolocation.getCurrentPosition(function (pos) {
     recordLat.value = pos.coords.latitude.toFixed(6);
     recordLng.value = pos.coords.longitude.toFixed(6);
     localStorage.setItem("recordLat", recordLat.value);
@@ -189,3 +148,6 @@ function clearRecord() {
   localStorage.removeItem("recordLng");
 }
 </script>
+
+</body>
+</html>
