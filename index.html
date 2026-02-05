@@ -1,12 +1,8 @@
-<script>
+// ===== بند 5 : الآبار =====
 let wells = JSON.parse(localStorage.getItem("wells")) || [];
 
-function saveWells() {
-  localStorage.setItem("wells", JSON.stringify(wells));
-}
-
-function addWell(lat = "", lng = "") {
-  wells.push({ lat, lng });
+function addWell() {
+  wells.push({ lat: "", lng: "" });
   saveWells();
   renderWells();
 }
@@ -22,23 +18,10 @@ function updateWell(index, field, value) {
   saveWells();
 }
 
-function locateWell(index) {
-  if (!navigator.geolocation) {
-    alert("المتصفح لا يدعم تحديد الموقع");
-    return;
-  }
-  navigator.geolocation.getCurrentPosition(pos => {
-    wells[index].lat = pos.coords.latitude.toFixed(6);
-    wells[index].lng = pos.coords.longitude.toFixed(6);
-    saveWells();
-    renderWells();
-  });
-}
-
 function openWellMap(index) {
   const w = wells[index];
   if (!w.lat || !w.lng) {
-    alert("أدخل الإحداثيات أولاً");
+    alert("أدخل إحداثيات البئر أولاً");
     return;
   }
   window.open(
@@ -47,22 +30,27 @@ function openWellMap(index) {
   );
 }
 
+function saveWells() {
+  localStorage.setItem("wells", JSON.stringify(wells));
+}
+
 function renderWells() {
-  const container = document.getElementById("wells");
+  const container = document.getElementById("wellsContainer");
   container.innerHTML = "";
 
   wells.forEach((w, i) => {
     container.innerHTML += `
-      <div style="margin-bottom:10px">
-        <input type="number" step="any" placeholder="Latitude"
+      <div style="margin-bottom:8px">
+        Lat:
+        <input type="number" step="any"
           value="${w.lat}"
-          onchange="updateWell(${i}, 'lat', this.value)">
-
-        <input type="number" step="any" placeholder="Longitude"
+          oninput="updateWell(${i}, 'lat', this.value)">
+        
+        Lng:
+        <input type="number" step="any"
           value="${w.lng}"
-          onchange="updateWell(${i}, 'lng', this.value)">
+          oninput="updateWell(${i}, 'lng', this.value)">
 
-        <button onclick="locateWell(${i})">📍</button>
         <button onclick="openWellMap(${i})">🗺</button>
         <button onclick="removeWell(${i})">−</button>
       </div>
@@ -70,6 +58,5 @@ function renderWells() {
   });
 }
 
-// تحميل الآبار المحفوظة عند فتح الصفحة
+// أول تحميل
 renderWells();
-</script>
