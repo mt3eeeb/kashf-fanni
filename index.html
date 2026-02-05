@@ -1,84 +1,89 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<title>اختبار بند 5</title>
-<style>
-body { font-family: Tahoma; padding:20px }
-button { margin:2px }
-</style>
-</head>
-
-<body>
-
-<h3>إحداثيات الآبار</h3>
-
-<div id="wellsContainer"></div>
-
-<button onclick="addWell()">+ إضافة بئر</button>
-
 <script>
-let wells = [];
+/* ===== بند 6: نظام الري ===== */
+
+let irrigation = [];
 
 // تحميل
-window.onload = function () {
-  const saved = localStorage.getItem("wells_test");
-  wells = saved ? JSON.parse(saved) : [];
-  renderWells();
-};
+window.addEventListener("load", () => {
+  const saved = localStorage.getItem("irrigation");
+  irrigation = saved ? JSON.parse(saved) : [];
+  renderIrrigation();
+});
 
-function saveWells() {
-  localStorage.setItem("wells_test", JSON.stringify(wells));
+// حفظ
+function saveIrrigation() {
+  localStorage.setItem("irrigation", JSON.stringify(irrigation));
 }
 
-function addWell() {
-  wells.push({ lat:"", lng:"" });
-  saveWells();
-  renderWells();
-}
-
-function removeWell(i) {
-  wells.splice(i,1);
-  saveWells();
-  renderWells();
-}
-
-function updateWell(i, f, v) {
-  wells[i][f] = v;
-  saveWells();
-}
-
-function locateWell(i) {
-  navigator.geolocation.getCurrentPosition(p=>{
-    wells[i].lat = p.coords.latitude.toFixed(6);
-    wells[i].lng = p.coords.longitude.toFixed(6);
-    saveWells();
-    renderWells();
+// إضافة
+function addIrrigation() {
+  irrigation.push({
+  type: "",
+  towers: ""
   });
+  saveIrrigation();
+  renderIrrigation();
 }
 
-function openWellMap(i) {
-  const w = wells[i];
-  if(!w.lat||!w.lng){ alert("أدخل الإحداثيات"); return; }
-  window.open(`https://www.google.com/maps?q=${w.lat},${w.lng}`);
+// حذف
+function removeIrrigation(i) {
+  irrigation.splice(i, 1);
+  saveIrrigation();
+  renderIrrigation();
 }
 
-function renderWells() {
-  const c = document.getElementById("wellsContainer");
+// تحديث
+function updateIrrigation(i, field, value) {
+  irrigation[i][field] = value;
+  saveIrrigation();
+  renderIrrigation();
+}
+
+// حساب المساحة
+function calcArea(towers) {
+  const t = Number(towers);
+  if (!t) return { m: 0, h: 0, d: 0 };
+
+  const area = t * 50 * 50; // متر مربع
+  return {
+    m: area,
+    h: (area / 10000).toFixed(3),
+    d: (area / 1000).toFixed(2)
+  };
+}
+
+// عرض
+function renderIrrigation() {
+  const c = document.getElementById("irrigationContainer");
   c.innerHTML = "";
-  wells.forEach((w,i)=>{
+
+  irrigation.forEach((r, i) => {
+    const a = calcArea(r.towers);
+
     c.innerHTML += `
-      <div>
-        Lat <input value="${w.lat}" oninput="updateWell(${i},'lat',this.value)">
-        Lng <input value="${w.lng}" oninput="updateWell(${i},'lng',this.value)">
-        <button onclick="locateWell(${i})">📍</button>
-        <button onclick="openWellMap(${i})">🗺️</button>
-        <button onclick="removeWell(${i})">−</button>
+      <div style="margin-bottom:8px">
+        نوع الري:
+        <select onchange="updateIrrigation(${i},'type',this.value)">
+          <option value="">—</option>
+          <option ${r.type==="رشاش"?"selected":""}>رشاش</option>
+          <option ${r.type==="تنقيط"?"selected":""}>تنقيط</option>
+          <option ${r.type==="غمر"?"selected":""}>غمر</option>
+        </select>
+
+        عدد الأبراج:
+        <input type="number" value="${r.towers}"
+          oninput="updateIrrigation(${i},'towers',this.value)">
+
+        <button onclick="removeIrrigation(${i})">−</button>
+
+        <div style="font-size:13px;margin-top:4px">
+          المساحة:
+          ${a.m} م² |
+          ${a.h} هكتار |
+          ${a.d} دونم
+        </div>
       </div>
     `;
   });
 }
 </script>
-
-</body>
-</html>
