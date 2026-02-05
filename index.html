@@ -2,128 +2,120 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>بند 6 - نظام الري</title>
+<title>نظام الري</title>
 <style>
-  body { font-family: Arial; direction: rtl; padding:20px }
-  input, select, button { margin:3px }
-  .box { border:1px solid #ccc; padding:10px; margin-bottom:10px }
+  body { font-family: Arial; direction: rtl; padding: 15px; }
+  .box { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+  input, select, button { margin: 3px; }
 </style>
 </head>
-
 <body>
 
-<h2>نظام الري</h2>
+<h3>نظام الري</h3>
 
 <div id="irrigationContainer"></div>
 
-<button type="button" onclick="addIrrigation()">+ إضافة نظام ري</button>
+<button onclick="addIrrigation()">+ إضافة نظام ري</button>
 
 <script>
 /* ===== بند 6 : نظام الري ===== */
 
-let irrigation = [];
-const TOWER_LENGTH = 50; // طول البرج ثابت
+let irrigations = [];
 
-// تحميل البيانات
-window.onload = function(){
-  const saved = localStorage.getItem("irrigation");
-  irrigation = saved ? JSON.parse(saved) : [];
+// تحميل
+document.addEventListener("DOMContentLoaded", () => {
+  irrigations = JSON.parse(localStorage.getItem("irrigations")) || [];
   renderIrrigation();
-};
+});
 
 // حفظ
-function saveIrrigation(){
-  localStorage.setItem("irrigation", JSON.stringify(irrigation));
+function saveIrrigation() {
+  localStorage.setItem("irrigations", JSON.stringify(irrigations));
 }
 
 // إضافة
-function addIrrigation(){
-  irrigation.push({
-    type:"",
-    crop:"",
-    fodder:"",
-    towers:0
+function addIrrigation() {
+  irrigations.push({
+    type: "",
+    towers: 0,
+    towerLength: 50,
+    crop: "",
+    cropNote: ""
   });
   saveIrrigation();
   renderIrrigation();
 }
 
 // حذف
-function removeIrrigation(i){
-  irrigation.splice(i,1);
+function removeIrrigation(i) {
+  irrigations.splice(i, 1);
   saveIrrigation();
   renderIrrigation();
 }
 
 // تحديث
-function updateIrrigation(i,f,v){
-  irrigation[i][f] = v;
+function updateIrrigation(i, field, val) {
+  irrigations[i][field] = val;
   saveIrrigation();
   renderIrrigation();
 }
 
-// حساب
-function calc(t){
-  const length = t * TOWER_LENGTH;
-  const area = length * 50;
-  return {
-    length: length,
-    m: area,
-    h: (area/10000).toFixed(2),
-    d: (area/1000).toFixed(2)
-  };
-}
-
 // عرض
-function renderIrrigation(){
+function renderIrrigation() {
   const c = document.getElementById("irrigationContainer");
   c.innerHTML = "";
 
-  irrigation.forEach((r,i)=>{
-    const a = calc(Number(r.towers));
+  irrigations.forEach((r, i) => {
+
+    const totalLength = (Number(r.towers) || 0) * (Number(r.towerLength) || 0);
+    const areaM = totalLength * 50; // افتراض عرض البرج 50م
+    const ha = areaM / 10000;
+    const dunam = areaM / 1000;
 
     c.innerHTML += `
       <div class="box">
-
         نوع الري:
         <select onchange="updateIrrigation(${i},'type',this.value)">
           <option value="">—</option>
           <option ${r.type=="رشاش"?"selected":""}>رشاش</option>
           <option ${r.type=="تنقيط"?"selected":""}>تنقيط</option>
+          <option ${r.type=="غمر"?"selected":""}>غمر</option>
         </select>
 
         <br>
+        عدد الأبراج:
+        <input type="number" value="${r.towers}"
+          oninput="updateIrrigation(${i},'towers',this.value)">
 
+        طول البرج:
+        <input type="number" value="${r.towerLength}" readonly>
+
+        <br>
         المحصول:
         <select onchange="updateIrrigation(${i},'crop',this.value)">
           <option value="">—</option>
           <option ${r.crop=="قمح"?"selected":""}>قمح</option>
-          <option ${r.crop=="أعلاف"?"selected":""}>أعلاف خضراء</option>
+          <option ${r.crop=="أعلاف خضره"?"selected":""}>أعلاف خضره</option>
           <option ${r.crop=="آخر"?"selected":""}>آخر</option>
         </select>
 
-        ${r.crop=="أعلاف" ? `
+        ${(r.crop=="أعلاف خضره" || r.crop=="آخر") ? `
           <br>
-          نوع الأعلاف:
-          <input value="${r.fodder}"
-            oninput="updateIrrigation(${i},'fodder',this.value)">
+          التفاصيل:
+          <input placeholder="اكتب النوع"
+            value="${r.cropNote}"
+            oninput="updateIrrigation(${i},'cropNote',this.value)">
         ` : ""}
 
-        <br>
-
-        عدد الأبراج:
-        <input type="number" min="0" value="${r.towers}"
-          oninput="updateIrrigation(${i},'towers',this.value)">
-
-        <button onclick="removeIrrigation(${i})">−</button>
-
         <hr>
+        الطول الكلي: <b>${totalLength}</b> م<br>
+        المساحة:
+        <b>${areaM.toFixed(2)}</b> م² |
+        <b>${ha.toFixed(2)}</b> هكتار |
+        <b>${dunam.toFixed(2)}</b> دونم
 
-        الطول الكلي: <b>${a.length}</b> م<br>
-        المساحة: <b>${a.m}</b> م²<br>
-        هكتار: <b>${a.h}</b><br>
-        دونم: <b>${a.d}</b>
-
+        <br><br>
+        <button onclick="removeIrrigation(${i})">− حذف</button>
       </div>
     `;
   });
