@@ -2,11 +2,19 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>المزروعات</title>
+<title>بند 7 - المزروعات</title>
 <style>
   body { font-family: Arial; direction: rtl; padding: 15px; }
-  .box { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
-  input, select, button { margin: 3px; }
+  .box {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+    background: #fafafa;
+  }
+  input, select, button {
+    margin: 4px;
+    padding: 4px;
+  }
 </style>
 </head>
 <body>
@@ -22,7 +30,7 @@
 
 let crops = [];
 
-// تحميل
+// تحميل البيانات
 document.addEventListener("DOMContentLoaded", () => {
   crops = JSON.parse(localStorage.getItem("crops")) || [];
   renderCrops();
@@ -37,11 +45,8 @@ function saveCrops() {
 function addCrop() {
   crops.push({
     type: "",
-    customType: "",
-    count: "",
-    areaM: "",
-    areaH: "",
-    areaD: ""
+    otherType: "",
+    count: ""
   });
   saveCrops();
   renderCrops();
@@ -67,47 +72,46 @@ function renderCrops() {
   c.innerHTML = "";
 
   crops.forEach((r, i) => {
+
+    const count = Number(r.count) || 0;
+    const areaM = count * 10; // 10 م² لكل شتلة
+    const areaH = areaM / 10000;
+    const areaD = areaM / 1000;
+
     c.innerHTML += `
       <div class="box">
 
         نوع المزروع:
         <select onchange="updateCrop(${i},'type',this.value)">
           <option value="">—</option>
-          <option ${r.type=="قمح"?"selected":""}>قمح</option>
           <option ${r.type=="نخيل"?"selected":""}>نخيل</option>
-          <option ${r.type=="أعلاف"?"selected":""}>أعلاف</option>
-          <option ${r.type=="خضار"?"selected":""}>خضار</option>
+          <option ${r.type=="مصدات رياح"?"selected":""}>مصدات رياح</option>
+          <option ${r.type=="حمضيات"?"selected":""}>حمضيات</option>
           <option ${r.type=="آخر"?"selected":""}>آخر</option>
         </select>
 
         ${r.type=="آخر" ? `
           <br>
           نوع آخر:
-          <input placeholder="اكتب النوع"
-            value="${r.customType}"
-            oninput="updateCrop(${i},'customType',this.value)">
+          <input
+            placeholder="اكتب النوع"
+            value="${r.otherType}"
+            oninput="updateCrop(${i},'otherType',this.value)">
         ` : ""}
 
         <br>
         عدد الشتلات:
-        <input type="number" value="${r.count}"
+        <input type="number"
+          value="${r.count}"
           oninput="updateCrop(${i},'count',this.value)">
 
         <hr>
-        المساحة (كتابي):
+        المساحة (حساب آلي):
 
         <br>
-        م²:
-        <input type="number" value="${r.areaM}"
-          oninput="updateCrop(${i},'areaM',this.value)">
-
-        هكتار:
-        <input type="number" step="any" value="${r.areaH}"
-          oninput="updateCrop(${i},'areaH',this.value)">
-
-        دونم:
-        <input type="number" step="any" value="${r.areaD}"
-          oninput="updateCrop(${i},'areaD',this.value)">
+        ${areaM.toFixed(2)} م² |
+        ${areaH.toFixed(4)} هكتار |
+        ${areaD.toFixed(3)} دونم
 
         <br><br>
         <button onclick="removeCrop(${i})">− حذف</button>
