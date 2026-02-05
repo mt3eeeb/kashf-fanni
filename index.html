@@ -2,133 +2,68 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>كشف فني زراعي</title>
+<title>بند 1 - البيانات العامة</title>
+
 <style>
-body{font-family:Tahoma;background:#f5f5f5;margin:0}
-.section{background:#4CAF50;color:#fff;padding:10px;margin-top:15px}
-.box{background:#fff;padding:10px}
-.row{display:flex;gap:5px;margin-bottom:5px}
-input,select,button{flex:1;padding:6px}
-button{background:#4CAF50;color:#fff;border:0}
-.small{flex:.5}
-.result{background:#eee;padding:8px;margin-top:5px}
+body{
+  font-family: Tahoma;
+  background:#f4f4f4;
+  margin:0;
+  padding:20px;
+}
+.section{
+  background:#fff;
+  padding:15px;
+  border-radius:6px;
+}
+.section h3{
+  background:#2ecc71;
+  color:#fff;
+  padding:8px;
+  margin:-15px -15px 15px -15px;
+}
+.row{
+  display:flex;
+  gap:10px;
+}
+.field{
+  flex:1;
+}
+label{
+  font-size:13px;
+  display:block;
+  margin-bottom:3px;
+}
+input{
+  width:100%;
+  padding:7px;
+  box-sizing:border-box;
+}
 </style>
 </head>
 
 <body>
 
-<div class="section">البيانات العامة</div>
-<div class="box">
-<input placeholder="اسم العميل" id="client">
-<input placeholder="رقم الطلب" id="order">
-<input type="date" id="date">
+<div class="section">
+  <h3>البيانات العامة</h3>
+
+  <div class="row">
+    <div class="field">
+      <label>اسم العميل</label>
+      <input type="text" id="clientName">
+    </div>
+
+    <div class="field">
+      <label>رقم الطلب</label>
+      <input type="text" id="orderNumber">
+    </div>
+
+    <div class="field">
+      <label>تاريخ الزيارة</label>
+      <input type="date" id="visitDate">
+    </div>
+  </div>
 </div>
-
-<div class="section">إحداثيات السجل</div>
-<div class="box">
-<div class="row">
-<input class="small" placeholder="Lon°">
-<input placeholder="Lon دقائق">
-<input class="small" placeholder="Lat°">
-<input placeholder="Lat دقائق">
-</div>
-</div>
-
-<div class="section">إحداثيات البوابة</div>
-<div class="box">
-<div class="row">
-<input class="small" placeholder="Lon°">
-<input placeholder="Lon دقائق">
-<input class="small" placeholder="Lat°">
-<input placeholder="Lat دقائق">
-</div>
-</div>
-
-<div class="section">زوايا المزرعة</div>
-<div class="box" id="points"></div>
-<button onclick="addPoint()">+ إضافة زاوية</button>
-
-<div class="section">حساب الأطوال والمساحة</div>
-<div class="box">
-<div id="distances"></div>
-<div class="result" id="area"></div>
-</div>
-
-<div class="section">الآبار</div>
-<div class="box" id="wells"></div>
-<button onclick="addWell()">+ إضافة بئر</button>
-
-<div class="section">نظام الري</div>
-<div class="box">
-<input type="number" id="towers" placeholder="عدد الأبراج">
-<div class="result" id="irrigation"></div>
-</div>
-
-<div class="section">المزروعات</div>
-<div class="box" id="plants"></div>
-<button onclick="addPlant()">+ إضافة مزروع</button>
-
-<div class="section">الموجودات</div>
-<div class="box" id="assets"></div>
-<button onclick="addAsset()">+ إضافة موجود</button>
-
-<script>
-function addPoint(){
- let d=document.createElement('div');
- d.className='row';
- d.innerHTML=`
- <input class="small" placeholder="Lon°">
- <input placeholder="Lon دقائق">
- <input class="small" placeholder="Lat°">
- <input placeholder="Lat دقائق">
- <button onclick="this.parentNode.remove()">-</button>`;
- document.getElementById('points').appendChild(d);
-}
-
-function addWell(){
- let d=document.createElement('div');
- d.className='row';
- d.innerHTML=`
- <input placeholder="Longitude">
- <input placeholder="Latitude">
- <button onclick="this.parentNode.remove()">-</button>`;
- document.getElementById('wells').appendChild(d);
-}
-
-function addPlant(){
- let d=document.createElement('div');
- d.className='row';
- d.innerHTML=`
- <select>
- <option>نخيل</option><option>قمح</option>
- <option>أعلاف</option><option>حمضيات</option>
- <option>أخرى</option>
- </select>
- <input placeholder="العدد">
- <input placeholder="الوصف">
- <button onclick="this.parentNode.remove()">-</button>`;
- document.getElementById('plants').appendChild(d);
-}
-
-function addAsset(){
- let d=document.createElement('div');
- d.className='row';
- d.innerHTML=`
- <input placeholder="الموجود">
- <input placeholder="الوصف">
- <button onclick="this.parentNode.remove()">-</button>`;
- document.getElementById('assets').appendChild(d);
-}
-
-document.getElementById('towers').oninput=function(){
- let n=this.value||0;
- let area=n*Math.PI*50*50;
- document.getElementById('irrigation').innerHTML=
- `م²: ${area.toFixed(1)}<br>
- هكتار: ${(area/10000).toFixed(2)}<br>
- دونم: ${(area/1000).toFixed(2)}`;
-}
-</script>
 
 </body>
 </html>
