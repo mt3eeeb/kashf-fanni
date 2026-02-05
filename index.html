@@ -5,24 +5,55 @@
 <title>كشف فني</title>
 
 <style>
-body{font-family:Tahoma;background:#f4f4f4;margin:0}
-.container{max-width:900px;margin:auto;background:#fff;padding:12px}
-.header{text-align:center;margin-bottom:15px}
-.header small{display:block;font-size:13px}
-.section{margin-bottom:15px}
-.section h3{background:#2ecc71;color:#fff;padding:7px;margin:0 0 8px}
-.row{display:flex;gap:5px;margin-bottom:5px;flex-wrap:wrap}
-input{flex:1;padding:6px;font-size:13px}
-button{padding:6px;border:none;font-size:13px;cursor:pointer}
-.add{background:#2ecc71;color:#fff}
-.del{background:#e74c3c;color:#fff}
-.gray{background:#ddd}
-.small-btn{width:100%}
-.result{background:#eee;padding:8px;font-size:13px}
+body{
+    font-family: Tahoma, Arial;
+    background:#f4f4f4;
+    margin:0;
+}
+.container{
+    max-width:900px;
+    margin:auto;
+    background:#fff;
+    padding:15px;
+}
+.header{text-align:center;margin-bottom:20px;}
+.header small{display:block;font-size:13px;margin-bottom:5px;}
+
+.section{margin-bottom:20px;}
+.section h3{
+    background:#2ecc71;
+    color:#fff;
+    padding:8px;
+    margin:0 0 10px;
+}
+
+.row{display:flex;gap:5px;margin-bottom:5px;}
+input{flex:1;padding:6px;font-size:14px;}
+button{padding:8px;border:none;cursor:pointer;font-size:14px;}
+.add{background:#2ecc71;color:#fff;}
+.del{background:#e74c3c;color:#fff;}
+.gray{background:#ddd;}
+.small-btn{width:100%;}
+.center{text-align:center;}
+
+.result{
+    background:#eee;
+    padding:8px;
+    page-break-inside:avoid;
+    font-size:14px;
+}
+
+.notice{
+    background:#fff3cd;
+    padding:8px;
+    border:1px solid #ffeeba;
+    font-size:13px;
+}
 
 @media print{
-button{display:none}
-.page-break{page-break-before:always}
+  button{display:none;}
+  .page-break{page-break-before:always;}
+  body{background:#fff;}
 }
 </style>
 </head>
@@ -31,11 +62,11 @@ button{display:none}
 <div class="container">
 
 <div class="header">
-<small>مكتب محافظة قرية العليا</small>
-<h2>كشف فني</h2>
+    <small>مكتب محافظة قرية العليا</small>
+    <h1>كشف فني</h1>
 </div>
 
-<!-- البيانات العامة -->
+<!-- الصفحة 1 -->
 <div class="section">
 <h3>البيانات العامة</h3>
 <input placeholder="اسم العميل">
@@ -43,205 +74,197 @@ button{display:none}
 <input type="date">
 </div>
 
-<!-- إحداثيات السجل -->
 <div class="section">
 <h3>إحداثيات السجل</h3>
-<div class="row coord">
-<input placeholder="Lat قبل">
-<input placeholder="Lat بعد">
-<input placeholder="Lng قبل">
-<input placeholder="Lng بعد">
+<div class="row">
+<input placeholder="Lat">
+<input placeholder="Lng">
 </div>
-<button class="gray small-btn" onclick="openMaps(this)">فتح الخريطة</button>
+<button class="gray small-btn" onclick="openMapRow(this)">فتح الخريطة</button>
 </div>
 
-<!-- إحداثيات البوابة -->
 <div class="section">
 <h3>إحداثيات البوابة</h3>
-<div class="row coord">
-<input placeholder="Lat قبل">
-<input placeholder="Lat بعد">
-<input placeholder="Lng قبل">
-<input placeholder="Lng بعد">
+<div class="row">
+<input placeholder="Lat">
+<input placeholder="Lng">
 </div>
-<button class="gray small-btn" onclick="getLocation(this)">📍 تحديد الموقع الحالي</button>
-<button class="gray small-btn" onclick="openMaps(this)">فتح الخريطة</button>
+<button class="gray small-btn" onclick="getLocation(this)">تحديد الموقع الحالي</button>
+<button class="gray small-btn" onclick="openMapRow(this)">فتح الخريطة</button>
 </div>
 
-<!-- زوايا المزرعة -->
 <div class="section">
-<h3>زوايا المزرعة</h3>
+<h3>زوايا المزرعة (للفحص فقط)</h3>
 <div id="corners"></div>
 <button class="add small-btn" onclick="addCorner()">+ إضافة زاوية</button>
-<button class="gray small-btn" onclick="calcArea()">احسب المساحة</button>
-<div id="areaResult" class="result">لم يتم الحساب بعد</div>
+<button class="gray small-btn" onclick="calcCorners()">فحص الزوايا</button>
+<div id="cornerResult" class="result"></div>
+</div>
+
+<div class="section">
+<h3>المساحة الرسمية (حسب الكروكي)</h3>
+<div class="notice">
+⚠️ هذه هي المساحة المعتمدة رسميًا
+</div>
+<input id="crokiArea" placeholder="المساحة بالمتر المربع">
+<div class="result" id="crokiResult"></div>
 </div>
 
 <div class="page-break"></div>
 
-<!-- الآبار -->
+<!-- الصفحة 2 -->
 <div class="section">
 <h3>الآبار</h3>
 <div id="wells"></div>
 <button class="add small-btn" onclick="addWell()">+ إضافة بئر</button>
 </div>
 
-<!-- نظام الري -->
 <div class="section">
 <h3>نظام الري</h3>
 <div id="irrigation"></div>
 <button class="add small-btn" onclick="addIrrigation()">+ إضافة نظام ري</button>
 </div>
 
-<!-- المزروعات -->
 <div class="section">
 <h3>المزروعات</h3>
 <div id="crops"></div>
 <button class="add small-btn" onclick="addCrop()">+ إضافة مزروع</button>
 </div>
 
-<!-- الموجودات -->
 <div class="section">
 <h3>الموجودات</h3>
 <div id="assets"></div>
 <button class="add small-btn" onclick="addAsset()">+ إضافة موجود</button>
 </div>
 
-<!-- اسم الباحث -->
 <div class="section">
 <h3>اسم الباحث</h3>
 <input placeholder="اسم الباحث">
 </div>
 
-<button class="gray small-btn" onclick="window.print()">🖨️ طباعة</button>
+<div class="section center">
+<button class="gray" onclick="window.print()">🖨️ طباعة PDF</button>
+</div>
 
 </div>
 
 <script>
-// صف إحداثيات
-function coordRow(){
-return `
-<div class="row coord">
-<input placeholder="Lat قبل">
-<input placeholder="Lat بعد">
-<input placeholder="Lng قبل">
-<input placeholder="Lng بعد">
-<button class="del" onclick="this.parentElement.remove()">−</button>
-</div>
-<button class="gray small-btn" onclick="openMaps(this)">فتح الخريطة</button>
-`;
+// ===== أدوات عامة =====
+function openMapRow(btn){
+    let r=btn.previousElementSibling.querySelectorAll("input");
+    let lat=r[0].value;
+    let lng=r[1].value;
+    if(lat && lng){
+        window.open(`https://www.google.com/maps?q=${lat},${lng}`);
+    }else{
+        alert("أدخل الإحداثيات أولاً");
+    }
 }
 
-// إضافة عناصر
-function addCorner(){corners.innerHTML+=coordRow();}
-function addWell(){wells.innerHTML+=coordRow();}
-
-function addCrop(){
-crops.innerHTML+=`
-<div class="row">
-<input placeholder="اسم المزروع">
-<input placeholder="المساحة">
-<button class="del" onclick="this.parentElement.remove()">−</button>
-</div>`;
-}
-
-function addAsset(){
-assets.innerHTML+=`
-<div class="row">
-<input placeholder="الموجود">
-<input placeholder="الوصف">
-<button class="del" onclick="this.parentElement.remove()">−</button>
-</div>`;
-}
-
-function addIrrigation(){
-irrigation.innerHTML+=`
-<div class="row">
-<input placeholder="نوع الري">
-<input placeholder="عدد المحاور" oninput="calcPivot(this)">
-<input placeholder="المزروع">
-<input placeholder="أخرى">
-<button class="del" onclick="this.parentElement.remove()">−</button>
-</div>
-<div class="result">مساحة المحاور: <span>0</span> م²</div>`;
-}
-
-// فتح الخريطة
-function openMaps(btn){
-let r=btn.previousElementSibling.querySelectorAll("input");
-let lat=r[0].value+"."+r[1].value;
-let lng=r[2].value+"."+r[3].value;
-window.open(`https://www.google.com/maps?q=${lat},${lng}`);
-}
-
-// تحديد الموقع (للبوابة فقط)
 function getLocation(btn){
-if(!navigator.geolocation){
-alert("المتصفح لا يدعم GPS");
-return;
+    navigator.geolocation.getCurrentPosition(pos=>{
+        let r=btn.previousElementSibling.querySelectorAll("input");
+        r[0].value=pos.coords.latitude.toFixed(6);
+        r[1].value=pos.coords.longitude.toFixed(6);
+    });
 }
-navigator.geolocation.getCurrentPosition(pos=>{
-let lat=pos.coords.latitude.toString().split(".");
-let lng=pos.coords.longitude.toString().split(".");
-let inputs=btn.previousElementSibling.querySelectorAll("input");
-inputs[0].value=lat[0];
-inputs[1].value=lat[1];
-inputs[2].value=lng[0];
-inputs[3].value=lng[1];
+
+// ===== الزوايا =====
+function addCorner(){
+    corners.innerHTML+=`
+    <div class="row">
+        <input placeholder="Lat">
+        <input placeholder="Lng">
+        <button class="del" onclick="this.parentElement.remove()">−</button>
+    </div>`;
+}
+
+function distance(a,b,c,d){
+    const R=6371000;
+    let dLat=(c-a)*Math.PI/180;
+    let dLng=(d-b)*Math.PI/180;
+    let x=Math.sin(dLat/2)**2+
+    Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*
+    Math.sin(dLng/2)**2;
+    return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+}
+
+function calcCorners(){
+    let pts=[];
+    document.querySelectorAll("#corners .row").forEach(r=>{
+        let i=r.querySelectorAll("input");
+        if(i[0].value && i[1].value){
+            pts.push([parseFloat(i[0].value),parseFloat(i[1].value)]);
+        }
+    });
+
+    if(pts.length<3){
+        cornerResult.innerHTML="أدخل 3 زوايا على الأقل";
+        return;
+    }
+
+    let txt="";
+    for(let i=0;i<pts.length;i++){
+        let j=(i+1)%pts.length;
+        txt+=`المسافة بين زاوية ${i+1} و ${j+1}: 
+        ${distance(
+            pts[i][0],pts[i][1],
+            pts[j][0],pts[j][1]
+        ).toFixed(1)} م<br>`;
+    }
+
+    cornerResult.innerHTML=txt+
+    "<hr>🔎 هذه الحسابات للفحص فقط وليست المساحة الرسمية";
+}
+
+// ===== باقي الإضافات =====
+function addWell(){
+    wells.innerHTML+=`
+    <div class="row">
+        <input placeholder="Lat">
+        <input placeholder="Lng">
+        <button class="del" onclick="this.parentElement.remove()">−</button>
+    </div>`;
+}
+function addIrrigation(){
+    irrigation.innerHTML+=`
+    <div class="row">
+        <input placeholder="نوع الري">
+        <input placeholder="عدد المحاور">
+        <input placeholder="المزروع">
+        <input placeholder="مساحة الري">
+        <button class="del" onclick="this.parentElement.remove()">−</button>
+    </div>`;
+}
+function addCrop(){
+    crops.innerHTML+=`
+    <div class="row">
+        <input placeholder="اسم المزروع">
+        <input placeholder="المساحة">
+        <button class="del" onclick="this.parentElement.remove()">−</button>
+    </div>`;
+}
+function addAsset(){
+    assets.innerHTML+=`
+    <div class="row">
+        <input placeholder="الموجود">
+        <input placeholder="الوصف">
+        <button class="del" onclick="this.parentElement.remove()">−</button>
+    </div>`;
+}
+
+// ===== مساحة الكروكي =====
+document.getElementById("crokiArea").addEventListener("input",()=>{
+    let v=parseFloat(crokiArea.value);
+    if(v){
+        crokiResult.innerHTML=
+        `المساحة: ${v.toFixed(1)} م²<br>
+        الهكتار: ${(v/10000).toFixed(3)}<br>
+        الدونم: ${(v/1000).toFixed(2)}`;
+    }else{
+        crokiResult.innerHTML="";
+    }
 });
-}
-
-// مساحة المحاور
-function calcPivot(el){
-let count=parseFloat(el.value)||0;
-let r=500;
-let area=count*Math.PI*r*r;
-el.parentElement.nextElementSibling.querySelector("span").innerText=
-area.toFixed(1);
-}
-
-// حساب المساحة من الزوايا
-function dist(a,b,c,d){
-const R=6371000;
-let dLat=(c-a)*Math.PI/180;
-let dLng=(d-b)*Math.PI/180;
-let x=Math.sin(dLat/2)**2+
-Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*
-Math.sin(dLng/2)**2;
-return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
-}
-
-function calcArea(){
-let pts=[];
-document.querySelectorAll("#corners .coord").forEach(r=>{
-let i=r.querySelectorAll("input");
-pts.push([
-parseFloat(i[0].value+"."+i[1].value),
-parseFloat(i[2].value+"."+i[3].value)
-]);
-});
-if(pts.length<3){
-areaResult.innerHTML="أدخل 3 زوايا على الأقل";
-return;
-}
-let txt="";
-for(let i=0;i<pts.length;i++){
-let j=(i+1)%pts.length;
-txt+=`المسافة بين زاوية ${i+1} و ${j+1}: ${dist(
-pts[i][0],pts[i][1],pts[j][0],pts[j][1]
-).toFixed(1)} م<br>`;
-}
-let area=0;
-for(let i=0;i<pts.length;i++){
-let j=(i+1)%pts.length;
-area+=pts[i][0]*pts[j][1]-pts[j][0]*pts[i][1];
-}
-area=Math.abs(area/2)*111000*111000;
-areaResult.innerHTML=
-txt+`<hr>المساحة: ${area.toFixed(1)} م²<br>
-الهكتار: ${(area/10000).toFixed(3)}<br>
-الدونم: ${(area/1000).toFixed(2)}`;
-}
 </script>
 
 </body>
