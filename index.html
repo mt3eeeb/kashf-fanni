@@ -1,62 +1,65 @@
-// ===== بند 5 : الآبار =====
-let wells = JSON.parse(localStorage.getItem("wells")) || [];
+<script>
+  // ===== بند 5 : الآبار =====
+  let wells = JSON.parse(localStorage.getItem("wells")) || [];
 
-function addWell() {
-  wells.push({ lat: "", lng: "" });
-  saveWells();
-  renderWells();
-}
-
-function removeWell(index) {
-  wells.splice(index, 1);
-  saveWells();
-  renderWells();
-}
-
-function updateWell(index, field, value) {
-  wells[index][field] = value;
-  saveWells();
-}
-
-function openWellMap(index) {
-  const w = wells[index];
-  if (!w.lat || !w.lng) {
-    alert("أدخل إحداثيات البئر أولاً");
-    return;
+  function addWell() {
+    wells.push({ lat: "", lng: "" });
+    saveWells();
+    renderWells();
   }
-  window.open(
-    `https://www.google.com/maps?q=${w.lat},${w.lng}`,
-    "_blank"
-  );
-}
 
-function saveWells() {
-  localStorage.setItem("wells", JSON.stringify(wells));
-}
+  function removeWell(index) {
+    wells.splice(index, 1);
+    saveWells();
+    renderWells();
+  }
 
-function renderWells() {
-  const container = document.getElementById("wellsContainer");
-  container.innerHTML = "";
+  function updateWell(index, field, value) {
+    wells[index][field] = value;
+    saveWells();
+  }
 
-  wells.forEach((w, i) => {
-    container.innerHTML += `
-      <div style="margin-bottom:8px">
-        Lat:
-        <input type="number" step="any"
-          value="${w.lat}"
-          oninput="updateWell(${i}, 'lat', this.value)">
-        
-        Lng:
-        <input type="number" step="any"
-          value="${w.lng}"
-          oninput="updateWell(${i}, 'lng', this.value)">
+  function openWellMap(index) {
+    const w = wells[index];
+    if (!w.lat || !w.lng) {
+      alert("أدخل إحداثيات البئر أولاً");
+      return;
+    }
+    window.open(
+      `https://www.google.com/maps?q=${w.lat},${w.lng}`,
+      "_blank"
+    );
+  }
 
-        <button onclick="openWellMap(${i})">🗺</button>
-        <button onclick="removeWell(${i})">−</button>
-      </div>
-    `;
-  });
-}
+  function saveWells() {
+    localStorage.setItem("wells", JSON.stringify(wells));
+  }
 
-// أول تحميل
-renderWells();
+  function renderWells() {
+    const container = document.getElementById("wellsContainer");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    wells.forEach((w, i) => {
+      container.innerHTML += `
+        <div style="margin-bottom:8px">
+          Lat:
+          <input type="number" step="any"
+            value="${w.lat}"
+            oninput="updateWell(${i}, 'lat', this.value)">
+
+          Lng:
+          <input type="number" step="any"
+            value="${w.lng}"
+            oninput="updateWell(${i}, 'lng', this.value)">
+
+          <button onclick="openWellMap(${i})">🗺</button>
+          <button onclick="removeWell(${i})">−</button>
+        </div>
+      `;
+    });
+  }
+
+  renderWells();
+</script>
