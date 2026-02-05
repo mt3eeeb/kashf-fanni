@@ -101,3 +101,55 @@ function openRecordMap(){
   window.open(`https://www.google.com/maps?q=${lat},${lng}`);
 }
 </script>
+<!-- بند 3: إحداثية البوابة -->
+<div class="section">
+  <h3>إحداثية البوابة</h3>
+
+  <div class="row">
+    <div class="field">
+      <label>خط العرض (Latitude)</label>
+      <input type="text" id="gateLat" placeholder="مثال: 27.90670">
+    </div>
+
+    <div class="field">
+      <label>خط الطول (Longitude)</label>
+      <input type="text" id="gateLng" placeholder="مثال: 47.65737">
+    </div>
+  </div>
+
+  <div style="margin-top:10px; display:flex; gap:10px;">
+    <button type="button" onclick="openGateMap()">📍 الوصول عبر Google Maps</button>
+    <button type="button" onclick="getGateLocation()">🧭 تحديد الموقع</button>
+  </div>
+</div>
+
+<script>
+function openGateMap(){
+  const lat = document.getElementById('gateLat').value.trim();
+  const lng = document.getElementById('gateLng').value.trim();
+
+  if(lat === '' || lng === ''){
+    alert('الرجاء إدخال الإحداثيات كاملة');
+    return;
+  }
+
+  window.open(`https://www.google.com/maps?q=${lat},${lng}`);
+}
+
+function getGateLocation(){
+  if(!navigator.geolocation){
+    alert('المتصفح لا يدعم تحديد الموقع');
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      document.getElementById('gateLat').value = position.coords.latitude.toFixed(6);
+      document.getElementById('gateLng').value = position.coords.longitude.toFixed(6);
+    },
+    () => {
+      alert('لم يتم السماح بتحديد الموقع');
+    }
+  );
+}
+</script>
