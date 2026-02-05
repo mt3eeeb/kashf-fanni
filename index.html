@@ -1,116 +1,75 @@
-<section id="farm-corners">
-  <h3>زوايا المزرعة</h3>
-
-  <div id="corners"></div>
-
-  <button type="button" onclick="addCorner()">+ إضافة زاوية</button>
-  <button type="button" onclick="calculatePolygon()">حساب الأطوال والمساحة</button>
-
-  <div id="results" style="margin-top:15px"></div>
-</section>
-
 <script>
-// ===============================
-// أدوات التحويل WGS84 → UTM
-// ===============================
-function latLonToUTM(lat, lon) {
-  const a = 6378137.0;
-  const f = 1 / 298.257223563;
-  const k0 = 0.9996;
-  const e = Math.sqrt(f * (2 - f));
+let wells = JSON.parse(localStorage.getItem("wells")) || [];
 
-  const zone = 38; // السعودية
-  const λ0 = ((zone - 1) * 6 - 180 + 3) * Math.PI / 180;
-
-  const φ = lat * Math.PI / 180;
-  const λ = lon * Math.PI / 180;
-
-  const N = a / Math.sqrt(1 - e * e * Math.sin(φ) ** 2);
-  const T = Math.tan(φ) ** 2;
-  const C = (e * e / (1 - e * e)) * Math.cos(φ) ** 2;
-  const A = Math.cos(φ) * (λ - λ0);
-
-  const M = a * (
-    (1 - e*e/4 - 3*e**4/64 - 5*e**6/256) * φ
-    - (3*e*e/8 + 3*e**4/32 + 45*e**6/1024) * Math.sin(2*φ)
-    + (15*e**4/256 + 45*e**6/1024) * Math.sin(4*φ)
-  );
-
-  const easting = k0 * N * (
-    A + (1 - T + C) * A**3 / 6
-  ) + 500000;
-
-  const northing = k0 * (M + N * Math.tan(φ) * A**2 / 2);
-
-  return { x: easting, y: northing };
+function saveWells() {
+  localStorage.setItem("wells", JSON.stringify(wells));
 }
 
-// ===============================
-// إضافة / حذف زوايا
-// ===============================
-function addCorner(lat = "", lon = "") {
-  const div = document.createElement("div");
-  div.className = "corner";
-  div.innerHTML = `
-    Latitude <input type="number" step="any" value="${lat}">
-    Longitude <input type="number" step="any" value="${lon}">
-    <button type="button" onclick="this.parentNode.remove()">−</button>
-  `;
-  document.getElementById("corners").appendChild(div);
+function addWell(lat = "", lng = "") {
+  wells.push({ lat, lng });
+  saveWells();
+  renderWells();
 }
 
-// زوايا افتراضية (تقدر تحذفها)
-addCorner(27.90670, 47.65737);
-addCorner(27.89539, 47.63094);
-addCorner(27.87591, 47.64401);
-addCorner(27.88323, 47.67417);
+function removeWell(index) {
+  wells.splice(index, 1);
+  saveWells();
+  renderWells();
+}
 
-// ===============================
-// حساب الأطوال والمساحة
-// ===============================
-function calculatePolygon() {
-  const rows = document.querySelectorAll(".corner");
-  let points = [];
+function updateWell(index, field, value) {
+  wells[index][field] = value;
+  saveWells();
+}
 
-  rows.forEach(r => {
-    const lat = parseFloat(r.children[0].value);
-    const lon = parseFloat(r.children[1].value);
-    if (!isNaN(lat) && !isNaN(lon)) {
-      points.push(latLonToUTM(lat, lon));
-    }
-  });
-
-  if (points.length < 3) {
-    alert("أدخل 3 زوايا على الأقل");
+function locateWell(index) {
+  if (!navigator.geolocation) {
+    alert("المتصفح لا يدعم تحديد الموقع");
     return;
   }
-
-  let distances = "";
-  let area = 0;
-
-  for (let i = 0; i < points.length; i++) {
-    const p1 = points[i];
-    const p2 = points[(i + 1) % points.length];
-
-    const d = Math.hypot(p2.x - p1.x, p2.y - p1.y);
-    distances += `المسافة ${i+1} → ${i+2}: ${d.toFixed(2)} م<br>`;
-
-    area += (p1.x * p2.y - p2.x * p1.y);
-  }
-
-  area = Math.abs(area / 2);
-
-  const hectares = area / 10000;
-  const dunum = area / 1000;
-
-  document.getElementById("results").innerHTML = `
-    <hr>
-    <strong>الأطوال:</strong><br>${distances}
-    <hr>
-    <strong>المساحة:</strong><br>
-    ${area.toFixed(2)} م²<br>
-    ${hectares.toFixed(2)} هكتار<br>
-    ${dunum.toFixed(2)} دونم
-  `;
+  navigator.geolocation.getCurrentPosition(pos => {
+    wells[index].lat = pos.coords.latitude.toFixed(6);
+    wells[index].lng = pos.coords.longitude.toFixed(6);
+    saveWells();
+    renderWells();
+  });
 }
+
+function openWellMap(index) {
+  const w = wells[index];
+  if (!w.lat || !w.lng) {
+    alert("أدخل الإحداثيات أولاً");
+    return;
+  }
+  window.open(
+    `https://www.google.com/maps?q=${w.lat},${w.lng}`,
+    "_blank"
+  );
+}
+
+function renderWells() {
+  const container = document.getElementById("wells");
+  container.innerHTML = "";
+
+  wells.forEach((w, i) => {
+    container.innerHTML += `
+      <div style="margin-bottom:10px">
+        <input type="number" step="any" placeholder="Latitude"
+          value="${w.lat}"
+          onchange="updateWell(${i}, 'lat', this.value)">
+
+        <input type="number" step="any" placeholder="Longitude"
+          value="${w.lng}"
+          onchange="updateWell(${i}, 'lng', this.value)">
+
+        <button onclick="locateWell(${i})">📍</button>
+        <button onclick="openWellMap(${i})">🗺</button>
+        <button onclick="removeWell(${i})">−</button>
+      </div>
+    `;
+  });
+}
+
+// تحميل الآبار المحفوظة عند فتح الصفحة
+renderWells();
 </script>
