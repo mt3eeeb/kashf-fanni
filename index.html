@@ -3,8 +3,10 @@
 
 let wells = [];
 
-document.addEventListener("DOMContentLoaded", () => {
-  wells = JSON.parse(localStorage.getItem("wells")) || [];
+// تحميل البيانات بعد فتح الصفحة
+document.addEventListener("DOMContentLoaded", function () {
+  const saved = localStorage.getItem("wells");
+  wells = saved ? JSON.parse(saved) : [];
   renderWells();
 });
 
@@ -27,7 +29,7 @@ function removeWell(index) {
   renderWells();
 }
 
-// تحديث
+// تحديث قيمة
 function updateWell(index, field, value) {
   wells[index][field] = value;
   saveWells();
@@ -46,42 +48,50 @@ function openWellMap(index) {
   );
 }
 
-// تحديد الموقع
+// تحديد الموقع الحالي
 function locateWell(index) {
   if (!navigator.geolocation) {
     alert("المتصفح لا يدعم تحديد الموقع");
     return;
   }
 
-  navigator.geolocation.getCurrentPosition(pos => {
-    wells[index].lat = pos.coords.latitude.toFixed(6);
-    wells[index].lng = pos.coords.longitude.toFixed(6);
-    saveWells();
-    renderWells();
-  });
+  navigator.geolocation.getCurrentPosition(
+    function (pos) {
+      wells[index].lat = pos.coords.latitude.toFixed(6);
+      wells[index].lng = pos.coords.longitude.toFixed(6);
+      saveWells();
+      renderWells();
+    },
+    function () {
+      alert("تعذر تحديد الموقع");
+    }
+  );
 }
 
-// عرض
+// عرض الآبار
 function renderWells() {
-  const c = document.getElementById("wellsContainer");
-  if (!c) return;
+  const container = document.getElementById("wellsContainer");
+  if (!container) return;
 
-  c.innerHTML = "";
+  container.innerHTML = "";
 
-  wells.forEach((w, i) => {
-    c.innerHTML += `
-      <div style="margin-bottom:8px">
-        Lat:
-        <input type="number" step="any" value="${w.lat}"
-          oninput="updateWell(${i}, 'lat', this.value)">
-        Lng:
-        <input type="number" step="any" value="${w.lng}"
-          oninput="updateWell(${i}, 'lng', this.value)">
-        <button onclick="locateWell(${i})">📍</button>
-        <button onclick="openWellMap(${i})">🗺️</button>
-        <button onclick="removeWell(${i})">−</button>
-      </div>
+  wells.forEach(function (w, i) {
+    const div = document.createElement("div");
+    div.style.marginBottom = "8px";
+
+    div.innerHTML = `
+      Lat:
+      <input type="number" step="any" value="${w.lat}"
+        oninput="updateWell(${i}, 'lat', this.value)">
+      Lng:
+      <input type="number" step="any" value="${w.lng}"
+        oninput="updateWell(${i}, 'lng', this.value)">
+      <button type="button" onclick="locateWell(${i})">📍</button>
+      <button type="button" onclick="openWellMap(${i})">🗺️</button>
+      <button type="button" onclick="removeWell(${i})">−</button>
     `;
+
+    container.appendChild(div);
   });
 }
 </script>
