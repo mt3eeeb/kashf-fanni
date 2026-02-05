@@ -7,14 +7,14 @@
 <style>
   body {
     font-family: "Tahoma", Arial;
-    background: #f5f7fa;
+    background: #f4f8f5;
     margin: 0;
     padding: 20px;
-    color: #222;
+    color: #1f2933;
   }
 
   .page {
-    background: #fff;
+    background: #ffffff;
     padding: 25px;
     max-width: 900px;
     margin: auto;
@@ -22,6 +22,7 @@
     box-shadow: 0 0 10px rgba(0,0,0,0.08);
   }
 
+  /* ===== العنوان ===== */
   .header {
     text-align: center;
     margin-bottom: 25px;
@@ -30,20 +31,22 @@
   .header h1 {
     margin: 0;
     font-size: 22px;
-    color: #0b5ed7;
+    color: #2e7d32; /* أخضر */
   }
 
   .header h2 {
     margin: 8px 0 0;
     font-size: 18px;
-    color: #333;
+    color: #355f3b;
   }
 
+  /* ===== العناوين ===== */
   h3 {
-    border-bottom: 2px solid #0b5ed7;
+    border-bottom: 2px solid #2e7d32;
     padding-bottom: 5px;
     margin-bottom: 15px;
     font-size: 16px;
+    color: #2e7d32;
   }
 
   .row {
@@ -56,8 +59,14 @@
     padding: 8px;
     font-size: 14px;
     min-width: 200px;
-    border: 1px solid #ccc;
+    border: 1px solid #a5d6a7;
     border-radius: 4px;
+  }
+
+  input:focus {
+    outline: none;
+    border-color: #2e7d32;
+    box-shadow: 0 0 0 2px rgba(46,125,50,0.15);
   }
 
   @media print {
