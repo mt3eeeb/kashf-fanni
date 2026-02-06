@@ -183,95 +183,64 @@ function openGateMap(){
 }
 </script><!-- ===== بند 4 ===== -->
 <div class="section">
-  <div class="section-title">4️⃣ حدود الأرض وحساب المساحة</div>
-  <div class="section-body">
+  <h3>4️⃣ حدود الأرض وحساب المساحة</h3>
 
-    <div id="pointsContainer">
-
-      <div class="row pointRow">
-        <div class="field">
-          <label>خط العرض (1)</label>
-          <input type="number" step="any" class="lat">
-        </div>
-        <div class="field">
-          <label>خط الطول (1)</label>
-          <input type="number" step="any" class="lon">
-        </div>
-        <div class="field" style="flex:0.3;">
-          <label>&nbsp;</label>
-          <button type="button" onclick="removePoint(this)">➖</button>
-        </div>
-      </div>
-
+  <div id="pointsContainer">
+    <div class="point">
+      <input type="number" step="any" placeholder="خط العرض (1)" class="lat">
+      <input type="number" step="any" placeholder="خط الطول (1)" class="lon">
+      <button type="button" onclick="removePoint(this)">➖</button>
     </div>
-
-    <br>
-    <button type="button" onclick="addPoint()">➕ إضافة زاوية</button>
-    <button type="button" onclick="calculateLand()">📐 حساب المساحة والأطوال</button>
-
-    <div id="resultBox" style="margin-top:12px;color:#2e7d32;"></div>
-
   </div>
+
+  <br>
+  <button onclick="addPoint()">➕ إضافة زاوية</button>
+  <button onclick="calculate()">📐 حساب</button>
+
+  <div id="result" style="margin-top:10px;color:#2e7d32"></div>
 </div>
 
-<!-- ===== سكربت بند 4 ===== -->
 <script>
-const a = 6378137;
-const f = 1 / 298.257223563;
-const k0 = 0.9996;
+const R = 6371000; // نصف قطر الأرض بالمتر
 
 function toRad(d){ return d * Math.PI / 180; }
 
-/* تحويل Lat/Lon إلى UTM */
-function latLonToUTM(lat, lon){
-  const zone = Math.floor((lon + 180) / 6) + 1;
-  const λ0 = toRad((zone - 1) * 6 - 180 + 3);
+/* مسافة هافرسين */
+function haversine(p1, p2){
+  const dLat = toRad(p2.lat - p1.lat);
+  const dLon = toRad(p2.lon - p1.lon);
 
-  const φ = toRad(lat);
-  const λ = toRad(lon);
-  const e = Math.sqrt(f * (2 - f));
+  const a =
+    Math.sin(dLat/2)**2 +
+    Math.cos(toRad(p1.lat)) *
+    Math.cos(toRad(p2.lat)) *
+    Math.sin(dLon/2)**2;
 
-  const sinφ = Math.sin(φ);
-  const cosφ = Math.cos(φ);
-
-  const N = a / Math.sqrt(1 - Math.pow(e * sinφ, 2));
-  const T = Math.pow(Math.tan(φ), 2);
-  const C = Math.pow(e * cosφ, 2) / (1 - e * e);
-  const A = cosφ * (λ - λ0);
-
-  const M = a * (
-    (1 - e*e/4 - 3*Math.pow(e,4)/64 - 5*Math.pow(e,6)/256) * φ
-    - (3*e*e/8 + 3*Math.pow(e,4)/32 + 45*Math.pow(e,6)/1024) * Math.sin(2*φ)
-    + (15*Math.pow(e,4)/256 + 45*Math.pow(e,6)/1024) * Math.sin(4*φ)
-    - (35*Math.pow(e,6)/3072) * Math.sin(6*φ)
-  );
-
-  return {
-    x: k0 * N * (A + (1 - T + C) * Math.pow(A,3) / 6) + 500000,
-    y: k0 * (M + N * Math.tan(φ) * (Math.pow(A,2)/2))
-  };
+  return 2 * R * Math.asin(Math.sqrt(a));
 }
 
-/* المسافة بين نقطتين */
-function distance(p1, p2){
-  return Math.sqrt(
-    Math.pow(p1.x - p2.x, 2) +
-    Math.pow(p1.y - p2.y, 2)
-  );
+/* تحويل تقريبي لمتر */
+function project(points){
+  const lat0 = toRad(points[0].lat);
+  return points.map(p=>{
+    return {
+      x: toRad(p.lon) * R * Math.cos(lat0),
+      y: toRad(p.lat) * R
+    };
+  });
 }
 
 /* مساحة المضلع */
-function polygonArea(p){
+function area(points){
   let s = 0;
-  for(let i=0;i<p.length;i++){
-    let j = (i+1) % p.length;
-    s += p[i].x * p[j].y - p[j].x * p[i].y;
+  for(let i=0;i<points.length;i++){
+    let j = (i+1)%points.length;
+    s += points[i].x * points[j].y - points[j].x * points[i].y;
   }
-  return Math.abs(s / 2);
+  return Math.abs(s/2);
 }
 
-/* الحساب */
-function calculateLand(){
+function calculate(){
   const lats = document.querySelectorAll('.lat');
   const lons = document.querySelectorAll('.lon');
 
@@ -280,56 +249,47 @@ function calculateLand(){
     return;
   }
 
-  let points = [];
+  let pts = [];
   for(let i=0;i<lats.length;i++){
-    points.push(latLonToUTM(
-      parseFloat(lats[i].value),
-      parseFloat(lons[i].value)
-    ));
+    pts.push({
+      lat: parseFloat(lats[i].value),
+      lon: parseFloat(lons[i].value)
+    });
   }
 
   let html = '<b>أطوال الأضلاع:</b><br>';
   let perimeter = 0;
 
-  for(let i=0;i<points.length;i++){
-    let j = (i+1) % points.length;
-    let d = distance(points[i], points[j]);
+  for(let i=0;i<pts.length;i++){
+    let j = (i+1)%pts.length;
+    let d = haversine(pts[i], pts[j]);
     perimeter += d;
     html += `ضلع ${i+1} → ${j+1}: ${d.toFixed(2)} م<br>`;
   }
 
-  const area = polygonArea(points);
+  const projected = project(pts);
+  const a = area(projected);
 
   html += `<br><b>المحيط:</b> ${perimeter.toFixed(2)} م<br>`;
   html += `<b>المساحة:</b><br>`;
-  html += `${area.toFixed(2)} م²<br>`;
-  html += `${(area/1000).toFixed(2)} دونم<br>`;
-  html += `${(area/10000).toFixed(2)} هكتار`;
+  html += `${a.toFixed(2)} م²<br>`;
+  html += `${(a/1000).toFixed(2)} دونم<br>`;
+  html += `${(a/10000).toFixed(2)} هكتار`;
 
-  document.getElementById('resultBox').innerHTML = html;
+  document.getElementById('result').innerHTML = html;
 }
 
-/* إضافة / حذف */
 function addPoint(){
   document.getElementById('pointsContainer').insertAdjacentHTML('beforeend',`
-    <div class="row pointRow">
-      <div class="field">
-        <label>خط العرض</label>
-        <input type="number" step="any" class="lat">
-      </div>
-      <div class="field">
-        <label>خط الطول</label>
-        <input type="number" step="any" class="lon">
-      </div>
-      <div class="field" style="flex:0.3;">
-        <label>&nbsp;</label>
-        <button type="button" onclick="removePoint(this)">➖</button>
-      </div>
+    <div class="point">
+      <input type="number" step="any" placeholder="خط العرض" class="lat">
+      <input type="number" step="any" placeholder="خط الطول" class="lon">
+      <button onclick="removePoint(this)">➖</button>
     </div>
   `);
 }
 
-function removePoint(btn){
-  btn.closest('.pointRow').remove();
+function removePoint(b){
+  b.parentElement.remove();
 }
 </script>
