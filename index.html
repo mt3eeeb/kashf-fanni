@@ -1,186 +1,228 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>كشف فني زراعي</title>
-
+<title>كشف فني</title>
 <style>
-body{font-family:Arial;direction:rtl;background:#f2f2f2;margin:0;padding:10px}
-h1,h2{background:#2ecc71;color:#fff;padding:10px;border-radius:6px}
-.section{background:#fff;padding:10px;margin-bottom:10px;border-radius:6px}
-label{font-weight:bold}
-input,select{width:100%;padding:6px;margin:4px 0}
-button{padding:6px 12px;margin:4px}
-.box{border:1px solid #ddd;padding:6px;margin-bottom:6px;border-radius:5px}
-.result{background:#fafafa;padding:6px;border-radius:5px}
-hr{border:none;border-top:1px solid #ddd;margin:10px 0}
+body{font-family:Tahoma;background:#f5f5f5;margin:0}
+header{background:#2ecc71;color:#fff;padding:15px;text-align:center}
+section{background:#fff;margin:15px;border-radius:6px;overflow:hidden}
+h2{margin:0;background:#2ecc71;color:#fff;padding:10px;font-size:16px}
+.row{display:flex;gap:10px;padding:10px}
+input,select,button{padding:8px;width:100%}
+button{cursor:pointer}
+.small{width:48%}
+.actions{display:flex;gap:5px}
+.add{background:#3498db;color:#fff}
+.del{background:#e74c3c;color:#fff}
+.calc{background:#2ecc71;color:#fff}
+.print{background:#111;color:#fff}
+.result{padding:10px;font-weight:bold}
+@media print{
+  .no-print{display:none}
+  section{page-break-inside:avoid}
+}
 </style>
 </head>
 
 <body>
 
-<h1>صندوق التنمية الزراعية – مكتب محافظة قرية العليا<br>كشف فني</h1>
+<header>
+<h1>صندوق التنمية الزراعية – مكتب محافظة قرية العليا</h1>
+<p>كشف فني</p>
+</header>
 
 <!-- 1 البيانات العامة -->
-<div class="section">
+<section>
 <h2>1️⃣ البيانات العامة</h2>
-<label>اسم العميل</label>
-<input id="client">
-<label>رقم الطلب</label>
-<input id="order">
-<label>تاريخ الزيارة</label>
+<div class="row">
+<input placeholder="اسم العميل" id="client">
+<input placeholder="رقم الطلب" id="order">
 <input type="date" id="date">
 </div>
+</section>
 
-<!-- 2 احداثيات السجل -->
-<div class="section">
+<!-- 2 إحداثيات السجل -->
+<section>
 <h2>2️⃣ إحداثيات السجل</h2>
-<input id="regLat" placeholder="Latitude">
-<input id="regLng" placeholder="Longitude">
-<button onclick="getLoc('regLat','regLng')">📍 تحديد</button>
-<button onclick="openMap('regLat','regLng')">🗺️ قوقل ماب</button>
+<div class="row">
+<input placeholder="Latitude" id="regLat">
+<input placeholder="Longitude" id="regLng">
+<button onclick="goMap(regLat.value,regLng.value)">الوصول</button>
 </div>
+</section>
 
-<!-- 3 احداثية البوابة -->
-<div class="section">
+<!-- 3 البوابة -->
+<section>
 <h2>3️⃣ إحداثية البوابة</h2>
-<input id="gateLat" placeholder="Latitude">
-<input id="gateLng" placeholder="Longitude">
-<button onclick="getLoc('gateLat','gateLng')">📍 تحديد</button>
-<button onclick="openMap('gateLat','gateLng')">🗺️ قوقل ماب</button>
+<div class="row">
+<input placeholder="Latitude" id="gateLat">
+<input placeholder="Longitude" id="gateLng">
+<div class="actions">
+<button onclick="locate(gateLat,gateLng)">تحديد</button>
+<button onclick="goMap(gateLat.value,gateLng.value)">الوصول</button>
 </div>
+</div>
+</section>
 
-<!-- 4 زوايا -->
-<div class="section">
+<!-- 4 زوايا المزرعة -->
+<section>
 <h2>4️⃣ زوايا المزرعة</h2>
 <div id="corners"></div>
-<button onclick="calcArea()">حساب</button>
-<div id="areaResult" class="result"></div>
+<div class="row no-print">
+<button class="add" onclick="addCorner()">+ إضافة زاوية</button>
+<button class="calc" onclick="calcArea()">حساب</button>
 </div>
+<div class="result" id="areaResult"></div>
+</section>
 
 <!-- 5 الآبار -->
-<div class="section">
+<section>
 <h2>5️⃣ الآبار</h2>
 <div id="wells"></div>
-<button onclick="addWell()">+ إضافة بئر</button>
+<div class="row no-print">
+<button class="add" onclick="addWell()">+ إضافة بئر</button>
 </div>
+</section>
 
 <!-- 6 نظام الري -->
-<div class="section">
+<section>
 <h2>6️⃣ نظام الري</h2>
-<select id="irrigation">
-<option>محوري</option>
-<option>تنقيط</option>
-<option>رش</option>
+<div class="row">
+<select id="irrigation" onchange="irrigationUI()">
+<option value="">اختر النوع</option>
+<option value="sprinkler">رشاش</option>
+<option value="drip">تنقيط</option>
+<option value="flood">غمر</option>
 </select>
-<input id="towerLen" placeholder="طول البرج (م)">
-<input id="cropType" placeholder="نوع المزروع">
 </div>
+<div id="irrigationFields"></div>
+</section>
 
 <!-- 7 المزروعات -->
-<div class="section">
+<section>
 <h2>7️⃣ المزروعات</h2>
-<input id="cropName" placeholder="نوع المزروع">
-<input id="cropCount" placeholder="عدد الشتلات">
-<input id="cropArea" placeholder="مساحتها (م²)">
+<div class="row">
+<select id="cropType" onchange="cropUI()">
+<option>نخيل</option>
+<option>مصدات رياح</option>
+<option>حمضيات</option>
+<option>آخر</option>
+</select>
+<input id="cropOther" placeholder="نوع آخر" style="display:none">
+<input type="number" id="plants" placeholder="عدد الشتلات" oninput="calcPlants()">
 </div>
+<div class="result" id="plantArea"></div>
+</section>
 
 <!-- 8 الموجودات -->
-<div class="section">
+<section>
 <h2>8️⃣ الموجودات</h2>
-<input id="assets" placeholder="معدات – مباني – خزانات ...">
+<div id="assets"></div>
+<div class="row no-print">
+<button class="add" onclick="addAsset()">+ إضافة</button>
 </div>
+</section>
 
 <!-- 9 الباحث -->
-<div class="section">
+<section>
 <h2>9️⃣ اسم الباحث</h2>
+<div class="row">
 <input id="researcher">
 </div>
+</section>
 
-<!-- تحكم -->
-<div class="section">
-<button onclick="save()">💾 حفظ</button>
-<button onclick="clearAll()">🗑️ حذف وإدخال كشف جديد</button>
+<div class="row no-print">
+<button class="print" onclick="window.print()">طباعة PDF</button>
+<button class="del" onclick="localStorage.clear();location.reload()">مسح كشف جديد</button>
 </div>
 
 <script>
-/* حفظ تلقائي */
-document.querySelectorAll("input,select").forEach(e=>{
-  e.oninput=save;
-});
-
-/* تحديد موقع */
-function getLoc(a,b){
-navigator.geolocation.getCurrentPosition(p=>{
-document.getElementById(a).value=p.coords.latitude.toFixed(6);
-document.getElementById(b).value=p.coords.longitude.toFixed(6);
-save();
-});
+function goMap(lat,lng){
+ if(!lat||!lng)return;
+ window.open(`https://www.google.com/maps?q=${lat},${lng}`);
 }
-
-/* قوقل ماب */
-function openMap(a,b){
-let lat=document.getElementById(a).value;
-let lng=document.getElementById(b).value;
-if(lat&&lng) window.open(`https://maps.google.com/?q=${lat},${lng}`);
+function locate(lat,lng){
+ navigator.geolocation.getCurrentPosition(p=>{
+  lat.value=p.coords.latitude;
+  lng.value=p.coords.longitude;
+ });
 }
 
 /* زوايا */
-let corners=[{},{},{},{}];
-function drawCorners(){
-let c=document.getElementById("corners");
-c.innerHTML="";
-corners.forEach((p,i)=>{
-c.innerHTML+=`
-<div class="box">
-زاوية ${i+1}
-<input placeholder="Latitude" oninput="corners[${i}].lat=this.value">
-<input placeholder="Longitude" oninput="corners[${i}].lng=this.value">
-<button onclick="getCorner(${i})">📍</button>
-</div>`;
-});
+function addCorner(){
+ let d=document.createElement('div');
+ d.className='row';
+ d.innerHTML=`<input placeholder="Lat"><input placeholder="Lng"><button class="del" onclick="this.parentNode.remove()">-</button>`;
+ corners.appendChild(d);
 }
-function getCorner(i){
-navigator.geolocation.getCurrentPosition(p=>{
-corners[i]={lat:p.coords.latitude,lng:p.coords.longitude};
-drawCorners();save();
-});
+function hav(a,b,c,d){
+ let R=6371000;
+ let x=(c-a)*Math.PI/180;
+ let y=(d-b)*Math.PI/180;
+ return Math.sqrt(x*x+y*y)*R;
 }
 function calcArea(){
-let pts=corners.map(p=>[+p.lat,+p.lng]);
-let area=pts.length?10000:0;
-areaResult.innerHTML=
-`${area} م² | ${(area/10000).toFixed(2)} هكتار | ${(area/1000).toFixed(2)} دونم`;
+ let pts=[...corners.children].map(r=>({
+  lat:parseFloat(r.children[0].value),
+  lng:parseFloat(r.children[1].value)
+ })).filter(p=>!isNaN(p.lat));
+ if(pts.length<3)return;
+ let p=0;
+ for(let i=0;i<pts.length;i++){
+  let j=(i+1)%pts.length;
+  p+=pts[i].lat*pts[j].lng-pts[j].lat*pts[i].lng;
+ }
+ let area=Math.abs(p)*12365;
+ areaResult.innerHTML=
+ `المساحة: ${area.toFixed(0)} م² | ${(area/10000).toFixed(2)} هكتار | ${(area/1000).toFixed(2)} دونم`;
 }
 
 /* الآبار */
-let wells=[{}];
-function drawWells(){
-let w=document.getElementById("wells");
-w.innerHTML="";
-wells.forEach((p,i)=>{
-w.innerHTML+=`
-<div class="box">
-بئر ${i+1}
-<input placeholder="Latitude">
-<input placeholder="Longitude">
-</div>`;
-});
-}
-function addWell(){wells.push({});drawWells();}
-
-/* حفظ */
-function save(){
-localStorage.setItem("farmForm",document.body.innerHTML);
+function addWell(){
+ let d=document.createElement('div');
+ d.className='row';
+ d.innerHTML=`<input placeholder="Lat"><input placeholder="Lng">
+ <button onclick="locate(this.previousElementSibling.previousElementSibling,this.previousElementSibling)">📍</button>
+ <button onclick="goMap(this.previousElementSibling.previousElementSibling.value,this.previousElementSibling.value)">➡</button>
+ <button class="del" onclick="this.parentNode.remove()">-</button>`;
+ wells.appendChild(d);
 }
 
-/* حذف */
-function clearAll(){
-if(confirm("متأكد؟")){localStorage.clear();location.reload();}
+/* نظام الري */
+function irrigationUI(){
+ irrigationFields.innerHTML='';
+ let t=irrigation.value;
+ if(t==='sprinkler')
+ irrigationFields.innerHTML=`<div class="row"><input type="number" placeholder="عدد الأبراج"><input type="number" placeholder="طول البرج"></div>`;
+ if(t==='drip')
+ irrigationFields.innerHTML=`<div class="row"><input type="number" placeholder="طول التنقيط"></div>`;
+ if(t==='flood')
+ irrigationFields.innerHTML=`<div class="row"><input type="number" placeholder="المساحة م²"></div>`;
 }
 
-/* تشغيل */
-drawCorners();drawWells();
+/* المزروعات */
+function cropUI(){
+ cropOther.style.display=(cropType.value==='آخر'||cropType.value==='حمضيات')?'block':'none';
+}
+function calcPlants(){
+ let n=plants.value||0;
+ let area=n*10;
+ plantArea.innerHTML=`${area} م² | ${(area/10000).toFixed(2)} هكتار | ${(area/1000).toFixed(2)} دونم`;
+}
+
+/* الموجودات */
+function addAsset(){
+ let d=document.createElement('div');
+ d.className='row';
+ d.innerHTML=`<select>
+ <option>مباني</option><option>موجودات بئر</option><option>أخرى</option>
+ </select>
+ <input placeholder="الوصف">
+ <input type="number" placeholder="العدد">
+ <button class="del" onclick="this.parentNode.remove()">-</button>`;
+ assets.appendChild(d);
+}
 </script>
 
 </body>
