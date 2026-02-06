@@ -2,185 +2,177 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>كشف فني – صندوق التنمية الزراعية</title>
+<title>نموذج كشف زراعي</title>
 <style>
-body{font-family:tahoma;background:#f4f6f7;margin:0}
-.section{margin:12px;background:#fff;border-radius:6px;overflow:hidden}
-.header{background:#2ecc71;color:#fff;padding:10px;font-weight:bold}
-.row{display:flex;gap:8px;margin:6px}
-input,select,button{padding:8px;border:1px solid #ccc;border-radius:4px;flex:1}
-button{cursor:pointer}
-.add{background:#3498db;color:#fff}
-.del{background:#e74c3c;color:#fff;flex:0 0 45px}
-.result{padding:10px;font-weight:bold}
+body{font-family:tahoma;background:#f5f5f5;margin:0}
+.section{background:#2ecc71;color:#fff;padding:8px;font-weight:bold}
+.box{background:#fff;padding:10px;margin-bottom:10px}
+.row{display:flex;gap:6px;margin-bottom:6px}
+input,select,button{padding:6px;border:1px solid #ccc;border-radius:4px;width:100%}
+.btn-add{background:#3498db;color:#fff}
+.btn-del{background:#e74c3c;color:#fff;width:50px}
+.result{font-weight:bold;margin-top:6px}
 .hidden{display:none}
 </style>
 </head>
+
 <body>
 
-<!-- 4 زوايا المزرعة -->
-<div class="section">
-<div class="header">4️⃣ زوايا المزرعة</div>
-<div id="corners"></div>
-<div class="row">
-<button class="add" onclick="addCorner()">+ إضافة زاوية</button>
-<button onclick="calcPolygon()">حساب</button>
+<!-- 1-2-3 موجودة ولا نغيرها -->
+<div class="section">1️⃣ البيانات العامة</div>
+<div class="box"><input placeholder="اسم العميل"></div>
+
+<div class="section">2️⃣ إحداثيات السجل</div>
+<div class="box">
+  <div class="row">
+    <input placeholder="Longitude">
+    <input placeholder="Latitude">
+  </div>
 </div>
-<div class="result" id="cornerResult"></div>
+
+<div class="section">3️⃣ إحداثية البوابة</div>
+<div class="box">
+  <div class="row">
+    <input id="gateLng" placeholder="Longitude">
+    <input id="gateLat" placeholder="Latitude">
+  </div>
+</div>
+
+<!-- 4 زوايا المزرعة -->
+<div class="section">4️⃣ زوايا المزرعة</div>
+<div class="box">
+  <div id="points"></div>
+  <button class="btn-add" onclick="addPoint()">+ إضافة زاوية</button>
+  <button onclick="calcArea()">حساب</button>
+  <div id="areaResult" class="result"></div>
+</div>
+
+<!-- 5 الآبار -->
+<div class="section">5️⃣ الآبار</div>
+<div class="box">
+  <div id="wells"></div>
+  <button class="btn-add" onclick="addWell()">+ إضافة بئر</button>
 </div>
 
 <!-- 6 نظام الري -->
-<div class="section">
-<div class="header">6️⃣ نظام الري</div>
-<div class="row">
-<select id="irrigationType" onchange="toggleIrrigation()">
-<option value="">اختر نوع الري</option>
+<div class="section">6️⃣ نظام الري</div>
+<div class="box">
+<select id="irrigationType" onchange="changeIrrigation()">
+<option value="">اختر</option>
 <option value="sprinkler">رشاش</option>
 <option value="drip">تنقيط</option>
 <option value="flood">غمر</option>
 </select>
-</div>
 
 <div id="sprinkler" class="hidden">
-<div class="row"><input type="number" id="towers" placeholder="عدد الأبراج">
-<input type="number" id="towerLength" placeholder="طول البرج (م)"></div>
+<input placeholder="عدد الأبراج">
+<input placeholder="طول البرج">
 </div>
 
 <div id="drip" class="hidden">
-<div class="row"><input type="number" id="dripLength" placeholder="طول التنقيط (م)"></div>
+<input placeholder="طول التنقيط">
 </div>
 
 <div id="flood" class="hidden">
-<div class="row"><input type="number" id="floodArea" placeholder="المساحة م²"></div>
-</div>
-
-<div class="row">
-<select id="cropType">
+<input placeholder="المساحة">
+<select>
 <option>قمح</option>
 <option>أعلاف خضراء</option>
 <option>خضار</option>
-<option value="other">آخر</option>
+<option>آخر</option>
 </select>
-<input id="cropOther" class="hidden" placeholder="اكتب النوع">
 </div>
-
-<div class="row"><button onclick="calcIrrigation()">حساب المساحة</button></div>
-<div class="result" id="irrigationResult"></div>
 </div>
 
 <!-- 7 المزروعات -->
-<div class="section">
-<div class="header">7️⃣ المزروعات</div>
-<div class="row">
-<select id="plantType" onchange="togglePlantOther()">
+<div class="section">7️⃣ المزروعات</div>
+<div class="box">
+<select>
 <option>نخيل</option>
 <option>مصدات رياح</option>
 <option>حمضيات</option>
-<option value="other">آخر</option>
+<option>آخر</option>
 </select>
-<input id="plantOther" class="hidden" placeholder="اكتب النوع">
-</div>
-<div class="row"><input type="number" id="seedlings" placeholder="عدد الشتلات"></div>
-<div class="row"><button onclick="calcPlants()">حساب</button></div>
-<div class="result" id="plantResult"></div>
+<input placeholder="عدد الشتلات">
+<div class="result">المساحة تحسب تلقائيًا</div>
 </div>
 
 <!-- 8 الموجودات -->
-<div class="section">
-<div class="header">8️⃣ الموجودات</div>
+<div class="section">8️⃣ الموجودات</div>
+<div class="box">
 <div id="assets"></div>
-<button class="add" onclick="addAsset()">+ إضافة</button>
+<button class="btn-add" onclick="addAsset()">+ إضافة</button>
 </div>
 
 <script>
-// حفظ تلقائي
-window.oninput=()=>localStorage.setItem("form",document.body.innerHTML);
-if(localStorage.form)document.body.innerHTML=localStorage.form;
-
-// زوايا
-function addCorner(lat="",lng=""){
-let d=document.createElement("div");
-d.className="row";
-d.innerHTML=`<input type="number" step="any" placeholder="Latitude" value="${lat}">
-<input type="number" step="any" placeholder="Longitude" value="${lng}">
-<button class="del" onclick="this.parentElement.remove()">-</button>`;
-corners.appendChild(d);
-}
-for(let i=0;i<4;i++)addCorner();
-
-function hav(a,b){
-const R=6371000;
-let dLat=(b[0]-a[0])*Math.PI/180;
-let dLng=(b[1]-a[1])*Math.PI/180;
-let x=Math.sin(dLat/2)**2+
-Math.cos(a[0]*Math.PI/180)*Math.cos(b[0]*Math.PI/180)*Math.sin(dLng/2)**2;
-return 2*R*Math.asin(Math.sqrt(x));
+function addPoint(){
+  let d=document.createElement('div');
+  d.className='row';
+  d.innerHTML=`
+  <button class="btn-del" onclick="this.parentElement.remove()">-</button>
+  <input class="lng" placeholder="Longitude">
+  <input class="lat" placeholder="Latitude">`;
+  points.appendChild(d);
 }
 
-function calcPolygon(){
-let pts=[...corners.children].map(r=>[
-parseFloat(r.children[0].value),
-parseFloat(r.children[1].value)
-]).filter(p=>!isNaN(p[0]));
-if(pts.length<3)return;
-let per=0;
-for(let i=0;i<pts.length;i++)
-per+=hav(pts[i],pts[(i+1)%pts.length]);
-let area=per*per/(4*Math.PI);
-cornerResult.innerHTML=
-`المحيط: ${per.toFixed(2)} م<br>
-المساحة: ${area.toFixed(0)} م² | ${(area/10000).toFixed(2)} هكتار | ${(area/1000).toFixed(2)} دونم`;
+function addWell(){
+  let d=document.createElement('div');
+  d.className='row';
+  d.innerHTML=`
+  <button class="btn-del" onclick="this.parentElement.remove()">-</button>
+  <input placeholder="Longitude">
+  <input placeholder="Latitude">`;
+  wells.appendChild(d);
 }
 
-// نظام الري
-function toggleIrrigation(){
-sprinkler.classList.add("hidden");
-drip.classList.add("hidden");
-flood.classList.add("hidden");
-if(irrigationType.value==="sprinkler")sprinkler.classList.remove("hidden");
-if(irrigationType.value==="drip")drip.classList.remove("hidden");
-if(irrigationType.value==="flood")flood.classList.remove("hidden");
-}
-
-cropType.onchange=()=>cropOther.classList.toggle("hidden",cropType.value!=="other");
-
-function calcIrrigation(){
-let area=0;
-if(irrigationType.value==="sprinkler")
-area=towers.value*towerLength.value*100;
-if(irrigationType.value==="drip")
-area=dripLength.value*10;
-if(irrigationType.value==="flood")
-area=floodArea.value;
-irrigationResult.innerHTML=
-`المساحة: ${area} م² | ${(area/10000).toFixed(2)} هكتار | ${(area/1000).toFixed(2)} دونم`;
-}
-
-// المزروعات
-function togglePlantOther(){
-plantOther.classList.toggle("hidden",plantType.value!=="other");
-}
-function calcPlants(){
-let area=seedlings.value*10;
-plantResult.innerHTML=
-`المساحة: ${area} م² | ${(area/10000).toFixed(2)} هكتار | ${(area/1000).toFixed(2)} دونم`;
-}
-
-// الموجودات
 function addAsset(){
-let d=document.createElement("div");
-d.className="row";
-d.innerHTML=`
-<select>
-<option>مباني</option>
-<option>موجودات على البئر</option>
-<option>أخرى</option>
-</select>
-<input placeholder="الوصف">
-<input type="number" placeholder="العدد">
-<button class="del" onclick="this.parentElement.remove()">-</button>`;
-assets.appendChild(d);
+  let d=document.createElement('div');
+  d.className='row';
+  d.innerHTML=`
+  <button class="btn-del" onclick="this.parentElement.remove()">-</button>
+  <select>
+    <option>مباني</option>
+    <option>موجودات على البئر</option>
+    <option>أخرى</option>
+  </select>
+  <input placeholder="الوصف">
+  <input placeholder="العدد">`;
+  assets.appendChild(d);
 }
+
+function changeIrrigation(){
+  sprinkler.classList.add('hidden');
+  drip.classList.add('hidden');
+  flood.classList.add('hidden');
+  document.getElementById(irrigationType.value)?.classList.remove('hidden');
+}
+
+function hav(lat1,lon1,lat2,lon2){
+  const R=6371000;
+  let dLat=(lat2-lat1)*Math.PI/180;
+  let dLon=(lon2-lon1)*Math.PI/180;
+  let a=Math.sin(dLat/2)**2+
+  Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return 2*R*Math.asin(Math.sqrt(a));
+}
+
+function calcArea(){
+  let pts=[...document.querySelectorAll('.lng')].map((e,i)=>({
+    lng:+e.value,lat:+document.querySelectorAll('.lat')[i].value
+  }));
+  if(pts.length<3)return;
+  let sum=0;
+  for(let i=0;i<pts.length;i++){
+    let j=(i+1)%pts.length;
+    sum+=pts[i].lng*pts[j].lat-pts[j].lng*pts[i].lat;
+  }
+  let area=Math.abs(sum/2)*111139*111139;
+  areaResult.innerHTML=
+  `المساحة: ${area.toFixed(2)} م² | ${(area/10000).toFixed(2)} هكتار | ${(area/1000).toFixed(2)} دونم`;
+}
+
+addPoint();addPoint();addPoint();addPoint();
 </script>
+
 </body>
 </html>
