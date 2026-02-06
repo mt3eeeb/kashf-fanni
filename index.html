@@ -181,115 +181,144 @@ function openGateMap(){
     "_blank"
   );
 }
-</script><!-- ===== بند 4 ===== -->
-<div class="section">
+</script><!-- ================== بند 4 : حدود الأرض وحساب المساحة ================== -->
+<section class="card">
   <h3>4️⃣ حدود الأرض وحساب المساحة</h3>
 
-  <div id="pointsContainer">
-    <div class="point">
-      <input type="number" step="any" placeholder="خط العرض (1)" class="lat">
-      <input type="number" step="any" placeholder="خط الطول (1)" class="lon">
-      <button type="button" onclick="removePoint(this)">➖</button>
-    </div>
+  <div id="points"></div>
+
+  <div class="actions">
+    <button onclick="addPoint()">➕ إضافة زاوية</button>
+    <button onclick="calculate()">📐 حساب</button>
   </div>
 
-  <br>
-  <button onclick="addPoint()">➕ إضافة زاوية</button>
-  <button onclick="calculate()">📐 حساب</button>
+  <div id="result"></div>
+</section>
 
-  <div id="result" style="margin-top:10px;color:#2e7d32"></div>
-</div>
+<style>
+  .card{
+    border:1px solid #ddd;
+    padding:15px;
+    margin:15px 0;
+    border-radius:8px;
+    background:#fff;
+  }
+  .point{
+    display:flex;
+    gap:10px;
+    margin-bottom:8px;
+    align-items:center;
+  }
+  .point input{
+    width:140px;
+    padding:5px;
+  }
+  .point button{
+    background:#eee;
+    border:none;
+    padding:5px 10px;
+    cursor:pointer;
+  }
+  .actions button{
+    margin:5px;
+    padding:6px 12px;
+    cursor:pointer;
+  }
+  #result{
+    margin-top:15px;
+    color:#1b5e20;
+    font-weight:bold;
+    line-height:1.8;
+  }
+</style>
 
 <script>
-const R = 6371000; // نصف قطر الأرض بالمتر
+let pointsDiv = document.getElementById("points");
 
-function toRad(d){ return d * Math.PI / 180; }
+// إنشاء 4 زوايا افتراضيًا
+for(let i=0;i<4;i++) addPoint();
 
-/* مسافة هافرسين */
-function haversine(p1, p2){
-  const dLat = toRad(p2.lat - p1.lat);
-  const dLon = toRad(p2.lon - p1.lon);
+function addPoint(){
+  let idx = pointsDiv.children.length + 1;
+  let div = document.createElement("div");
+  div.className = "point";
+  div.innerHTML = `
+    <button onclick="this.parentElement.remove()">−</button>
+    <input type="number" step="any" placeholder="خط الطول (${idx})" class="lon">
+    <input type="number" step="any" placeholder="خط العرض (${idx})" class="lat">
+  `;
+  pointsDiv.appendChild(div);
+}
 
+// ترتيب الزوايا (حل اختلاف الجوال / اللابتوب)
+function sortPoints(pts){
+  const cx = pts.reduce((s,p)=>s+p.lon,0)/pts.length;
+  const cy = pts.reduce((s,p)=>s+p.lat,0)/pts.length;
+  return pts.sort((a,b)=>
+    Math.atan2(a.lat-cy,a.lon-cx) -
+    Math.atan2(b.lat-cy,b.lon-cx)
+  );
+}
+
+// حساب المسافة بين نقطتين (Haversine)
+function distance(p1,p2){
+  const R = 6371000;
+  const dLat = (p2.lat-p1.lat)*Math.PI/180;
+  const dLon = (p2.lon-p1.lon)*Math.PI/180;
   const a =
     Math.sin(dLat/2)**2 +
-    Math.cos(toRad(p1.lat)) *
-    Math.cos(toRad(p2.lat)) *
+    Math.cos(p1.lat*Math.PI/180) *
+    Math.cos(p2.lat*Math.PI/180) *
     Math.sin(dLon/2)**2;
-
   return 2 * R * Math.asin(Math.sqrt(a));
 }
 
-/* تحويل تقريبي لمتر */
-function project(points){
-  const lat0 = toRad(points[0].lat);
-  return points.map(p=>{
-    return {
-      x: toRad(p.lon) * R * Math.cos(lat0),
-      y: toRad(p.lat) * R
-    };
-  });
-}
-
-/* مساحة المضلع */
-function area(points){
-  let s = 0;
-  for(let i=0;i<points.length;i++){
-    let j = (i+1)%points.length;
-    s += points[i].x * points[j].y - points[j].x * points[i].y;
-  }
-  return Math.abs(s/2);
-}
-
 function calculate(){
-  const lats = document.querySelectorAll('.lat');
-  const lons = document.querySelectorAll('.lon');
+  let pts = [];
+  document.querySelectorAll(".point").forEach(p=>{
+    let lon = parseFloat(p.querySelector(".lon").value);
+    let lat = parseFloat(p.querySelector(".lat").value);
+    if(!isNaN(lon) && !isNaN(lat)){
+      pts.push({lon,lat});
+    }
+  });
 
-  if(lats.length < 3){
-    alert('أدخل 3 زوايا على الأقل');
+  if(pts.length < 3){
+    alert("أدخل 3 زوايا على الأقل");
     return;
   }
 
-  let pts = [];
-  for(let i=0;i<lats.length;i++){
-    pts.push({
-      lat: parseFloat(lats[i].value),
-      lon: parseFloat(lons[i].value)
-    });
+  // ترتيب الزوايا
+  pts = sortPoints(pts);
+
+  // حساب الأطوال
+  let lengths = [];
+  let perimeter = 0;
+  for(let i=0;i<pts.length;i++){
+    let d = distance(pts[i], pts[(i+1)%pts.length]);
+    lengths.push(d);
+    perimeter += d;
   }
 
-  let html = '<b>أطوال الأضلاع:</b><br>';
-  let perimeter = 0;
-
+  // حساب المساحة (Shoelace)
+  let area = 0;
   for(let i=0;i<pts.length;i++){
     let j = (i+1)%pts.length;
-    let d = haversine(pts[i], pts[j]);
-    perimeter += d;
-    html += `ضلع ${i+1} → ${j+1}: ${d.toFixed(2)} م<br>`;
+    area += pts[i].lon*pts[j].lat - pts[j].lon*pts[i].lat;
   }
+  area = Math.abs(area)/2 * 111139 * 111139;
 
-  const projected = project(pts);
-  const a = area(projected);
+  let html = "📏 أطوال الأضلاع:<br>";
+  lengths.forEach((l,i)=>{
+    html += `ضلع ${i+1} → ${i+2>pts.length?1:i+2} : ${l.toFixed(2)} م<br>`;
+  });
 
-  html += `<br><b>المحيط:</b> ${perimeter.toFixed(2)} م<br>`;
-  html += `<b>المساحة:</b><br>`;
-  html += `${a.toFixed(2)} م²<br>`;
-  html += `${(a/1000).toFixed(2)} دونم<br>`;
-  html += `${(a/10000).toFixed(2)} هكتار`;
+  html += `<br>🔁 المحيط: ${perimeter.toFixed(2)} م<br><br>`;
+  html += `📐 المساحة:<br>`;
+  html += `${area.toFixed(2)} م²<br>`;
+  html += `${(area/1000).toFixed(2)} دونم<br>`;
+  html += `${(area/10000).toFixed(2)} هكتار`;
 
-  document.getElementById('result').innerHTML = html;
-}
-
-function addPoint(){
-  document.getElementById('pointsContainer').insertAdjacentHTML('beforeend',`
-    <div class="point">
-      <input type="number" step="any" placeholder="خط العرض" class="lat">
-      <input type="number" step="any" placeholder="خط الطول" class="lon">
-      <button onclick="removePoint(this)">➖</button>
-    </div>
-  `);
-}
-
-function removePoint(b){
-  b.parentElement.remove();
+  document.getElementById("result").innerHTML = html;
 }
 </script>
