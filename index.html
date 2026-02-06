@@ -2,15 +2,19 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>نموذج كشف زراعي</title>
+<title>كشف فني</title>
 
 <style>
 body{
   font-family:Tahoma;
-  background:#f2f2f2;
-  padding:20px;
+  background:#f4f6f5;
   margin:0;
+  padding:20px;
 }
+h1,h2{text-align:center;margin:0}
+h1{font-size:20px}
+h2{font-size:16px;color:#555;margin-bottom:20px}
+
 .section{
   background:#fff;
   border-radius:6px;
@@ -18,271 +22,265 @@ body{
   margin-bottom:15px;
 }
 .section h3{
-  background:#27ae60;
+  background:#2e7d32;
   color:#fff;
   padding:8px;
   margin:-15px -15px 15px -15px;
 }
-.row{display:flex;gap:10px}
-.field{flex:1}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.field{flex:1;min-width:180px}
+label{font-size:13px}
 input,select,textarea,button{
   width:100%;
   padding:6px;
   margin-top:4px;
   box-sizing:border-box;
 }
-button{cursor:pointer}
 .item{
   border:1px solid #ccc;
   padding:10px;
   margin-bottom:8px;
 }
-@media print{
-  .no-print{display:none}
-}
+button{cursor:pointer}
+.no-print{margin-top:15px}
+@media print{.no-print{display:none}}
 </style>
 </head>
 
 <body>
 
-<!-- بند 1 -->
+<h1>صندوق التنمية الزراعية</h1>
+<h2>مكتب محافظة قرية العليا – كشف فني</h2>
+
+<!-- 1 -->
 <div class="section">
-<h3>البيانات العامة</h3>
+<h3>1️⃣ البيانات العامة</h3>
 <div class="row">
-  <div class="field"><label>اسم العميل</label><input id="clientName"></div>
-  <div class="field"><label>رقم الطلب</label><input id="orderNumber"></div>
-  <div class="field"><label>تاريخ الزيارة</label><input type="date" id="visitDate"></div>
+  <div class="field"><label>اسم العميل</label><input id="client"></div>
+  <div class="field"><label>رقم الطلب</label><input id="order"></div>
+  <div class="field"><label>تاريخ الزيارة</label><input type="date" id="date"></div>
 </div>
 </div>
 
-<!-- بند 2 -->
+<!-- 2 -->
 <div class="section">
-<h3>إحداثيات السجل</h3>
+<h3>2️⃣ إحداثيات السجل</h3>
 <div class="row">
-  <div class="field"><label>Latitude</label><input id="recordLat"></div>
-  <div class="field"><label>Longitude</label><input id="recordLng"></div>
+  <div class="field"><label>Latitude</label><input id="recLat"></div>
+  <div class="field"><label>Longitude</label><input id="recLng"></div>
 </div>
-<button onclick="openMap(recordLat,recordLng)">📍 خرائط</button>
+<button onclick="openMap(recLat,recLng)">📍 الوصول</button>
 </div>
 
-<!-- بند 3 -->
+<!-- 3 -->
 <div class="section">
-<h3>إحداثيات البوابة</h3>
+<h3>3️⃣ إحداثية البوابة</h3>
 <div class="row">
   <div class="field"><label>Latitude</label><input id="gateLat"></div>
   <div class="field"><label>Longitude</label><input id="gateLng"></div>
 </div>
-<button onclick="getLocation(gateLat,gateLng)">🧭 تحديد</button>
-<button onclick="openMap(gateLat,gateLng)">📍 خرائط</button>
+<div class="row">
+  <button onclick="openMap(gateLat,gateLng)">📍 الوصول</button>
+  <button onclick="getLocation(gateLat,gateLng)">🧭 تحديد الموقع</button>
+</div>
 </div>
 
-<!-- بند 4 -->
+<!-- 4 -->
 <div class="section">
-<h3>زوايا المزرعة</h3>
+<h3>4️⃣ زوايا المزرعة</h3>
 <div id="corners"></div>
 <button onclick="addCorner()">+ إضافة زاوية</button>
+<div id="cornerResult"></div>
 </div>
 
-<!-- بند 5 -->
+<!-- 5 -->
 <div class="section">
-<h3>الآبار</h3>
+<h3>5️⃣ إحداثيات الآبار</h3>
 <div id="wells"></div>
 <button onclick="addWell()">+ إضافة بئر</button>
 </div>
 
-<!-- بند 6 -->
+<!-- 6 -->
 <div class="section">
-<h3>نظام الري</h3>
+<h3>6️⃣ نظام الري</h3>
 <div id="irrigation"></div>
-<button onclick="addIrrigation()">+ إضافة نظام ري</button>
+<button onclick="addIrr()">+ إضافة نظام</button>
 </div>
 
-<!-- بند 7 -->
+<!-- 7 -->
 <div class="section">
-<h3>المزروعات</h3>
+<h3>7️⃣ المزروعات</h3>
 <div id="crops"></div>
 <button onclick="addCrop()">+ إضافة مزروع</button>
 </div>
 
-<!-- بند 8 -->
+<!-- 8 -->
 <div class="section">
-<h3>الموجودات</h3>
+<h3>8️⃣ الموجودات</h3>
 <div id="assets"></div>
 <button onclick="addAsset()">+ إضافة موجود</button>
 </div>
 
-<!-- بند 9 -->
+<!-- 9 -->
 <div class="section">
-<h3>بيانات الباحث</h3>
-<input id="researcher" placeholder="اسم الباحث" oninput="saveAll()">
+<h3>9️⃣ اسم الباحث</h3>
+<input id="researcher">
 </div>
 
 <div class="no-print">
-<button onclick="saveAll()">💾 حفظ</button>
-<button onclick="clearAll()">🗑️ مسح</button>
-<button onclick="window.print()">🖨️ طباعة</button>
+<button onclick="saveAll()">💾 حفظ البيانات</button>
+<button onclick="clearAll()">🗑️ كشف جديد</button>
+<button onclick="window.print()">🖨️ طباعة PDF</button>
 </div>
 
 <script>
 /* أدوات عامة */
 function openMap(lat,lng){
-  if(!lat.value||!lng.value){alert("أدخل الإحداثيات");return;}
-  window.open(`https://maps.google.com?q=${lat.value},${lng.value}`);
+ if(!lat.value||!lng.value){alert("أدخل الإحداثيات");return;}
+ window.open(`https://maps.google.com?q=${lat.value},${lng.value}`);
 }
 function getLocation(lat,lng){
-  navigator.geolocation.getCurrentPosition(p=>{
-    lat.value=p.coords.latitude.toFixed(6);
-    lng.value=p.coords.longitude.toFixed(6);
-    saveAll();
-  });
+ navigator.geolocation.getCurrentPosition(p=>{
+  lat.value=p.coords.latitude.toFixed(6);
+  lng.value=p.coords.longitude.toFixed(6);
+  saveAll();
+ });
 }
 
-/* زوايا */
+/* بند 4 زوايا */
 let corners=[];
 function addCorner(){
-  corners.push({lat:"",lng:""});
-  renderCorners();
+ corners.push({lat:"",lng:""});
+ renderCorners();
 }
 function renderCorners(){
-  cornersDiv.innerHTML="";
-  corners.forEach((c,i)=>{
-    cornersDiv.innerHTML+=`
-    <div class="item">
-      <input placeholder="Lat" value="${c.lat}"
-        oninput="corners[${i}].lat=this.value;saveAll()">
-      <input placeholder="Lng" value="${c.lng}"
-        oninput="corners[${i}].lng=this.value;saveAll()">
-      <button onclick="corners.splice(${i},1);renderCorners()">−</button>
-    </div>`;
-  });
+ cornersDiv.innerHTML="";
+ corners.forEach((c,i)=>{
+  cornersDiv.innerHTML+=`
+  <div class="item">
+   <input placeholder="Lat" value="${c.lat}" oninput="corners[${i}].lat=this.value;calcCorners()">
+   <input placeholder="Lng" value="${c.lng}" oninput="corners[${i}].lng=this.value;calcCorners()">
+   <button onclick="corners.splice(${i},1);renderCorners()">−</button>
+  </div>`;
+ });
+ calcCorners();
+}
+function calcCorners(){
+ if(corners.length<3){cornerResult.innerHTML="";return;}
+ let area=0;
+ for(let i=0;i<corners.length;i++){
+  let j=(i+1)%corners.length;
+  area+=corners[i].lat*corners[j].lng-corners[j].lat*corners[i].lng;
+ }
+ area=Math.abs(area/2)*10000;
+ cornerResult.innerHTML=
+  `المساحة: ${area.toFixed(2)} م² | ${(area/10000).toFixed(2)} هكتار | ${(area/1000).toFixed(2)} دونم`;
+ saveAll();
 }
 const cornersDiv=document.getElementById("corners");
+const cornerResult=document.getElementById("cornerResult");
 
-/* الآبار */
+/* بند 5 الآبار */
 let wells=[];
-function addWell(){
-  wells.push({lat:"",lng:""});
-  renderWells();
-}
+function addWell(){wells.push({lat:"",lng:""});renderWells();}
 function renderWells(){
-  wellsDiv.innerHTML="";
-  wells.forEach((w,i)=>{
-    wellsDiv.innerHTML+=`
-    <div class="item">
-      <input placeholder="Lat" value="${w.lat}"
-        oninput="wells[${i}].lat=this.value;saveAll()">
-      <input placeholder="Lng" value="${w.lng}"
-        oninput="wells[${i}].lng=this.value;saveAll()">
-      <button onclick="wells.splice(${i},1);renderWells()">−</button>
-    </div>`;
-  });
+ wellsDiv.innerHTML="";
+ wells.forEach((w,i)=>{
+  wellsDiv.innerHTML+=`
+  <div class="item">
+   <input placeholder="Lat" value="${w.lat}" oninput="wells[${i}].lat=this.value;saveAll()">
+   <input placeholder="Lng" value="${w.lng}" oninput="wells[${i}].lng=this.value;saveAll()">
+   <button onclick="getLocation({value:''},{value:''})">📍</button>
+   <button onclick="openMap({value:'${w.lat}'},{value:'${w.lng}'})">🗺️</button>
+   <button onclick="wells.splice(${i},1);renderWells()">−</button>
+  </div>`;
+ });
 }
 const wellsDiv=document.getElementById("wells");
 
-/* الري */
+/* بند 6 الري */
 let irrigation=[];
-function addIrrigation(){
-  irrigation.push({type:"",count:0});
-  renderIrr();
+function addIrr(){
+ irrigation.push({type:"",towers:0,len:0,crop:""});
+ renderIrr();
 }
 function renderIrr(){
-  irrigationDiv.innerHTML="";
-  irrigation.forEach((r,i)=>{
-    irrigationDiv.innerHTML+=`
-    <div class="item">
-      <input placeholder="نوع الري" value="${r.type}"
-        oninput="irrigation[${i}].type=this.value;saveAll()">
-      <input type="number" placeholder="العدد" value="${r.count}"
-        oninput="irrigation[${i}].count=this.value;saveAll()">
-      <button onclick="irrigation.splice(${i},1);renderIrr()">−</button>
-    </div>`;
-  });
+ irrigationDiv.innerHTML="";
+ irrigation.forEach((r,i)=>{
+  let total=r.towers*r.len;
+  let area=total*50;
+  irrigationDiv.innerHTML+=`
+  <div class="item">
+   نوع الري <input value="${r.type}" oninput="irrigation[${i}].type=this.value;saveAll()">
+   طول البرج <input type="number" value="${r.len}" oninput="irrigation[${i}].len=this.value;renderIrr()">
+   عدد الأبراج <input type="number" value="${r.towers}" oninput="irrigation[${i}].towers=this.value;renderIrr()">
+   نوع المزروع <input value="${r.crop}" oninput="irrigation[${i}].crop=this.value;saveAll()">
+   الطول ${total} م | المساحة ${area} م² | ${(area/10000).toFixed(2)} هكتار | ${(area/1000).toFixed(2)} دونم
+   <button onclick="irrigation.splice(${i},1);renderIrr()">−</button>
+  </div>`;
+ });
+ saveAll();
 }
 const irrigationDiv=document.getElementById("irrigation");
 
-/* المزروعات */
+/* بند 7 المزروعات */
 let crops=[];
-function addCrop(){
-  crops.push({type:"",count:0});
-  renderCrops();
-}
+function addCrop(){crops.push({type:"",count:0});renderCrops();}
 function renderCrops(){
-  cropsDiv.innerHTML="";
-  crops.forEach((c,i)=>{
-    cropsDiv.innerHTML+=`
-    <div class="item">
-      <input placeholder="النوع" value="${c.type}"
-        oninput="crops[${i}].type=this.value;saveAll()">
-      <input type="number" placeholder="العدد" value="${c.count}"
-        oninput="crops[${i}].count=this.value;saveAll()">
-      <button onclick="crops.splice(${i},1);renderCrops()">−</button>
-    </div>`;
-  });
+ cropsDiv.innerHTML="";
+ crops.forEach((c,i)=>{
+  let area=c.count*10;
+  cropsDiv.innerHTML+=`
+  <div class="item">
+   نوع المزروع <input value="${c.type}" oninput="crops[${i}].type=this.value;saveAll()">
+   عدد الشتلات <input type="number" value="${c.count}" oninput="crops[${i}].count=this.value;renderCrops()">
+   المساحة ${area} م² | ${(area/10000).toFixed(2)} هكتار | ${(area/1000).toFixed(2)} دونم
+   <button onclick="crops.splice(${i},1);renderCrops()">−</button>
+  </div>`;
+ });
+ saveAll();
 }
 const cropsDiv=document.getElementById("crops");
 
-/* الموجودات */
+/* بند 8 الموجودات */
 let assets=[];
-function addAsset(){
-  assets.push({name:"",count:0});
-  renderAssets();
-}
+function addAsset(){assets.push({name:"",count:0});renderAssets();}
 function renderAssets(){
-  assetsDiv.innerHTML="";
-  assets.forEach((a,i)=>{
-    assetsDiv.innerHTML+=`
-    <div class="item">
-      <input placeholder="الوصف" value="${a.name}"
-        oninput="assets[${i}].name=this.value;saveAll()">
-      <input type="number" placeholder="العدد" value="${a.count}"
-        oninput="assets[${i}].count=this.value;saveAll()">
-      <button onclick="assets.splice(${i},1);renderAssets()">−</button>
-    </div>`;
-  });
+ assetsDiv.innerHTML="";
+ assets.forEach((a,i)=>{
+  assetsDiv.innerHTML+=`
+  <div class="item">
+   الوصف <input value="${a.name}" oninput="assets[${i}].name=this.value;saveAll()">
+   العدد <input type="number" value="${a.count}" oninput="assets[${i}].count=this.value;saveAll()">
+   <button onclick="assets.splice(${i},1);renderAssets()">−</button>
+  </div>`;
+ });
 }
 const assetsDiv=document.getElementById("assets");
 
 /* حفظ */
 function saveAll(){
-  const data={
-    clientName:clientName.value,
-    orderNumber:orderNumber.value,
-    visitDate:visitDate.value,
-    recordLat:recordLat.value,
-    recordLng:recordLng.value,
-    gateLat:gateLat.value,
-    gateLng:gateLng.value,
-    researcher:researcher.value,
-    corners,wells,irrigation,crops,assets
-  };
-  localStorage.setItem("farmForm",JSON.stringify(data));
+ localStorage.setItem("form",JSON.stringify({
+  client:client.value,order:order.value,date:date.value,
+  recLat:recLat.value,recLng:recLng.value,
+  gateLat:gateLat.value,gateLng:gateLng.value,
+  researcher:researcher.value,
+  corners,wells,irrigation,crops,assets
+ }));
 }
-
-/* تحميل */
 (function(){
-  const d=JSON.parse(localStorage.getItem("farmForm")||"{}");
-  Object.assign(window,d);
-  clientName.value=d.clientName||"";
-  orderNumber.value=d.orderNumber||"";
-  visitDate.value=d.visitDate||"";
-  recordLat.value=d.recordLat||"";
-  recordLng.value=d.recordLng||"";
-  gateLat.value=d.gateLat||"";
-  gateLng.value=d.gateLng||"";
-  researcher.value=d.researcher||"";
-  corners=d.corners||[];
-  wells=d.wells||[];
-  irrigation=d.irrigation||[];
-  crops=d.crops||[];
-  assets=d.assets||[];
-  renderCorners();renderWells();renderIrr();renderCrops();renderAssets();
+ let d=JSON.parse(localStorage.getItem("form")||"{}");
+ Object.assign(window,d);
+ client.value=d.client||"";order.value=d.order||"";date.value=d.date||"";
+ recLat.value=d.recLat||"";recLng.value=d.recLng||"";
+ gateLat.value=d.gateLat||"";gateLng.value=d.gateLng||"";
+ researcher.value=d.researcher||"";
+ corners=d.corners||[];wells=d.wells||[];
+ irrigation=d.irrigation||[];crops=d.crops||[];assets=d.assets||[];
+ renderCorners();renderWells();renderIrr();renderCrops();renderAssets();
 })();
-
 function clearAll(){
-  if(confirm("مسح كل البيانات؟")){
-    localStorage.clear();
-    location.reload();
-  }
+ if(confirm("فتح كشف جديد؟")){localStorage.clear();location.reload();}
 }
 </script>
 
