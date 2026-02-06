@@ -190,11 +190,11 @@ function openGateMap(){
 
       <div class="row landRow">
         <div class="field">
-          <label>خط العرض</label>
+          <label>خط العرض (1)</label>
           <input type="number" step="any" class="landLat">
         </div>
         <div class="field">
-          <label>خط الطول</label>
+          <label>خط الطول (1)</label>
           <input type="number" step="any" class="landLon">
         </div>
         <div class="field" style="flex:0.3;">
@@ -207,10 +207,10 @@ function openGateMap(){
 
     <div style="margin-top:10px;">
       <button type="button" onclick="addLandPoint()">➕ إضافة زاوية</button>
-      <button type="button" onclick="calculateLandArea()">📐 حساب المساحة</button>
+      <button type="button" onclick="calculateLand()">📐 حساب المساحة والأطوال</button>
     </div>
 
-    <div id="landAreaResult"
+    <div id="landResult"
          style="margin-top:10px;font-size:13px;color:#2e7d32">
     </div>
 
@@ -218,23 +218,31 @@ function openGateMap(){
 </div>
 
 <script>
-const EARTH_R = 6378137;
+const R = 6378137;
 
-function toRad(v){
-  return v * Math.PI / 180;
+function toRad(v){ return v * Math.PI / 180; }
+
+function distance(lat1,lon1,lat2,lon2){
+  const dLat = toRad(lat2-lat1);
+  const dLon = toRad(lon2-lon1);
+  const a =
+    Math.sin(dLat/2)**2 +
+    Math.cos(toRad(lat1)) *
+    Math.cos(toRad(lat2)) *
+    Math.sin(dLon/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(a));
 }
 
 function addLandPoint(){
-  document.getElementById("landPoints").insertAdjacentHTML(
-    "beforeend",
-    `
+  const count = document.querySelectorAll(".landRow").length + 1;
+  document.getElementById("landPoints").insertAdjacentHTML("beforeend",`
     <div class="row landRow">
       <div class="field">
-        <label>خط العرض</label>
+        <label>خط العرض (${count})</label>
         <input type="number" step="any" class="landLat">
       </div>
       <div class="field">
-        <label>خط الطول</label>
+        <label>خط الطول (${count})</label>
         <input type="number" step="any" class="landLon">
       </div>
       <div class="field" style="flex:0.3;">
@@ -242,45 +250,63 @@ function addLandPoint(){
         <button type="button" onclick="removeLandPoint(this)">➖</button>
       </div>
     </div>
-    `
-  );
+  `);
 }
 
 function removeLandPoint(btn){
   btn.closest(".landRow").remove();
 }
 
-function calculateLandArea(){
-  const lats = document.querySelectorAll(".landLat");
-  const lons = document.querySelectorAll(".landLon");
+function calculateLand(){
+  const lats = [...document.querySelectorAll(".landLat")];
+  const lons = [...document.querySelectorAll(".landLon")];
 
   if(lats.length < 3){
     alert("أدخل 3 زوايا على الأقل");
     return;
   }
 
-  const lat0 = parseFloat(lats[0].value);
   let pts = [];
-
   for(let i=0;i<lats.length;i++){
-    let lat = parseFloat(lats[i].value);
-    let lon = parseFloat(lons[i].value);
-
-    let x = toRad(lon) * EARTH_R * Math.cos(toRad(lat0));
-    let y = toRad(lat) * EARTH_R;
-
-    pts.push({x,y});
+    pts.push({
+      lat: parseFloat(lats[i].value),
+      lon: parseFloat(lons[i].value)
+    });
   }
 
-  let area = 0;
+  // حساب الأطوال
+  let lengthsHTML = "<b>أطوال الأضلاع:</b><br>";
+  let perimeter = 0;
+
   for(let i=0;i<pts.length;i++){
     let j = (i+1) % pts.length;
-    area += pts[i].x * pts[j].y - pts[j].x * pts[i].y;
+    let d = distance(
+      pts[i].lat, pts[i].lon,
+      pts[j].lat, pts[j].lon
+    );
+    perimeter += d;
+    lengthsHTML += `ضلع ${i+1} → ${j+1}: ${d.toFixed(2)} م<br>`;
   }
 
-  area = Math.abs(area / 2);
+  // حساب المساحة
+  const lat0 = pts[0].lat;
+  let area = 0;
 
-  document.getElementById("landAreaResult").innerHTML = `
+  for(let i=0;i<pts.length;i++){
+    let j = (i+1) % pts.length;
+    let x1 = toRad(pts[i].lon) * R * Math.cos(toRad(lat0));
+    let y1 = toRad(pts[i].lat) * R;
+    let x2 = toRad(pts[j].lon) * R * Math.cos(toRad(lat0));
+    let y2 = toRad(pts[j].lat) * R;
+    area += x1*y2 - x2*y1;
+  }
+
+  area = Math.abs(area/2);
+
+  document.getElementById("landResult").innerHTML = `
+    ${lengthsHTML}
+    <br>
+    <b>المحيط:</b> ${perimeter.toFixed(2)} م<br><br>
     <b>المساحة:</b><br>
     ${area.toFixed(2)} م²<br>
     ${(area/1000).toFixed(2)} دونم<br>
