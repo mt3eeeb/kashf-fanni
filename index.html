@@ -1,262 +1,214 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>كشف فني</title>
-
+<title>نظام حساب المزرعة</title>
 <style>
 body{
-  font-family: Tahoma;
-  background:#f2f2f2;
-  margin:0;
+  font-family: Arial;
+  direction: rtl;
+  background:#f5f5f5;
   padding:20px;
 }
-h1,h2{
-  text-align:center;
-  margin:5px 0;
-}
-.section{
-  background:#fff;
-  padding:15px;
-  margin-bottom:15px;
-  border-radius:6px;
-  page-break-inside: avoid;
-}
-.section h3{
+h2{
   background:#2ecc71;
   color:#fff;
-  padding:8px;
-  margin:-15px -15px 15px -15px;
+  padding:10px;
 }
-.row{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
+.box{
+  background:#fff;
+  padding:10px;
+  margin-bottom:10px;
+  border-radius:6px;
 }
-.field{
-  flex:1;
-  min-width:180px;
-}
-label{
-  font-size:13px;
-  display:block;
-  margin-bottom:4px;
-}
-input, select, textarea{
+input{
   width:100%;
   padding:6px;
-  box-sizing:border-box;
+  margin-bottom:6px;
 }
 button{
   padding:6px 10px;
   margin:3px;
-  cursor:pointer;
 }
-.box{
-  border:1px solid #ccc;
+.result{
+  background:#fff;
   padding:10px;
-  margin-bottom:10px;
-}
-@media print{
-  .page-break{ page-break-before:always; }
-  button{ display:none; }
+  border-radius:6px;
+  font-size:16px;
 }
 </style>
 </head>
 
 <body>
 
-<h1>صندوق التنمية الزراعية</h1>
-<h2>مكتب محافظة قرية العليا</h2>
-<h2>كشف فني</h2>
-
-<!-- 1 -->
-<div class="section">
-<h3>1️⃣ البيانات العامة</h3>
-<div class="row">
-  <div class="field">
-    <label>اسم العميل</label>
-    <input id="clientName">
-  </div>
-  <div class="field">
-    <label>رقم الطلب</label>
-    <input id="orderNumber">
-  </div>
-  <div class="field">
-    <label>تاريخ الزيارة</label>
-    <input type="date" id="visitDate">
-  </div>
-</div>
-</div>
-
-<!-- 2 -->
-<div class="section">
-<h3>2️⃣ إحداثيات السجل</h3>
-<div class="row">
-  <div class="field">
-    <label>Latitude</label>
-    <input id="recordLat">
-  </div>
-  <div class="field">
-    <label>Longitude</label>
-    <input id="recordLng">
-  </div>
-</div>
-<button onclick="openMap('recordLat','recordLng')">📍 الوصول</button>
-</div>
-
-<!-- 3 -->
-<div class="section">
-<h3>3️⃣ إحداثية البوابة</h3>
-<div class="row">
-  <div class="field">
-    <label>Latitude</label>
-    <input id="gateLat">
-  </div>
-  <div class="field">
-    <label>Longitude</label>
-    <input id="gateLng">
-  </div>
-</div>
-<button onclick="getLocation('gateLat','gateLng')">📍 تحديد الموقع</button>
-<button onclick="openMap('gateLat','gateLng')">🗺️ الوصول</button>
-</div>
-
-<!-- 4 -->
-<div class="section">
-<h3>4️⃣ زوايا المزرعة</h3>
+<h2>زوايا المزرعة</h2>
 <div id="corners"></div>
 <button onclick="addCorner()">+ إضافة زاوية</button>
 <button onclick="calcCorners()">حساب</button>
-<div id="cornerResult"></div>
-</div>
 
-<div class="page-break"></div>
+<div id="cornerResult" class="result"></div>
 
-<!-- 5 -->
-<div class="section">
-<h3>5️⃣ الآبار</h3>
+<hr>
+
+<h2>الآبار</h2>
 <div id="wells"></div>
 <button onclick="addWell()">+ إضافة بئر</button>
-</div>
-
-<!-- 6 -->
-<div class="section">
-<h3>6️⃣ نظام الري</h3>
-<div id="irrigations"></div>
-<button onclick="addIrr()">+ إضافة</button>
-</div>
-
-<!-- 7 -->
-<div class="section">
-<h3>7️⃣ المزروعات</h3>
-<div id="crops"></div>
-<button onclick="addCrop()">+ إضافة</button>
-</div>
-
-<!-- 8 -->
-<div class="section">
-<h3>8️⃣ الموجودات</h3>
-<div id="assets"></div>
-<button onclick="addAsset()">+ إضافة</button>
-</div>
-
-<!-- 9 -->
-<div class="section">
-<h3>9️⃣ اسم الباحث</h3>
-<input id="researcher">
-</div>
-
-<div class="section">
-<button onclick="saveAll()">💾 حفظ</button>
-<button onclick="clearAll()">🗑️ حذف</button>
-<button onclick="window.print()">🖨️ طباعة</button>
-</div>
 
 <script>
-/* ===== حفظ عام ===== */
-const ids=[
-'clientName','orderNumber','visitDate',
-'recordLat','recordLng','gateLat','gateLng','researcher'
-];
-ids.forEach(id=>{
-  const el=document.getElementById(id);
-  el.value=localStorage.getItem(id)||'';
-  el.oninput=()=>localStorage.setItem(id,el.value);
-});
+/* =====================
+   الزوايا
+===================== */
+let corners = JSON.parse(localStorage.getItem("corners") || "[]");
 
-/* خرائط */
-function openMap(a,b){
-  const lat=document.getElementById(a).value;
-  const lng=document.getElementById(b).value;
-  if(!lat||!lng){alert('أدخل الإحداثيات');return;}
-  window.open(`https://www.google.com/maps?q=${lat},${lng}`);
-}
-function getLocation(a,b){
-  navigator.geolocation.getCurrentPosition(p=>{
-    document.getElementById(a).value=p.coords.latitude.toFixed(6);
-    document.getElementById(b).value=p.coords.longitude.toFixed(6);
-    localStorage.setItem(a,document.getElementById(a).value);
-    localStorage.setItem(b,document.getElementById(b).value);
-  });
-}
-
-/* ===== زوايا ===== */
-let corners=JSON.parse(localStorage.getItem('corners')||'[]');
 function addCorner(){
-  corners.push({lat:'',lng:''});
-  saveCorners(); renderCorners();
+  corners.push({lat:"",lng:""});
+  saveCorners();
+  renderCorners();
 }
+
 function saveCorners(){
-  localStorage.setItem('corners',JSON.stringify(corners));
+  localStorage.setItem("corners",JSON.stringify(corners));
 }
+
 function renderCorners(){
-  const c=document.getElementById('corners'); c.innerHTML='';
+  const c = document.getElementById("corners");
+  c.innerHTML = "";
   corners.forEach((p,i)=>{
-    c.innerHTML+=`
-    <div class="row">
-      <input placeholder="Lat" value="${p.lat}"
+    c.innerHTML += `
+    <div class="box">
+      <label>Latitude</label>
+      <input value="${p.lat}"
         oninput="corners[${i}].lat=this.value;saveCorners()">
-      <input placeholder="Lng" value="${p.lng}"
+      <label>Longitude</label>
+      <input value="${p.lng}"
         oninput="corners[${i}].lng=this.value;saveCorners()">
+      <button onclick="getCornerLocation(${i})">📍 تحديد</button>
     </div>`;
   });
 }
+
+function getCornerLocation(i){
+  navigator.geolocation.getCurrentPosition(p=>{
+    corners[i].lat = p.coords.latitude.toFixed(6);
+    corners[i].lng = p.coords.longitude.toFixed(6);
+    saveCorners();
+    renderCorners();
+  });
+}
+
+/* =====================
+   حساب المساحة (UTM)
+===================== */
+function deg2rad(d){ return d*Math.PI/180; }
+
+function toUTM(lat,lng){
+  const a=6378137;
+  const f=1/298.257223563;
+  const k0=0.9996;
+  const e=Math.sqrt(f*(2-f));
+
+  const zone=Math.floor((lng+180)/6)+1;
+  const λ0=deg2rad((zone-1)*6-180+3);
+
+  const φ=deg2rad(lat);
+  const λ=deg2rad(lng);
+
+  const N=a/Math.sqrt(1-e*e*Math.sin(φ)**2);
+  const T=Math.tan(φ)**2;
+  const C=(e*e/(1-e*e))*Math.cos(φ)**2;
+  const A=Math.cos(φ)*(λ-λ0);
+
+  const M=a*((1-e*e/4-3*e**4/64)*φ
+    -(3*e*e/8+3*e**4/32)*Math.sin(2*φ));
+
+  const x=k0*N*(A+(1-T+C)*A**3/6)+500000;
+  const y=k0*(M+N*Math.tan(φ)*A*A/2);
+
+  return {x,y};
+}
+
 function calcCorners(){
-  if(corners.length<3){alert('أدخل 3 زوايا');return;}
-  let pts=corners.map(p=>({
-    x:parseFloat(p.lng), y:parseFloat(p.lat)
-  }));
-  let area=0,dist='';
+  if(corners.length<3){
+    alert("أدخل 3 زوايا على الأقل");
+    return;
+  }
+
+  let pts=corners.map(p=>toUTM(+p.lat,+p.lng));
+  let area=0;
+  let txt="";
+
   for(let i=0;i<pts.length;i++){
     let j=(i+1)%pts.length;
-    let d=Math.hypot(pts[j].x-pts[i].x,pts[j].y-pts[i].y)*111000;
-    dist+=`ضلع ${i+1}-${j+1}: ${d.toFixed(1)} م<br>`;
+    let dx=pts[j].x-pts[i].x;
+    let dy=pts[j].y-pts[i].y;
+    let d=Math.sqrt(dx*dx+dy*dy);
+    txt+=`ضلع ${i+1}-${j+1}: ${d.toFixed(1)} م<br>`;
     area+=pts[i].x*pts[j].y-pts[j].x*pts[i].y;
   }
-  area=Math.abs(area/2)*(111000**2);
-  document.getElementById('cornerResult').innerHTML=
-    dist+`<b>المساحة:</b><br>
+
+  area=Math.abs(area/2);
+
+  document.getElementById("cornerResult").innerHTML=
+    txt+
+    `<br><b>المساحة:</b><br>
     ${area.toFixed(0)} م² |
     ${(area/10000).toFixed(2)} هكتار |
     ${(area/1000).toFixed(2)} دونم`;
 }
-renderCorners();
 
-/* ===== البقية مختصرة لكن شغالة ===== */
-let wells=[], irrigations=[], crops=[], assets=[];
-function addWell(){ wells.push({lat:'',lng:''}); save('wells',wells); render(); }
-function addIrr(){ irrigations.push({}); save('irrigations',irrigations); render(); }
-function addCrop(){ crops.push({}); save('crops',crops); render(); }
-function addAsset(){ assets.push({}); save('assets',assets); render(); }
-function save(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
-function saveAll(){ alert('تم الحفظ'); }
-function clearAll(){
-  if(confirm('متأكد؟')){
-    localStorage.clear(); location.reload();
-  }
+/* =====================
+   الآبار
+===================== */
+let wells = JSON.parse(localStorage.getItem("wells") || "[]");
+
+function addWell(){
+  wells.push({lat:"",lng:""});
+  saveWells();
+  renderWells();
 }
-function render(){}
+
+function saveWells(){
+  localStorage.setItem("wells",JSON.stringify(wells));
+}
+
+function renderWells(){
+  const c=document.getElementById("wells");
+  c.innerHTML="";
+  wells.forEach((w,i)=>{
+    c.innerHTML+=`
+    <div class="box">
+      <label>Latitude</label>
+      <input value="${w.lat}"
+        oninput="wells[${i}].lat=this.value;saveWells()">
+      <label>Longitude</label>
+      <input value="${w.lng}"
+        oninput="wells[${i}].lng=this.value;saveWells()">
+      <button onclick="getWellLocation(${i})">📍 تحديد</button>
+      <button onclick="openMap(${i})">🗺️ خريطة</button>
+    </div>`;
+  });
+}
+
+function getWellLocation(i){
+  navigator.geolocation.getCurrentPosition(p=>{
+    wells[i].lat=p.coords.latitude.toFixed(6);
+    wells[i].lng=p.coords.longitude.toFixed(6);
+    saveWells();
+    renderWells();
+  });
+}
+
+function openMap(i){
+  if(!wells[i].lat||!wells[i].lng){
+    alert("أدخل الإحداثيات");
+    return;
+  }
+  window.open(`https://www.google.com/maps?q=${wells[i].lat},${wells[i].lng}`);
+}
+
+/* تشغيل */
+renderCorners();
+renderWells();
 </script>
 
 </body>
