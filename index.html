@@ -181,4 +181,110 @@ function openGateMap(){
     "_blank"
   );
 }
+</script><!-- ===== بند 4 ===== -->
+<div class="section">
+  <div class="section-title">4️⃣ حدود الأرض وحساب المساحة</div>
+  <div class="section-body">
+
+    <div id="landPoints">
+
+      <div class="row landRow">
+        <div class="field">
+          <label>خط العرض</label>
+          <input type="number" step="any" class="landLat">
+        </div>
+        <div class="field">
+          <label>خط الطول</label>
+          <input type="number" step="any" class="landLon">
+        </div>
+        <div class="field" style="flex:0.3;">
+          <label>&nbsp;</label>
+          <button type="button" onclick="removeLandPoint(this)">➖</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="margin-top:10px;">
+      <button type="button" onclick="addLandPoint()">➕ إضافة زاوية</button>
+      <button type="button" onclick="calculateLandArea()">📐 حساب المساحة</button>
+    </div>
+
+    <div id="landAreaResult"
+         style="margin-top:10px;font-size:13px;color:#2e7d32">
+    </div>
+
+  </div>
+</div>
+
+<script>
+const EARTH_R = 6378137;
+
+function toRad(v){
+  return v * Math.PI / 180;
+}
+
+function addLandPoint(){
+  document.getElementById("landPoints").insertAdjacentHTML(
+    "beforeend",
+    `
+    <div class="row landRow">
+      <div class="field">
+        <label>خط العرض</label>
+        <input type="number" step="any" class="landLat">
+      </div>
+      <div class="field">
+        <label>خط الطول</label>
+        <input type="number" step="any" class="landLon">
+      </div>
+      <div class="field" style="flex:0.3;">
+        <label>&nbsp;</label>
+        <button type="button" onclick="removeLandPoint(this)">➖</button>
+      </div>
+    </div>
+    `
+  );
+}
+
+function removeLandPoint(btn){
+  btn.closest(".landRow").remove();
+}
+
+function calculateLandArea(){
+  const lats = document.querySelectorAll(".landLat");
+  const lons = document.querySelectorAll(".landLon");
+
+  if(lats.length < 3){
+    alert("أدخل 3 زوايا على الأقل");
+    return;
+  }
+
+  const lat0 = parseFloat(lats[0].value);
+  let pts = [];
+
+  for(let i=0;i<lats.length;i++){
+    let lat = parseFloat(lats[i].value);
+    let lon = parseFloat(lons[i].value);
+
+    let x = toRad(lon) * EARTH_R * Math.cos(toRad(lat0));
+    let y = toRad(lat) * EARTH_R;
+
+    pts.push({x,y});
+  }
+
+  let area = 0;
+  for(let i=0;i<pts.length;i++){
+    let j = (i+1) % pts.length;
+    area += pts[i].x * pts[j].y - pts[j].x * pts[i].y;
+  }
+
+  area = Math.abs(area / 2);
+
+  document.getElementById("landAreaResult").innerHTML = `
+    <b>المساحة:</b><br>
+    ${area.toFixed(2)} م²<br>
+    ${(area/1000).toFixed(2)} دونم<br>
+    ${(area/10000).toFixed(2)} هكتار
+  `;
+}
 </script>
