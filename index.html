@@ -1,262 +1,244 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>كشف فني</title>
+    <meta charset="UTF-8">
+    <title>كشف فني ميداني - صندوق التنمية الزراعية</title>
+    <style>
+        :root { --main-green: #2e7d32; --light-green: #e8f5e9; }
+        body { font-family: 'Tahoma', 'Arial', sans-serif; background: #f2f5f3; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 900px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        
+        /* العناوين */
+        .header { text-align: center; margin-bottom: 25px; border: 2px solid var(--main-green); padding: 15px; border-radius: 6px; }
+        .header h1 { margin: 0; font-size: 22px; color: var(--main-green); }
+        .header h2 { margin: 5px 0 0; font-size: 16px; color: var(--main-green); }
 
-<style>
-body{
-  font-family: Tahoma, Arial;
-  background:#f4f4f4;
-  margin:20px;
-}
-.form-container{
-  background:#fff;
-  padding:20px;
-  border-radius:6px;
-  max-width:800px;
-}
-h1{
-  margin:0 0 10px;
-}
-.section{
-  border:1px solid #ddd;
-  margin-bottom:15px;
-  border-radius:6px;
-}
-.section-title{
-  background:#e9f2ec;
-  padding:8px 10px;
-  font-weight:bold;
-}
-.section-body{
-  padding:10px;
-}
-.row{
-  display:flex;
-  gap:10px;
-  margin-bottom:10px;
-}
-.field{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-}
-label{
-  font-size:13px;
-  margin-bottom:3px;
-}
-input{
-  padding:6px;
-}
-button{
-  padding:6px 12px;
-  cursor:pointer;
-}
-</style>
+        .section { background: #fff; border-radius: 6px; margin-bottom: 20px; border: 1px solid var(--main-green); overflow: hidden; }
+        .section-title { background: var(--light-green); color: var(--main-green); padding: 10px 15px; font-size: 15px; font-weight: bold; border-bottom: 1px solid var(--main-green); }
+        .section-body { padding: 15px; }
+
+        /* تنسيق الصفوف والحقول */
+        .row { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 10px; }
+        .field { flex: 1; min-width: 120px; }
+        label { font-size: 13px; display: block; margin-bottom: 5px; color: var(--main-green); font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; }
+        
+        /* تنسيق الإحداثيات بجانب بعضها */
+        .coords-row { display: flex; gap: 10px; align-items: flex-end; background: #f9f9f9; padding: 10px; border-radius: 4px; margin-bottom: 10px; border: 1px dashed #ccc; }
+        .coords-row .field { flex: 1; }
+
+        button { padding: 8px 15px; font-size: 13px; cursor: pointer; background: var(--main-green); color: #fff; border: none; border-radius: 4px; transition: 0.3s; margin: 5px 2px; }
+        button:hover { background: #1b5e20; }
+        button.btn-remove { background: #d32f2f; }
+        
+        #result { background: #f1f8e9; padding: 10px; border-radius: 4px; margin-top: 10px; border: 1px solid var(--main-green); }
+
+        /* تنسيق الطباعة */
+        @media print {
+            body { background: #fff; padding: 0; }
+            .container { box-shadow: none; max-width: 100%; width: 100%; }
+            button { display: none !important; }
+            .section { border: 1px solid #000; page-break-inside: avoid; }
+            .page-break { page-break-before: always; } /* فاصل الصفحات */
+            input, select { border: none; background: transparent; appearance: none; }
+        }
+    </style>
 </head>
-
 <body>
 
-<div class="form-container">
-
-<h1>صندوق التنمية الزراعية</h1>
-<h2>مكتب محافظة قرية العليا</h2>
-<p>كشف فني</p>
-
-<!-- ===== بند 1 ===== -->
-<div class="section">
-  <div class="section-title">1️⃣ البيانات العامة</div>
-  <div class="section-body">
-    <div class="row">
-      <div class="field">
-        <label>اسم العميل</label>
-        <input type="text">
-      </div>
-      <div class="field">
-        <label>رقم الطلب</label>
-        <input type="text">
-      </div>
-    </div>
-    <div class="row">
-      <div class="field">
-        <label>تاريخ الزيارة</label>
-        <input type="date">
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ===== بند 2 ===== -->
-<div class="section">
-  <div class="section-title">2️⃣ إحداثيات الموقع</div>
-  <div class="section-body">
-
-    <div class="row">
-      <div class="field">
-        <label>خط العرض</label>
-        <input type="number" step="any" id="siteLat">
-      </div>
-      <div class="field">
-        <label>خط الطول</label>
-        <input type="number" step="any" id="siteLon">
-      </div>
+<div class="container">
+    <div class="header">
+        <h1>صندوق التنمية الزراعية</h1>
+        <h2>مكتب محافظة قرية العليا</h2>
+        <h2>كشف فني ميداني</h2>
     </div>
 
-    <button type="button" onclick="openSiteInMaps()">🗺️ زر الوصول</button>
-
-  </div>
-</div>
-
-<!-- ===== بند 3 ===== -->
-<div class="section">
-  <div class="section-title">3️⃣ إحداثيات البوابة</div>
-  <div class="section-body">
-
-    <div class="row">
-      <div class="field">
-        <label>خط العرض</label>
-        <input type="number" step="any" id="gateLat">
-      </div>
-
-      <div class="field">
-        <label>خط الطول</label>
-        <input type="number" step="any" id="gateLon">
-      </div>
+    <!-- 1. البيانات العامة -->
+    <div class="section">
+        <div class="section-title">1️⃣ البيانات العامة</div>
+        <div class="section-body">
+            <div class="row">
+                <div class="field"><label>اسم العميل</label><input type="text"></div>
+                <div class="field"><label>رقم الطلب</label><input type="text"></div>
+                <div class="field"><label>تاريخ الزيارة</label><input type="date"></div>
+            </div>
+        </div>
     </div>
 
-    <div class="row" style="margin-top:8px;">
-      <button type="button" onclick="getGateLocation()">📍 الموقع الحالي</button>
-      <button type="button" onclick="openGateMap()">🗺️ الوصول (Google Maps)</button>
+    <!-- 2. إحداثيات السجل -->
+    <div class="section">
+        <div class="section-title">2️⃣ إحداثيات السجل</div>
+        <div class="section-body">
+            <div class="coords-row">
+                <div class="field"><label>Latitude</label><input type="text" id="recordLat"></div>
+                <div class="field"><label>Longitude</label><input type="text" id="recordLng"></div>
+            </div>
+            <button onclick="openMap('recordLat', 'recordLng')">📍 عرض على الخريطة</button>
+        </div>
     </div>
 
-    <div id="gateStatus" style="margin-top:6px;font-size:12px;color:#555"></div>
+    <!-- 3. إحداثيات البوابة -->
+    <div class="section">
+        <div class="section-title">3️⃣ إحداثيات البوابة</div>
+        <div class="section-body">
+            <div class="coords-row">
+                <div class="field"><label>Latitude</label><input type="text" id="gateLat"></div>
+                <div class="field"><label>Longitude</label><input type="text" id="gateLng"></div>
+            </div>
+            <button onclick="getGateLocation()">🧭 جلب موقعي الحالي</button>
+            <button onclick="openMap('gateLat', 'gateLng')">📍 عرض على الخريطة</button>
+        </div>
+    </div>
 
-  </div>
+    <!-- 4. حدود الأرض -->
+    <div class="section">
+        <div class="section-title">4️⃣ حدود الأرض وحساب المساحة</div>
+        <div class="section-body">
+            <div id="points-container">
+                <!-- النقاط ستظهر هنا -->
+            </div>
+            <button onclick="addPoint()">+ إضافة زاوية</button>
+            <button onclick="calculateArea()" style="background: #2196F3;">⚖️ حساب الأطوال والمساحة</button>
+            <div id="result">النتائج ستظهر هنا...</div>
+        </div>
+    </div>
+
+    <!-- فاصل صفحة للطباعة -->
+    <div class="page-break"></div>
+
+    <!-- 5. إحداثيات الآبار -->
+    <div class="section">
+        <div class="section-title">5️⃣ إحداثيات الآبار</div>
+        <div class="section-body">
+            <div id="wells-container"></div>
+            <button onclick="addWell()">➕ إضافة بئر جديد</button>
+        </div>
+    </div>
+
+    <!-- 6. نظام الري -->
+    <div class="section">
+        <div class="section-title">6️⃣ نظام الري</div>
+        <div class="section-body" id="irrigationContainer">
+            <!-- سيتم إضافة الأنظمة برمجياً -->
+        </div>
+        <button onclick="addIrrigation()" style="margin: 15px;">➕ إضافة نظام ري</button>
+    </div>
+
+    <!-- 9. بيانات الباحث -->
+    <div class="section">
+        <div class="section-title">9️⃣ بيانات الباحث والاعتماد</div>
+        <div class="section-body">
+            <div class="field">
+                <label>اسم الباحث الفني</label>
+                <input type="text" id="researcherName">
+            </div>
+            <div style="margin-top: 20px; text-align: center;">
+                <button onclick="window.print()" style="background: #000; padding: 10px 30px;">🖨 طباعة الكشف (PDF)</button>
+                <button onclick="location.reload()" class="btn-remove">🗑 مسح البيانات</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
-function getGateLocation(){
-  if(!navigator.geolocation){
-    alert("المتصفح لا يدعم تحديد الموقع");
-    return;
-  }
-
-  document.getElementById("gateStatus").innerText =
-    "📡 جاري تحديد الموقع بدقة عالية...";
-
-  navigator.geolocation.getCurrentPosition(
-    (pos)=>{
-      document.getElementById("gateLat").value =
-        pos.coords.latitude.toFixed(6);
-      document.getElementById("gateLon").value =
-        pos.coords.longitude.toFixed(6);
-
-      document.getElementById("gateStatus").innerText =
-        "✅ تم تحديد الموقع";
-    },
-    ()=>{
-      document.getElementById("gateStatus").innerText =
-        "❌ تعذر تحديد الموقع";
-    },
-    {
-      enableHighAccuracy:true,
-      timeout:20000,
-      maximumAge:0
+    // --- وظائف عامة ---
+    function openMap(latId, lngId) {
+        const lat = document.getElementById(latId).value;
+        const lng = document.getElementById(lngId).value;
+        if(lat && lng) window.open(`https://www.google.com/maps?q=${lat},${lng}`, '_blank');
+        else alert("الرجاء إدخال الإحداثيات");
     }
-  );
-}
 
-function openGateMap(){
-  const lat = document.getElementById("gateLat").value;
-  const lon = document.getElementById("gateLon").value;
+    function getGateLocation() {
+        navigator.geolocation.getCurrentPosition(pos => {
+            document.getElementById('gateLat').value = pos.coords.latitude.toFixed(6);
+            document.getElementById('gateLng').value = pos.coords.longitude.toFixed(6);
+        }, () => alert("تعذر الوصول للموقع"));
+    }
 
-  if(!lat || !lon){
-    alert("أدخل الإحداثيات أولاً");
-    return;
-  }
+    // --- بند 4: حساب المساحة ---
+    function addPoint(lat = '', lon = '') {
+        const container = document.getElementById('points-container');
+        const div = document.createElement('div');
+        div.className = 'coords-row';
+        div.innerHTML = `
+            <div class="field"><label>Latitude</label><input type="number" step="any" class="lat" value="${lat}"></div>
+            <div class="field"><label>Longitude</label><input type="number" step="any" class="lon" value="${lon}"></div>
+            <button class="btn-remove" onclick="this.parentElement.remove()">×</button>
+        `;
+        container.appendChild(div);
+    }
 
-  window.open(
-    `https://www.google.com/maps?q=${lat},${lon}`,
-    "_blank"
-  );
-}
-</script><section class="card">
-<h3>4️⃣ حدود الأرض وحساب المساحة</h3>
+    function calculateArea() {
+        const R = 6378137; 
+        const lats = document.querySelectorAll('.lat');
+        const lons = document.querySelectorAll('.lon');
+        let points = [];
+        
+        if(lats.length < 3) { alert("يجب إضافة 3 زوايا على الأقل"); return; }
 
-<div id="points"></div>
+        const lat0 = parseFloat(lats[0].value);
+        const lon0 = parseFloat(lons[0].value);
 
-<button onclick="addPoint()">➕ إضافة زاوية</button>
-<button onclick="calculate()">📐 حساب</button>
+        for (let i = 0; i < lats.length; i++) {
+            let y = (parseFloat(lats[i].value) - lat0) * (Math.PI / 180) * R;
+            let x = (parseFloat(lons[i].value) - lon0) * (Math.PI / 180) * R * Math.cos(lat0 * Math.PI / 180);
+            points.push({x, y});
+        }
 
-<div id="result"></div>
-</section>
+        let area = 0;
+        let perimeter = 0;
+        for (let i = 0; i < points.length; i++) {
+            let j = (i + 1) % points.length;
+            area += points[i].x * points[j].y - points[j].x * points[i].y;
+            perimeter += Math.hypot(points[j].x - points[i].x, points[j].y - points[i].y);
+        }
+        area = Math.abs(area / 2);
 
-<script>
-let container = document.getElementById("points");
-for(let i=0;i<4;i++) addPoint();
+        document.getElementById('result').innerHTML = `
+            <strong>النتائج:</strong><br>
+            المحيط: ${perimeter.toFixed(2)} م <br>
+            المساحة: ${area.toFixed(2)} م² <br>
+            الهكتار: ${(area/10000).toFixed(2)} هـ | الدونم: ${(area/1000).toFixed(2)} دونم
+        `;
+    }
 
-function addPoint(){
-  let d = document.createElement("div");
-  d.innerHTML = `
-    <input type="number" step="any" placeholder="Longitude">
-    <input type="number" step="any" placeholder="Latitude">
-    <button onclick="this.parentElement.remove()">−</button>
-  `;
-  container.appendChild(d);
-}
+    // --- بند 5: الآبار ---
+    function addWell() {
+        const container = document.getElementById('wells-container');
+        const div = document.createElement('div');
+        div.className = 'coords-row';
+        div.innerHTML = `
+            <div class="field"><label>بئر (Lat)</label><input type="number" step="any" class="w-lat"></div>
+            <div class="field"><label>بئر (Lng)</label><input type="number" step="any" class="w-lon"></div>
+            <button class="btn-remove" onclick="this.parentElement.remove()">حذف</button>
+        `;
+        container.appendChild(div);
+    }
 
-// تحويل Lat/Lon إلى أمتار (Equirectangular Projection)
-function toXY(lat, lon, refLat){
-  const R = 6378137;
-  let x = lon * Math.PI/180 * R * Math.cos(refLat*Math.PI/180);
-  let y = lat * Math.PI/180 * R;
-  return {x,y};
-}
+    // --- بند 6: نظام الري (مبسط) ---
+    function addIrrigation() {
+        const container = document.getElementById('irrigationContainer');
+        const div = document.createElement('div');
+        div.style = "border:1px solid #ddd; padding:10px; margin-bottom:10px; border-radius:4px;";
+        div.innerHTML = `
+            <div class="row">
+                <div class="field"><label>نوع الري</label><select><option>رشاش محوري</option><option>تنقيط</option><option>غمر</option></select></div>
+                <div class="field"><label>المساحة</label><input type="number" placeholder="م²"></div>
+                <button class="btn-remove" onclick="this.parentElement.parentElement.remove()">×</button>
+            </div>
+        `;
+        container.appendChild(div);
+    }
 
-function distance(p1,p2){
-  return Math.hypot(p2.x-p1.x, p2.y-p1.y);
-}
-
-function calculate(){
-  let raw = [];
-  document.querySelectorAll("#points div").forEach(p=>{
-    let lon = parseFloat(p.children[0].value);
-    let lat = parseFloat(p.children[1].value);
-    if(!isNaN(lat) && !isNaN(lon)) raw.push({lat,lon});
-  });
-
-  if(raw.length < 3){
-    alert("أدخل 3 زوايا على الأقل");
-    return;
-  }
-
-  let refLat = raw.reduce((s,p)=>s+p.lat,0)/raw.length;
-  let pts = raw.map(p=>toXY(p.lat,p.lon,refLat));
-
-  // أطوال الأضلاع
-  let per = 0;
-  let txt = "📏 أطوال الأضلاع:<br>";
-  for(let i=0;i<pts.length;i++){
-    let d = distance(pts[i], pts[(i+1)%pts.length]);
-    per += d;
-    txt += `ضلع ${i+1} → ${i+2>pts.length?1:i+2} : ${d.toFixed(2)} م<br>`;
-  }
-
-  // المساحة (Shoelace صحيح بعد التحويل)
-  let area = 0;
-  for(let i=0;i<pts.length;i++){
-    let j = (i+1)%pts.length;
-    area += pts[i].x*pts[j].y - pts[j].x*pts[i].y;
-  }
-  area = Math.abs(area)/2;
-
-  txt += `<br>🔁 المحيط: ${per.toFixed(2)} م<br><br>`;
-  txt += `📐 المساحة:<br>`;
-  txt += `${area.toFixed(2)} م²<br>`;
-  txt += `${(area/1000).toFixed(2)} دونم<br>`;
-  txt += `${(area/10000).toFixed(2)} هكتار`;
-
-  document.getElementById("result").innerHTML = txt;
-}
+    // تهيئة الصفحة بنقاط افتراضية
+    window.onload = () => {
+        addPoint('27.906706', '47.657379');
+        addPoint('27.895394', '47.630944');
+        addPoint('27.875918', '47.644017');
+        addIrrigation();
+    };
 </script>
+
+</body>
+</html>
