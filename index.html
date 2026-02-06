@@ -181,7 +181,7 @@ function openGateMap(){
     "_blank"
   );
 }
-</script><!-- ===== بند 4 ===== -->
+</script><!-- ================== بند 4 ================== -->
 <div class="section">
   <div class="section-title">4️⃣ حدود الأرض وحساب المساحة</div>
   <div class="section-body">
@@ -205,38 +205,122 @@ function openGateMap(){
 
     <br>
     <button type="button" onclick="addPoint()">➕ إضافة زاوية</button>
-    <button type="button" onclick="calculateUTMArea()">📐 حساب المساحة والأطوال</button>
+    <button type="button" onclick="calculateUTM()">📐 حساب المساحة والأطوال</button>
 
-    <div id="utmResult" style="margin-top:12px;color:#2e7d32;"></div>
-
-  </div>
-</div><!-- ===== بند 4 ===== -->
-<div class="section">
-  <div class="section-title">4️⃣ حدود الأرض وحساب المساحة</div>
-  <div class="section-body">
-
-    <div id="pointsContainer">
-      <div class="row pointRow">
-        <div class="field">
-          <label>خط العرض (1)</label>
-          <input type="number" step="any" class="lat">
-        </div>
-        <div class="field">
-          <label>خط الطول (1)</label>
-          <input type="number" step="any" class="lon">
-        </div>
-        <div class="field" style="flex:0.3;">
-          <label>&nbsp;</label>
-          <button type="button" onclick="removePoint(this)">➖</button>
-        </div>
-      </div>
-    </div>
-
-    <br>
-    <button type="button" onclick="addPoint()">➕ إضافة زاوية</button>
-    <button type="button" onclick="calculateUTMArea()">📐 حساب المساحة والأطوال</button>
-
-    <div id="utmResult" style="margin-top:12px;color:#2e7d32;"></div>
+    <div id="result4" style="margin-top:15px;color:#2e7d32;"></div>
 
   </div>
 </div>
+
+<script>
+/* ===== تحويل UTM ===== */
+const a = 6378137;
+const f = 1 / 298.257223563;
+const k0 = 0.9996;
+
+function toRad(d){ return d * Math.PI / 180; }
+
+function latLonToUTM(lat, lon){
+  const zone = Math.floor((lon + 180) / 6) + 1;
+  const λ0 = toRad((zone - 1) * 6 - 180 + 3);
+
+  const φ = toRad(lat);
+  const λ = toRad(lon);
+  const e = Math.sqrt(f * (2 - f));
+
+  const N = a / Math.sqrt(1 - Math.pow(e * Math.sin(φ), 2));
+  const T = Math.pow(Math.tan(φ), 2);
+  const C = Math.pow(e * Math.cos(φ), 2) / (1 - e * e);
+  const A = Math.cos(φ) * (λ - λ0);
+
+  const M = a * (
+    (1 - e*e/4 - 3*e**4/64 - 5*e**6/256) * φ
+    - (3*e*e/8 + 3*e**4/32 + 45*e**6/1024) * Math.sin(2*φ)
+    + (15*e**4/256 + 45*e**6/1024) * Math.sin(4*φ)
+    - (35*e**6/3072) * Math.sin(6*φ)
+  );
+
+  return {
+    x: k0 * N * (A + (1 - T + C) * A**3 / 6) + 500000,
+    y: k0 * (M + N * Math.tan(φ) * (A*A/2))
+  };
+}
+
+/* ===== حساب المساحة ===== */
+function distance(p1, p2){
+  return Math.sqrt((p1.x-p2.x)**2 + (p1.y-p2.y)**2);
+}
+
+function polygonArea(p){
+  let s = 0;
+  for(let i=0;i<p.length;i++){
+    let j = (i+1)%p.length;
+    s += p[i].x*p[j].y - p[j].x*p[i].y;
+  }
+  return Math.abs(s/2);
+}
+
+function calculateUTM(){
+  const lats = document.querySelectorAll('.lat');
+  const lons = document.querySelectorAll('.lon');
+
+  if(lats.length < 3){
+    alert('أدخل 3 زوايا على الأقل');
+    return;
+  }
+
+  let pts = [];
+  for(let i=0;i<lats.length;i++){
+    pts.push(latLonToUTM(
+      parseFloat(lats[i].value),
+      parseFloat(lons[i].value)
+    ));
+  }
+
+  let html = '<b>أطوال الأضلاع:</b><br>';
+  let perimeter = 0;
+
+  for(let i=0;i<pts.length;i++){
+    let j = (i+1)%pts.length;
+    let d = distance(pts[i], pts[j]);
+    perimeter += d;
+    html += `ضلع ${i+1} → ${j+1}: ${d.toFixed(2)} م<br>`;
+  }
+
+  const area = polygonArea(pts);
+
+  html += `<br><b>المحيط:</b> ${perimeter.toFixed(2)} م<br><br>`;
+  html += `<b>المساحة:</b><br>
+    ${area.toFixed(2)} م²<br>
+    ${(area/1000).toFixed(2)} دونم<br>
+    ${(area/10000).toFixed(2)} هكتار
+  `;
+
+  document.getElementById('result4').innerHTML = html;
+}
+
+/* ===== إضافة / حذف ===== */
+function addPoint(){
+  const n = document.querySelectorAll('.pointRow').length + 1;
+  document.getElementById('pointsContainer').insertAdjacentHTML('beforeend',`
+    <div class="row pointRow">
+      <div class="field">
+        <label>خط العرض (${n})</label>
+        <input type="number" step="any" class="lat">
+      </div>
+      <div class="field">
+        <label>خط الطول (${n})</label>
+        <input type="number" step="any" class="lon">
+      </div>
+      <div class="field" style="flex:0.3;">
+        <label>&nbsp;</label>
+        <button type="button" onclick="removePoint(this)">➖</button>
+      </div>
+    </div>
+  `);
+}
+
+function removePoint(btn){
+  btn.closest('.pointRow').remove();
+}
+</script>
