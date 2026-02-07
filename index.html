@@ -12,66 +12,57 @@ body{
   padding:20px;
   font-size:13px;
 }
-.container{max-width:900px;margin:auto}
+.container{max-width:900px;margin:auto;}
 .header{
   text-align:center;
+  margin-bottom:20px;
   border:2px solid #2e7d32;
   padding:15px;
-  background:#fff;
   border-radius:6px;
-  margin-bottom:20px;
+  background:#fff;
 }
-.header h1,.header h2{margin:4px 0;color:#2e7d32}
+.header h1,.header h2{margin:4px 0;color:#2e7d32;}
+
 .section{
   background:#fff;
-  border:2px solid #2e7d32;
   border-radius:6px;
   margin-bottom:15px;
+  border:2px solid #2e7d32;
 }
 .section-title{
   background:#e8f5e9;
+  color:#2e7d32;
   padding:8px 12px;
   font-weight:bold;
-  color:#2e7d32;
   border-bottom:2px solid #2e7d32;
 }
-.section-body{padding:12px}
-.row{display:flex;gap:10px;flex-wrap:wrap}
-.field{flex:1;min-width:150px}
-label{display:block;color:#2e7d32;margin-bottom:4px}
+.section-body{padding:12px;}
+
+.row{display:flex;gap:10px;flex-wrap:wrap;}
+.field{flex:1;min-width:150px;}
+label{display:block;margin-bottom:4px;color:#2e7d32;}
 input,select{
-  width:100%;
-  padding:6px;
+  width:100%;padding:6px;
   border:1px solid #2e7d32;
   border-radius:4px;
 }
 button{
   padding:6px 10px;
-  background:#2e7d32;
-  color:#fff;
-  border:none;
-  border-radius:4px;
   cursor:pointer;
+  background:#2e7d32;
+  color:#fff;border:none;border-radius:4px;
 }
-button:hover{opacity:.9}
 
-/* ===== بند 4 و 5 ===== */
-.point,.wellRow{
-  border:1px solid #ccc;
-  padding:8px;
-  margin-bottom:8px;
-}
-.coord-row{
-  display:flex;
-  gap:10px;
-  align-items:flex-end;
-}
+/* بند 4 */
+.point{margin-bottom:10px;}
+.coord-row{display:flex;gap:10px;}
 .coord{flex:1}
 
+/* طباعة */
 @media print{
-  button{display:none}
-  body{background:#fff}
-  @page{size:A4;margin:10mm}
+  button{display:none;}
+  body{background:#fff;padding:0;}
+  @page{size:A4;margin:10mm;}
 }
 </style>
 </head>
@@ -101,10 +92,10 @@ button:hover{opacity:.9}
 <div class="section-title">2️⃣ إحداثيات السجل</div>
 <div class="section-body">
 <div class="row">
-<div class="field"><label>Latitude</label><input id="recordLat"></div>
-<div class="field"><label>Longitude</label><input id="recordLng"></div>
-</div><br>
-<button onclick="openMap('recordLat','recordLng')">📍 الوصول</button>
+<div class="field"><label>Latitude</label><input id="recLat"></div>
+<div class="field"><label>Longitude</label><input id="recLon"></div>
+</div>
+<button onclick="openMap('recLat','recLon')">📍 الوصول</button>
 </div>
 </div>
 
@@ -114,10 +105,10 @@ button:hover{opacity:.9}
 <div class="section-body">
 <div class="row">
 <div class="field"><label>Latitude</label><input id="gateLat"></div>
-<div class="field"><label>Longitude</label><input id="gateLng"></div>
-</div><br>
-<button onclick="openMap('gateLat','gateLng')">📍 الوصول</button>
-<button onclick="getLocation('gateLat','gateLng')">🧭 الموقع الحالي</button>
+<div class="field"><label>Longitude</label><input id="gateLon"></div>
+</div>
+<button onclick="openMap('gateLat','gateLon')">📍 الوصول</button>
+<button onclick="getLocation('gateLat','gateLon')">🧭 الموقع الحالي</button>
 </div>
 </div>
 
@@ -125,13 +116,10 @@ button:hover{opacity:.9}
 <div class="section">
 <div class="section-title">4️⃣ حدود الأرض وحساب المساحة</div>
 <div class="section-body">
-
 <div id="points"></div>
-
 <button onclick="addPoint()">➕ إضافة زاوية</button>
 <button onclick="calcArea()">📐 حساب</button>
-
-<div id="areaResult" style="margin-top:10px"></div>
+<div id="areaResult"></div>
 </div>
 </div>
 
@@ -144,6 +132,50 @@ button:hover{opacity:.9}
 </div>
 </div>
 
+<!-- بند 6 -->
+<div class="section">
+<div class="section-title">6️⃣ نظام الري</div>
+<div class="section-body">
+<select onchange="this.nextElementSibling.style.display='block'">
+<option value="">اختر</option>
+<option>رشاش</option>
+<option>تنقيط</option>
+<option>غمر</option>
+</select>
+<div style="display:none;margin-top:8px;">
+<label>ملاحظات</label>
+<input>
+</div>
+</div>
+</div>
+
+<!-- بند 7 -->
+<div class="section">
+<div class="section-title">7️⃣ المزروعات</div>
+<div class="section-body">
+<select onchange="this.nextElementSibling.style.display='block'">
+<option value="">اختر</option>
+<option>نخيل</option>
+<option>مصدات رياح</option>
+<option>حمضيات</option>
+<option>آخر</option>
+</select>
+<div style="display:none;margin-top:8px;">
+<label>وصف</label>
+<input>
+</div>
+</div>
+</div>
+
+<!-- بند 8 -->
+<div class="section">
+<div class="section-title">8️⃣ الموجودات</div>
+<div class="section-body">
+<button onclick="addAsset()">➕ إضافة موجود</button>
+<div id="assets"></div>
+</div>
+</div>
+
 <!-- بند 9 -->
 <div class="section">
 <div class="section-title">9️⃣ بيانات الباحث</div>
@@ -151,79 +183,75 @@ button:hover{opacity:.9}
 <label>اسم الباحث</label>
 <input>
 <br><br>
-<button onclick="window.print()">🖨 طباعة</button>
+<button onclick="window.print()">🖨 طباعة PDF</button>
 </div>
 </div>
 
 </div>
 
 <script>
-/* خرائط */
-function openMap(lat,lng){
-  const la=document.getElementById(lat).value;
-  const lo=document.getElementById(lng).value;
-  if(!la||!lo)return alert('أدخل الإحداثيات');
-  window.open(`https://maps.google.com?q=${la},${lo}`);
+function openMap(lat,lon){
+  const a=document.getElementById(lat).value;
+  const b=document.getElementById(lon).value;
+  if(a&&b) window.open(`https://maps.google.com/?q=${a},${b}`);
 }
-function getLocation(lat,lng){
-  navigator.geolocation.getCurrentPosition(p=>{
-    document.getElementById(lat).value=p.coords.latitude.toFixed(6);
-    document.getElementById(lng).value=p.coords.longitude.toFixed(6);
-  });
+function getLocation(lat,lon){
+navigator.geolocation.getCurrentPosition(p=>{
+document.getElementById(lat).value=p.coords.latitude.toFixed(6);
+document.getElementById(lon).value=p.coords.longitude.toFixed(6);
+});
 }
 
 /* بند 4 */
 const R=6378137;
-function toRad(d){return d*Math.PI/180}
-function xy(lat,lon,lat0){
-  return{
-    x:toRad(lon)*R*Math.cos(toRad(lat0)),
-    y:toRad(lat)*R
-  }
-}
 function addPoint(){
-  points.insertAdjacentHTML('beforeend',`
-  <div class="point coord-row">
-    <div class="coord"><label>Latitude</label><input class="lat"></div>
-    <div class="coord"><label>Longitude</label><input class="lon"></div>
-    <button onclick="this.parentElement.remove()">➖</button>
-  </div>`);
+points.insertAdjacentHTML('beforeend',`
+<div class="point">
+<div class="coord-row">
+<div class="coord"><label>Latitude</label><input class="lat"></div>
+<div class="coord"><label>Longitude</label><input class="lon"></div>
+</div>
+<button onclick="this.parentElement.remove()">➖</button>
+</div>`);
 }
 function calcArea(){
-  const lats=document.querySelectorAll('.lat');
-  const lons=document.querySelectorAll('.lon');
-  if(lats.length<3)return alert('3 زوايا على الأقل');
-  let lat0=parseFloat(lats[0].value),pts=[];
-  for(let i=0;i<lats.length;i++)
-    pts.push(xy(+lats[i].value,+lons[i].value,lat0));
-  let area=0;
-  for(let i=0;i<pts.length;i++){
-    let j=(i+1)%pts.length;
-    area+=pts[i].x*pts[j].y-pts[j].x*pts[i].y;
-  }
-  area=Math.abs(area/2);
-  areaResult.innerHTML=`
-  ${area.toFixed(2)} م²<br>
-  ${(area/1000).toFixed(2)} دونم<br>
-  ${(area/10000).toFixed(2)} هكتار`;
+const lats=[...document.querySelectorAll('.lat')];
+const lons=[...document.querySelectorAll('.lon')];
+if(lats.length<3) return alert('3 نقاط على الأقل');
+let lat0=parseFloat(lats[0].value);
+let pts=lats.map((e,i)=>({
+x:lons[i].value*Math.PI/180*R*Math.cos(lat0*Math.PI/180),
+y:e.value*Math.PI/180*R
+}));
+let a=0;
+for(let i=0;i<pts.length;i++){
+let j=(i+1)%pts.length;
+a+=pts[i].x*pts[j].y-pts[j].x*pts[i].y;
+}
+a=Math.abs(a/2);
+areaResult.innerHTML=`${a.toFixed(2)} م²<br>${(a/1000).toFixed(2)} دونم<br>${(a/10000).toFixed(2)} هكتار`;
 }
 
 /* بند 5 */
 function addWell(){
-  wells.insertAdjacentHTML('beforeend',`
-  <div class="wellRow coord-row">
-    <div class="coord"><label>Latitude</label><input></div>
-    <div class="coord"><label>Longitude</label><input></div>
-    <button onclick="this.parentElement.remove()">➖</button>
-    <button onclick="getWell(this)">🧭</button>
-  </div>`);
+wells.insertAdjacentHTML('beforeend',`
+<div class="point">
+<div class="coord-row">
+<div class="coord"><label>Latitude</label><input></div>
+<div class="coord"><label>Longitude</label><input></div>
+</div>
+<button onclick="getLocation(this.previousElementSibling.children[0].children[1].id,this.previousElementSibling.children[1].children[1].id)">🧭</button>
+<button onclick="this.parentElement.remove()">➖</button>
+</div>`);
 }
-function getWell(btn){
-  navigator.geolocation.getCurrentPosition(p=>{
-    const r=btn.parentElement.querySelectorAll('input');
-    r[0].value=p.coords.latitude.toFixed(6);
-    r[1].value=p.coords.longitude.toFixed(6);
-  });
+
+/* بند 8 */
+function addAsset(){
+assets.insertAdjacentHTML('beforeend',`
+<div class="point">
+<input placeholder="وصف الموجود">
+<button onclick="this.parentElement.remove()">➖</button>
+</div>`);
 }
 </script>
 
