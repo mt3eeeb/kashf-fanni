@@ -203,70 +203,106 @@ function getGateLocation(){
     }
   );
 }
-</script><!-- بند 4 : حدود الأرض وحساب الأطوال والمساحة -->
+</script><!-- ===== بند 4 : حدود الأرض وحساب المساحة ===== -->
 <h3 style="color:green;">4- حدود الأرض وحساب المساحة</h3>
+
 <div id="points-container">
-  <div class="point">
-    <label>Latitude</label>
-    <input type="number" step="any" class="lat" value="27.9067062622577">
-    <label>Longitude</label>
-    <input type="number" step="any" class="lon" value="47.6573794635725">
-    <button onclick="removePoint(this)">−</button>
-  </div>
-  <div class="point">
-    <label>Latitude</label>
-    <input type="number" step="any" class="lat" value="27.8953949896574">
-    <label>Longitude</label>
-    <input type="number" step="any" class="lon" value="47.6309444646944">
-    <button onclick="removePoint(this)">−</button>
-  </div>
-  <div class="point">
-    <label>Latitude</label>
-    <input type="number" step="any" class="lat" value="27.8759187770115">
-    <label>Longitude</label>
-    <input type="number" step="any" class="lon" value="47.6440173862045">
-    <button onclick="removePoint(this)">−</button>
-  </div>
-  <div class="point">
-    <label>Latitude</label>
-    <input type="number" step="any" class="lat" value="27.8832309350795">
-    <label>Longitude</label>
-    <input type="number" step="any" class="lon" value="47.6741783244199">
-    <button onclick="removePoint(this)">−</button>
-  </div>
+
 </div>
-<button onclick="addPoint()">+ إضافة زاوية</button>
-<button onclick="calculate()">حساب الأطوال والمساحة</button>
-<div id="result"></div>
+
+<button type="button" onclick="addPoint()">➕ إضافة زاوية</button>
+<button type="button" onclick="calculate()">📐 حساب الأطوال والمساحة</button>
+
+<div id="result" style="margin-top:10px;"></div>
+
+<style>
+.point{
+  margin-bottom:10px;
+}
+.coord-row{
+  display:flex;
+  gap:10px;
+  align-items:flex-end;
+}
+.coord{
+  width:45%;
+}
+.coord label{
+  font-size:13px;
+  color:#2e7d32;
+}
+.coord input{
+  width:100%;
+  padding:6px;
+}
+.remove-btn{
+  padding:6px 10px;
+}
+</style>
+
 <script>
 const R = 6378137;
-function toRad(d) {
-  return d * Math.PI / 180;
-}
-function latLonToXY(lat, lon, lat0) {
+function toRad(d){ return d * Math.PI / 180; }
+
+function latLonToXY(lat, lon, lat0){
   return {
     x: toRad(lon) * R * Math.cos(toRad(lat0)),
     y: toRad(lat) * R
   };
 }
-function distance(p1, p2) {
+
+function distance(p1, p2){
   return Math.hypot(p2.x - p1.x, p2.y - p1.y);
 }
-function polygonArea(points) {
-  let area = 0;
-  for (let i = 0; i < points.length; i++) {
-    let j = (i + 1) % points.length;
-    area += points[i].x * points[j].y;
-    area -= points[j].x * points[i].y;
+
+function polygonArea(points){
+  let a = 0;
+  for(let i=0;i<points.length;i++){
+    let j = (i+1) % points.length;
+    a += points[i].x * points[j].y - points[j].x * points[i].y;
   }
-  return Math.abs(area / 2);
+  return Math.abs(a/2);
 }
-function calculate() {
-  const lats = document.querySelectorAll('.lat');
-  const lons = document.querySelectorAll('.lon');
+
+function addPoint(){
+  document.getElementById("points-container").insertAdjacentHTML("beforeend",`
+    <div class="point">
+      <div class="coord-row">
+        <div class="coord">
+          <label>Latitude</label>
+          <input type="number" step="any" class="lat">
+        </div>
+        <div class="coord">
+          <label>Longitude</label>
+          <input type="number" step="any" class="lon">
+        </div>
+        <button type="button" class="remove-btn" onclick="removePoint(this)">➖</button>
+      </div>
+    </div>
+  `);
+}
+
+function removePoint(btn){
+  btn.closest(".point").remove();
+}
+
+function calculate(){
+  const lats = document.querySelectorAll(".lat");
+  const lons = document.querySelectorAll(".lon");
+
+  if(lats.length < 3){
+    alert("أدخل 3 زوايا على الأقل");
+    return;
+  }
+
   let lat0 = parseFloat(lats[0].value);
   let pts = [];
-  for (let i = 0; i < lats.length; i++) {
+
+  for(let i=0;i<lats.length;i++){
+    if(!lats[i].value || !lons[i].value){
+      alert("تأكد من إدخال جميع الإحداثيات");
+      return;
+    }
     pts.push(
       latLonToXY(
         parseFloat(lats[i].value),
@@ -275,116 +311,48 @@ function calculate() {
       )
     );
   }
-  let out = '<h4>أطوال الأضلاع:</h4>';
-  for (let i = 0; i < pts.length; i++) {
-    let j = (i + 1) % pts.length;
-    out += `الضلع ${i+1}-${j+1}: ${distance(pts[i], pts[j]).toFixed(2)} م<br>`;
+
+  let out = "<b>أطوال الأضلاع:</b><br>";
+  for(let i=0;i<pts.length;i++){
+    let j = (i+1)%pts.length;
+    out += `الضلع ${i+1}-${j+1}: ${distance(pts[i],pts[j]).toFixed(2)} م<br>`;
   }
+
   const area = polygonArea(pts);
-  out += `<h4>المساحة:</h4>
+  out += `<br><b>المساحة:</b><br>
           ${area.toFixed(2)} م²<br>
-          ${(area / 10000).toFixed(2)} هكتار<br>
-          ${(area / 1000).toFixed(2)} دونم`;
-  document.getElementById('result').innerHTML = out;
+          ${(area/1000).toFixed(2)} دونم<br>
+          ${(area/10000).toFixed(2)} هكتار`;
+
+  document.getElementById("result").innerHTML = out;
 }
-function addPoint() {
-  const c = document.getElementById('points-container');
-  c.insertAdjacentHTML('beforeend', `
+</script>
+
+<!-- ===== بند 5 : إحداثيات الآبار ===== -->
+<h3 style="color:green;">5- إحداثيات الآبار</h3>
+
+<div id="wells-container"></div>
+
+<button type="button" onclick="addWell()">➕ إضافة بئر</button>
+
+<script>
+function addWell(){
+  document.getElementById("wells-container").insertAdjacentHTML("beforeend",`
     <div class="point">
-      <label>Latitude</label>
-      <input type="number" step="any" class="lat">
-      <label>Longitude</label>
-      <input type="number" step="any" class="lon">
-      <button onclick="removePoint(this)">−</button>
+      <div class="coord-row">
+        <div class="coord">
+          <label>Latitude</label>
+          <input type="number" step="any">
+        </div>
+        <div class="coord">
+          <label>Longitude</label>
+          <input type="number" step="any">
+        </div>
+        <button type="button" class="remove-btn" onclick="this.closest('.point').remove()">➖</button>
+      </div>
     </div>
   `);
 }
-function removePoint(btn) {
-  btn.parentElement.remove();
-}
-</script><!-- بند 5 : إحداثيات الآبار -->
-<h3 style="color:green;">5- إحداثيات الآبار</h3>
-<div id="wells-container"></div>
-<button onclick="addWell()">➕ إضافة بئر</button>
-<script>
-let wells = [];
-function saveWells() {
-  localStorage.setItem("wells", JSON.stringify(wells));
-}
-function loadWells() {
-  const data = localStorage.getItem("wells");
-  if (data) {
-    wells = JSON.parse(data);
-    renderWells();
-  }
-}
-function renderWells() {
-  const c = document.getElementById("wells-container");
-  c.innerHTML = "";
-  wells.forEach((w, i) => {
-    c.insertAdjacentHTML("beforeend", `
-      <div class="well" style="border:1px solid #ccc;padding:10px;margin:10px 0;">
-        <label>Latitude</label>
-        <input type="number" step="any" value="${w.lat || ""}" 
-               onchange="updateWell(${i}, 'lat', this.value)">
-        <label>Longitude</label>
-        <input type="number" step="any" value="${w.lon || ""}" 
-               onchange="updateWell(${i}, 'lon', this.value)">
-        <br><br>
-        <button onclick="locateWell(${i})">📍 تحديد الموقع</button>
-        <button onclick="openMap(${i})">🗺️ الوصول للموقع</button>
-        <button onclick="removeWell(${i})">➖ حذف</button>
-      </div>
-    `);
-  });
-}
-function addWell() {
-  wells.push({ lat: "", lon: "" });
-  saveWells();
-  renderWells();
-}
-function removeWell(i) {
-  wells.splice(i, 1);
-  saveWells();
-  renderWells();
-}
-function updateWell(i, key, value) {
-  wells[i][key] = value;
-  saveWells();
-}
-function locateWell(i) {
-  if (!navigator.geolocation) {
-    alert("المتصفح لا يدعم تحديد الموقع");
-    return;
-  }
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      wells[i].lat = pos.coords.latitude.toFixed(6);
-      wells[i].lon = pos.coords.longitude.toFixed(6);
-      saveWells();
-      renderWells();
-    },
-    () => {
-      alert("تعذر تحديد الموقع، تأكد من تفعيل GPS");
-    },
-    {
-      enableHighAccuracy: true,
-      timeout: 15000,
-      maximumAge: 0
-    }
-  );
-}
-function openMap(i) {
-  if (!wells[i].lat || !wells[i].lon) {
-    alert("أدخل الإحداثيات أولاً");
-    return;
-  }
-  window.open(
-    `https://www.google.com/maps?q=${wells[i].lat},${wells[i].lon}`,
-    "_blank"
-  );
-}
-loadWells();
 </script><!-- بند 6 : نظام الري -->
 <h3 style="color:green;">6- نظام الري</h3>
 <div id="irrigationContainer">
