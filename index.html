@@ -3,706 +3,229 @@
 <head>
 <meta charset="UTF-8">
 <title>كشف فني</title>
+
 <style>
 body{
   font-family: Tahoma, Arial;
   background:#f2f5f3;
   margin:0;
   padding:20px;
+  font-size:13px;
 }
-.container{
-  max-width:900px;
-  margin:auto;
-}
-/* ===== العنوان ===== */
+.container{max-width:900px;margin:auto}
 .header{
   text-align:center;
-  margin-bottom:25px;
   border:2px solid #2e7d32;
   padding:15px;
-  border-radius:6px;
   background:#fff;
+  border-radius:6px;
+  margin-bottom:20px;
 }
-.header h1{
-  margin:0;
-  font-size:20px;
-  color:#2e7d32;
-}
-.header h2{
-  margin:5px 0 0;
-  font-size:15px;
-  color:#2e7d32;
-}
-/* ===== الصناديق ===== */
+.header h1,.header h2{margin:4px 0;color:#2e7d32}
 .section{
   background:#fff;
+  border:2px solid #2e7d32;
   border-radius:6px;
   margin-bottom:15px;
-  border:2px solid #2e7d32;
 }
 .section-title{
   background:#e8f5e9;
-  color:#2e7d32;
   padding:8px 12px;
-  font-size:14px;
   font-weight:bold;
+  color:#2e7d32;
   border-bottom:2px solid #2e7d32;
 }
-.section-body{
-  padding:12px;
-}
-/* ===== الحقول ===== */
-.row{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-.field{
-  flex:1;
-  min-width:150px;
-}
-label{
-  font-size:13px;
-  display:block;
-  margin-bottom:4px;
-  color:#2e7d32;
-}
-input, select, textarea{
+.section-body{padding:12px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.field{flex:1;min-width:150px}
+label{display:block;color:#2e7d32;margin-bottom:4px}
+input,select{
   width:100%;
   padding:6px;
-  box-sizing:border-box;
-  font-size:13px;
   border:1px solid #2e7d32;
   border-radius:4px;
 }
 button{
   padding:6px 10px;
-  font-size:13px;
-  cursor:pointer;
   background:#2e7d32;
   color:#fff;
   border:none;
   border-radius:4px;
+  cursor:pointer;
 }
-button:hover{
-  opacity:0.9;
-}
-/* ===== الطباعة ===== */
-@media print{
-  body{
-    background:#fff;
-    padding:0;
-  }
-  button{
-    display:none;
-  }
-}
-</style>
-</head>
-<body>
-<div class="container">
-<!-- ===== العنوان ===== -->
-<div class="header">
-  <h1>صندوق التنمية الزراعية</h1>
-  <h2>مكتب محافظة قرية العليا</h2>
-  <h2>كشف فني</h2>
-</div>
-<!-- البنود تضاف هنا -->
-</div>
-</body>
-</html><!-- ===== بند 1 : البيانات العامة ===== -->
-<div class="section">
-  <div class="section-title">1️⃣ البيانات العامة</div>
-  <div class="section-body">
-    <div class="row">
-      <div class="field">
-        <label>اسم العميل</label>
-        <input type="text" id="clientName">
-      </div>
-      <div class="field">
-        <label>رقم الطلب</label>
-        <input type="text" id="orderNumber">
-      </div>
-      <div class="field">
-        <label>تاريخ الزيارة</label>
-        <input type="date" id="visitDate">
-      </div>
-    </div>
-  </div>
-</div>
-<!-- ===== بند 2 : إحداثيات السجل ===== -->
-<div class="section">
-  <div class="section-title">2️⃣ إحداثيات السجل</div>
-  <div class="section-body">
-    <div class="row">
-      <div class="field">
-        <label>خط العرض (Latitude)</label>
-        <input type="text" id="recordLat" placeholder="مثال: 27.90670">
-      </div>
-      <div class="field">
-        <label>خط الطول (Longitude)</label>
-        <input type="text" id="recordLng" placeholder="مثال: 47.65737">
-      </div>
-    </div>
-    <br>
-    <button type="button" onclick="openRecordMap()">📍 الوصول عبر Google Maps</button>
-  </div>
-</div>
-<!-- ===== بند 3 : إحداثيات البوابة ===== -->
-<div class="section">
-  <div class="section-title">3️⃣ إحداثيات البوابة</div>
-  <div class="section-body">
-    <div class="row">
-      <div class="field">
-        <label>خط العرض (Latitude)</label>
-        <input type="text" id="gateLat" placeholder="مثال: 27.90670">
-      </div>
-      <div class="field">
-        <label>خط الطول (Longitude)</label>
-        <input type="text" id="gateLng" placeholder="مثال: 47.65737">
-      </div>
-    </div>
-    <br>
-    <button type="button" onclick="openGateMap()">📍 الوصول عبر Google Maps</button>
-    <button type="button" onclick="getGateLocation()">🧭 عرض الموقع الحالي</button>
-  </div>
-</div>
-<script>
-/* ===== بند 2 ===== */
-function openRecordMap(){
-  const lat = document.getElementById("recordLat").value.trim();
-  const lng = document.getElementById("recordLng").value.trim();
-  if(!lat || !lng){
-    alert("الرجاء إدخال الإحداثيات كاملة");
-    return;
-  }
-  window.open("https://www.google.com/maps?q=" + lat + "," + lng, "_blank");
-}
-/* ===== بند 3 ===== */
-function openGateMap(){
-  const lat = document.getElementById("gateLat").value.trim();
-  const lng = document.getElementById("gateLng").value.trim();
-  if(!lat || !lng){
-    alert("الرجاء إدخال الإحداثيات كاملة");
-    return;
-  }
-  window.open("https://www.google.com/maps?q=" + lat + "," + lng, "_blank");
-}
-function getGateLocation(){
-  if(!navigator.geolocation){
-    alert("المتصفح لا يدعم تحديد الموقع");
-    return;
-  }
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      document.getElementById("gateLat").value = pos.coords.latitude.toFixed(6);
-      document.getElementById("gateLng").value = pos.coords.longitude.toFixed(6);
-    },
-    () => {
-      alert("لم يتم السماح بتحديد الموقع");
-    }
-  );
-}
-</script><!-- ===== بند 4 : حدود الأرض وحساب المساحة ===== -->
-<h3 style="color:green;">4- حدود الأرض وحساب المساحة</h3>
+button:hover{opacity:.9}
 
-<div id="points-container">
-
-</div>
-
-<button type="button" onclick="addPoint()">➕ إضافة زاوية</button>
-<button type="button" onclick="calculate()">📐 حساب الأطوال والمساحة</button>
-
-<div id="result" style="margin-top:10px;"></div>
-
-<style>
-.point{
-  margin-bottom:10px;
+/* ===== بند 4 و 5 ===== */
+.point,.wellRow{
+  border:1px solid #ccc;
+  padding:8px;
+  margin-bottom:8px;
 }
 .coord-row{
   display:flex;
   gap:10px;
   align-items:flex-end;
 }
-.coord{
-  width:45%;
-}
-.coord label{
-  font-size:13px;
-  color:#2e7d32;
-}
-.coord input{
-  width:100%;
-  padding:6px;
-}
-.remove-btn{
-  padding:6px 10px;
+.coord{flex:1}
+
+@media print{
+  button{display:none}
+  body{background:#fff}
+  @page{size:A4;margin:10mm}
 }
 </style>
+</head>
+
+<body>
+<div class="container">
+
+<div class="header">
+  <h1>صندوق التنمية الزراعية</h1>
+  <h2>كشف فني</h2>
+</div>
+
+<!-- بند 1 -->
+<div class="section">
+<div class="section-title">1️⃣ البيانات العامة</div>
+<div class="section-body">
+<div class="row">
+<div class="field"><label>اسم العميل</label><input></div>
+<div class="field"><label>رقم الطلب</label><input></div>
+<div class="field"><label>تاريخ الزيارة</label><input type="date"></div>
+</div>
+</div>
+</div>
+
+<!-- بند 2 -->
+<div class="section">
+<div class="section-title">2️⃣ إحداثيات السجل</div>
+<div class="section-body">
+<div class="row">
+<div class="field"><label>Latitude</label><input id="recordLat"></div>
+<div class="field"><label>Longitude</label><input id="recordLng"></div>
+</div><br>
+<button onclick="openMap('recordLat','recordLng')">📍 الوصول</button>
+</div>
+</div>
+
+<!-- بند 3 -->
+<div class="section">
+<div class="section-title">3️⃣ إحداثيات البوابة</div>
+<div class="section-body">
+<div class="row">
+<div class="field"><label>Latitude</label><input id="gateLat"></div>
+<div class="field"><label>Longitude</label><input id="gateLng"></div>
+</div><br>
+<button onclick="openMap('gateLat','gateLng')">📍 الوصول</button>
+<button onclick="getLocation('gateLat','gateLng')">🧭 الموقع الحالي</button>
+</div>
+</div>
+
+<!-- بند 4 -->
+<div class="section">
+<div class="section-title">4️⃣ حدود الأرض وحساب المساحة</div>
+<div class="section-body">
+
+<div id="points"></div>
+
+<button onclick="addPoint()">➕ إضافة زاوية</button>
+<button onclick="calcArea()">📐 حساب</button>
+
+<div id="areaResult" style="margin-top:10px"></div>
+</div>
+</div>
+
+<!-- بند 5 -->
+<div class="section">
+<div class="section-title">5️⃣ إحداثيات الآبار</div>
+<div class="section-body">
+<div id="wells"></div>
+<button onclick="addWell()">➕ إضافة بئر</button>
+</div>
+</div>
+
+<!-- بند 9 -->
+<div class="section">
+<div class="section-title">9️⃣ بيانات الباحث</div>
+<div class="section-body">
+<label>اسم الباحث</label>
+<input>
+<br><br>
+<button onclick="window.print()">🖨 طباعة</button>
+</div>
+</div>
+
+</div>
 
 <script>
-const R = 6378137;
-function toRad(d){ return d * Math.PI / 180; }
-
-function latLonToXY(lat, lon, lat0){
-  return {
-    x: toRad(lon) * R * Math.cos(toRad(lat0)),
-    y: toRad(lat) * R
-  };
+/* خرائط */
+function openMap(lat,lng){
+  const la=document.getElementById(lat).value;
+  const lo=document.getElementById(lng).value;
+  if(!la||!lo)return alert('أدخل الإحداثيات');
+  window.open(`https://maps.google.com?q=${la},${lo}`);
+}
+function getLocation(lat,lng){
+  navigator.geolocation.getCurrentPosition(p=>{
+    document.getElementById(lat).value=p.coords.latitude.toFixed(6);
+    document.getElementById(lng).value=p.coords.longitude.toFixed(6);
+  });
 }
 
-function distance(p1, p2){
-  return Math.hypot(p2.x - p1.x, p2.y - p1.y);
-}
-
-function polygonArea(points){
-  let a = 0;
-  for(let i=0;i<points.length;i++){
-    let j = (i+1) % points.length;
-    a += points[i].x * points[j].y - points[j].x * points[i].y;
+/* بند 4 */
+const R=6378137;
+function toRad(d){return d*Math.PI/180}
+function xy(lat,lon,lat0){
+  return{
+    x:toRad(lon)*R*Math.cos(toRad(lat0)),
+    y:toRad(lat)*R
   }
-  return Math.abs(a/2);
 }
-
 function addPoint(){
-  document.getElementById("points-container").insertAdjacentHTML("beforeend",`
-    <div class="point">
-      <div class="coord-row">
-        <div class="coord">
-          <label>Latitude</label>
-          <input type="number" step="any" class="lat">
-        </div>
-        <div class="coord">
-          <label>Longitude</label>
-          <input type="number" step="any" class="lon">
-        </div>
-        <button type="button" class="remove-btn" onclick="removePoint(this)">➖</button>
-      </div>
-    </div>
-  `);
+  points.insertAdjacentHTML('beforeend',`
+  <div class="point coord-row">
+    <div class="coord"><label>Latitude</label><input class="lat"></div>
+    <div class="coord"><label>Longitude</label><input class="lon"></div>
+    <button onclick="this.parentElement.remove()">➖</button>
+  </div>`);
 }
-
-function removePoint(btn){
-  btn.closest(".point").remove();
-}
-
-function calculate(){
-  const lats = document.querySelectorAll(".lat");
-  const lons = document.querySelectorAll(".lon");
-
-  if(lats.length < 3){
-    alert("أدخل 3 زوايا على الأقل");
-    return;
-  }
-
-  let lat0 = parseFloat(lats[0].value);
-  let pts = [];
-
-  for(let i=0;i<lats.length;i++){
-    if(!lats[i].value || !lons[i].value){
-      alert("تأكد من إدخال جميع الإحداثيات");
-      return;
-    }
-    pts.push(
-      latLonToXY(
-        parseFloat(lats[i].value),
-        parseFloat(lons[i].value),
-        lat0
-      )
-    );
-  }
-
-  let out = "<b>أطوال الأضلاع:</b><br>";
+function calcArea(){
+  const lats=document.querySelectorAll('.lat');
+  const lons=document.querySelectorAll('.lon');
+  if(lats.length<3)return alert('3 زوايا على الأقل');
+  let lat0=parseFloat(lats[0].value),pts=[];
+  for(let i=0;i<lats.length;i++)
+    pts.push(xy(+lats[i].value,+lons[i].value,lat0));
+  let area=0;
   for(let i=0;i<pts.length;i++){
-    let j = (i+1)%pts.length;
-    out += `الضلع ${i+1}-${j+1}: ${distance(pts[i],pts[j]).toFixed(2)} م<br>`;
+    let j=(i+1)%pts.length;
+    area+=pts[i].x*pts[j].y-pts[j].x*pts[i].y;
   }
-
-  const area = polygonArea(pts);
-  out += `<br><b>المساحة:</b><br>
-          ${area.toFixed(2)} م²<br>
-          ${(area/1000).toFixed(2)} دونم<br>
-          ${(area/10000).toFixed(2)} هكتار`;
-
-  document.getElementById("result").innerHTML = out;
+  area=Math.abs(area/2);
+  areaResult.innerHTML=`
+  ${area.toFixed(2)} م²<br>
+  ${(area/1000).toFixed(2)} دونم<br>
+  ${(area/10000).toFixed(2)} هكتار`;
 }
-</script>
 
-<!-- ===== بند 5 : إحداثيات الآبار ===== -->
-<h3 style="color:green;">5- إحداثيات الآبار</h3>
-
-<div id="wells-container"></div>
-
-<button type="button" onclick="addWell()">➕ إضافة بئر</button>
-
-<script>
+/* بند 5 */
 function addWell(){
-  document.getElementById("wells-container").insertAdjacentHTML("beforeend",`
-    <div class="point">
-      <div class="coord-row">
-        <div class="coord">
-          <label>Latitude</label>
-          <input type="number" step="any">
-        </div>
-        <div class="coord">
-          <label>Longitude</label>
-          <input type="number" step="any">
-        </div>
-        <button type="button" class="remove-btn" onclick="this.closest('.point').remove()">➖</button>
-      </div>
-    </div>
-  `);
+  wells.insertAdjacentHTML('beforeend',`
+  <div class="wellRow coord-row">
+    <div class="coord"><label>Latitude</label><input></div>
+    <div class="coord"><label>Longitude</label><input></div>
+    <button onclick="this.parentElement.remove()">➖</button>
+    <button onclick="getWell(this)">🧭</button>
+  </div>`);
 }
-</script><!-- بند 6 : نظام الري -->
-<h3 style="color:green;">6- نظام الري</h3>
-<div id="irrigationContainer">
-  <div class="irrigationBox" style="border:1px solid #ccc; padding:10px; margin-bottom:15px;">
-    <h4>نظام ري رقم 1</h4>
-    <label>نوع الري</label>
-    <select class="irrigationType" onchange="handleIrrigation(this)">
-      <option value="">اختر</option>
-      <option value="sprinkler">رشاش</option>
-      <option value="drip">تنقيط</option>
-      <option value="flood">غمر</option>
-    </select>
-    <!-- رشاش -->
-    <div class="sprinklerBox" style="display:none; margin-top:10px;">
-      <label>عدد الأبراج</label>
-      <input type="number" class="towerCount" oninput="calcSprinkler(this)">
-      <label>طول البرج (م)</label>
-      <input type="number" class="towerLength" oninput="calcSprinkler(this)">
-      <div class="sprinklerResult"></div>
-    </div>
-    <!-- تنقيط -->
-    <div class="dripBox" style="display:none; margin-top:10px;">
-      <label>الطول (م)</label>
-      <input type="number" class="dripLength" oninput="calcDrip(this)">
-      <label>العرض (م)</label>
-      <input type="number" class="dripWidth" oninput="calcDrip(this)">
-      <div class="dripResult"></div>
-    </div>
-    <!-- غمر -->
-    <div class="floodBox" style="display:none; margin-top:10px;">
-      <label>المساحة (م²)</label>
-      <input type="number" class="floodArea" oninput="calcFlood(this)">
-      <div class="floodResult"></div>
-    </div>
-    <hr>
-    <!-- نوع المزروع (خاص بالري) -->
-    <label>نوع المزروع</label>
-    <select class="irrigationCrop" onchange="handleIrrigationCrop(this)">
-      <option value="">اختر</option>
-      <option value="wheat">قمح</option>
-      <option value="fodder">أعلاف خضره</option>
-      <option value="vegetables">خضار</option>
-      <option value="other">آخر</option>
-    </select>
-    <div class="irrigationCropNote" style="display:none; margin-top:8px;">
-      <label>وصف المزروع</label>
-      <input type="text">
-    </div>
-    <button onclick="removeIrrigation(this)">➖ حذف</button>
-  </div>
-</div>
-<button onclick="addIrrigation()">➕ إضافة نظام ري</button>
-<script>
-let irrigationIndex = 1;
-function handleIrrigation(el) {
-  const box = el.closest('.irrigationBox');
-  box.querySelector('.sprinklerBox').style.display = 'none';
-  box.querySelector('.dripBox').style.display = 'none';
-  box.querySelector('.floodBox').style.display = 'none';
-  if (el.value === 'sprinkler') box.querySelector('.sprinklerBox').style.display = 'block';
-  if (el.value === 'drip') box.querySelector('.dripBox').style.display = 'block';
-  if (el.value === 'flood') box.querySelector('.floodBox').style.display = 'block';
+function getWell(btn){
+  navigator.geolocation.getCurrentPosition(p=>{
+    const r=btn.parentElement.querySelectorAll('input');
+    r[0].value=p.coords.latitude.toFixed(6);
+    r[1].value=p.coords.longitude.toFixed(6);
+  });
 }
-/* رشاش – حساب دائري دقيق */
-function calcSprinkler(el) {
-  const box = el.closest('.irrigationBox');
-  const count = +box.querySelector('.towerCount').value;
-  const length = +box.querySelector('.towerLength').value;
-  if (!count || !length) return;
-  const radius = count * length;
-  const area = Math.PI * radius * radius;
-  showResult(area, box.querySelector('.sprinklerResult'));
-}
-/* تنقيط */
-function calcDrip(el) {
-  const box = el.closest('.irrigationBox');
-  const l = +box.querySelector('.dripLength').value;
-  const w = +box.querySelector('.dripWidth').value;
-  if (!l || !w) return;
-  showResult(l * w, box.querySelector('.dripResult'));
-}
-/* غمر */
-function calcFlood(el) {
-  const area = +el.value;
-  if (!area) return;
-  const box = el.closest('.irrigationBox');
-  showResult(area, box.querySelector('.floodResult'));
-}
-/* عرض النتائج */
-function showResult(area, target) {
-  target.innerHTML = `
-    <p><strong>المساحة:</strong></p>
-    <p>${area.toLocaleString(undefined,{maximumFractionDigits:2})} م²</p>
-    <p>${(area/10000).toFixed(2)} هكتار</p>
-    <p>${(area/1000).toFixed(2)} دونم</p>
-  `;
-}
-/* نوع المزروع */
-function handleIrrigationCrop(el) {
-  const box = el.closest('.irrigationBox');
-  const note = box.querySelector('.irrigationCropNote');
-  note.style.display =
-    (el.value === 'fodder' || el.value === 'vegetables' || el.value === 'other')
-      ? 'block'
-      : 'none';
-}
-/* إضافة / حذف */
-function addIrrigation() {
-  irrigationIndex++;
-  irrigationContainer.insertAdjacentHTML('beforeend',
-    irrigationContainer.children[0].outerHTML.replace(/رقم 1/g, 'رقم ' + irrigationIndex)
-  );
-}
-function removeIrrigation(btn) {
-  btn.closest('.irrigationBox').remove();
-}
-</script><!-- بند 7 : المزروعات -->
-<h3 style="color:green;">7- المزروعات</h3>
-<div id="plantsContainer">
-  <div class="plantBox" style="margin-bottom:15px; border:1px solid #ccc; padding:10px;">
-    <h4>مزروعات رقم 1</h4>
-    <label>نوع المزروع</label>
-    <select class="plantType" onchange="handlePlantType(this)">
-      <option value="">اختر</option>
-      <option value="palm">نخيل</option>
-      <option value="wind">مصدات رياح</option>
-      <option value="citrus">حمضيات</option>
-      <option value="other">آخر</option>
-    </select>
-    <div class="plantNote" style="display:none; margin-top:8px;">
-      <label>وصف المزروع</label>
-      <input type="text">
-    </div>
-    <label>مسافة الزراعة</label>
-    <select class="plantSpacing" onchange="calcPlant(this)">
-      <option value="">اختر</option>
-      <option value="49">7 × 7 متر</option>
-      <option value="64">8 × 8 متر</option>
-      <option value="100">10 × 10 متر</option>
-    </select>
-    <label>عدد الشتلات</label>
-    <input type="number" class="plantCount" oninput="calcPlant(this)">
-    <div class="plantResult" style="margin-top:10px;"></div>
-    <button onclick="removePlant(this)">➖ حذف</button>
-  </div>
-</div>
-<button onclick="addPlant()">➕ إضافة مزروعات</button>
-<script>
-let plantIndex = 1;
-function handlePlantType(el) {
-  const box = el.closest('.plantBox');
-  const note = box.querySelector('.plantNote');
-  const v = el.value;
-  note.style.display = (v === 'citrus' || v === 'other') ? 'block' : 'none';
-}
-function calcPlant(el) {
-  const box = el.closest('.plantBox');
-  const count = +box.querySelector('.plantCount').value;
-  const spacing = +box.querySelector('.plantSpacing').value;
-  if (!count || !spacing) return;
-  const area = count * spacing;
-  const donum = area / 1000;
-  const hectare = area / 10000;
-  box.querySelector('.plantResult').innerHTML = `
-    <p><strong>المساحة التقديرية:</strong></p>
-    <p>${area.toLocaleString()} م²</p>
-    <p>${donum.toFixed(2)} دونم</p>
-    <p>${hectare.toFixed(2)} هكتار</p>
-  `;
-}
-function addPlant() {
-  plantIndex++;
-  plantsContainer.insertAdjacentHTML('beforeend', `
-    <div class="plantBox" style="margin-bottom:15px; border:1px solid #ccc; padding:10px;">
-      <h4>مزروعات رقم ${plantIndex}</h4>
-      <label>نوع المزروع</label>
-      <select class="plantType" onchange="handlePlantType(this)">
-        <option value="">اختر</option>
-        <option value="palm">نخيل</option>
-        <option value="wind">مصدات رياح</option>
-        <option value="citrus">حمضيات</option>
-        <option value="other">آخر</option>
-      </select>
-      <div class="plantNote" style="display:none; margin-top:8px;">
-        <label>وصف المزروع</label>
-        <input type="text">
-      </div>
-      <label>مسافة الزراعة</label>
-      <select class="plantSpacing" onchange="calcPlant(this)">
-        <option value="">اختر</option>
-        <option value="49">7 × 7 متر</option>
-        <option value="64">8 × 8 متر</option>
-        <option value="100">10 × 10 متر</option>
-      </select>
-      <label>عدد الشتلات</label>
-      <input type="number" class="plantCount" oninput="calcPlant(this)">
-      <div class="plantResult" style="margin-top:10px;"></div>
-      <button onclick="removePlant(this)">➖ حذف</button>
-    </div>
-  `);
-}
-function removePlant(btn) {
-  btn.parentElement.remove();
-}
-</script><!-- بند 8 : الموجودات -->
-<h3 style="color:green;">8- الموجودات</h3>
-<!-- ================= مباني ================= -->
-<h4>1- مباني</h4>
-<div id="buildingsContainer"></div>
-<button type="button" onclick="addBuilding()">➕ إضافة مبنى</button>
-<hr>
-<!-- ================= الموجودات على البئر ================= -->
-<h4>2- الموجودات على البئر</h4>
-<div id="wellAssetsContainer"></div>
-<button type="button" onclick="addWellAsset()">➕ إضافة موجود على البئر</button>
-<hr>
-<!-- ================= آخر ================= -->
-<h4>3- أخرى</h4>
-<div id="otherAssetsContainer"></div>
-<button type="button" onclick="addOtherAsset()">➕ إضافة آخر</button>
-<script>
-/* ===== عناصر مشتركة ===== */
-function removeBox(btn) {
-  btn.closest('.assetBox').remove();
-}
-function handleAsset(select) {
-  const box = select.closest('.assetBox');
-  const note = box.querySelector('.assetNote');
-  note.style.display = select.value ? 'block' : 'none';
-}
-/* ===== مباني ===== */
-function addBuilding() {
-  document.getElementById('buildingsContainer').insertAdjacentHTML('beforeend', `
-    <div class="assetBox" style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
-      <label>نوع المبنى</label>
-      <select onchange="handleAsset(this)">
-        <option value="">اختر</option>
-        <option>سكن عمال</option>
-        <option>استراحة</option>
-        <option>مستودع</option>
-        <option>خزان ماء</option>
-      </select>
-      <div class="assetNote" style="display:none; margin-top:8px;">
-        <label>وصف / ملاحظات</label>
-        <input type="text" placeholder="مثال: عدد الغرف، السعة، الحالة">
-      </div>
-      <button type="button" onclick="removeBox(this)">➖ حذف</button>
-    </div>
-  `);
-}
-/* ===== موجودات البئر ===== */
-function addWellAsset() {
-  document.getElementById('wellAssetsContainer').insertAdjacentHTML('beforeend', `
-    <div class="assetBox" style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
-      <label>الموجود</label>
-      <select onchange="handleAsset(this)">
-        <option value="">اختر</option>
-        <option>رأس كهرب</option>
-        <option>غطاس</option>
-        <option>مكينة + طرمبة</option>
-      </select>
-      <div class="assetNote" style="display:none; margin-top:8px;">
-        <label>وصف / ملاحظات</label>
-        <input type="text" placeholder="مثال: القدرة، العمق، الحالة">
-      </div>
-      <button type="button" onclick="removeBox(this)">➖ حذف</button>
-    </div>
-  `);
-}
-/* ===== أخرى ===== */
-function addOtherAsset() {
-  document.getElementById('otherAssetsContainer').insertAdjacentHTML('beforeend', `
-    <div class="assetBox" style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
-      <label>وصف الموجود</label>
-      <input type="text" placeholder="اكتب الموجود بالتفصيل">
-      <button type="button" onclick="removeBox(this)">➖ حذف</button>
-    </div>
-  `);
-}
-</script><!-- بند 9 : بيانات الباحث -->
-<div id="section9">
-  <h3 style="color:green;">9- بيانات الباحث</h3>
-  <label>اسم الباحث</label>
-  <input type="text" id="researcherName" placeholder="اكتب اسم الباحث">
-  <hr>
-  <div style="margin-top:10px;">
-    <button onclick="saveForm()">💾 حفظ النموذج</button>
-    <button onclick="clearForm()">🗑 حذف النموذج</button>
-    <button onclick="newForm()">➕ نموذج جديد</button>
-    <button onclick="printPDF()">🖨 طباعة PDF</button>
-  </div>
-</div>
-<!-- ===== تنسيق الطباعة ===== -->
-<style>
-body{
-  font-family: Arial, sans-serif;
-  font-size: 12px;
-  line-height: 1.4;
-}
-@media print {
-  button{
-    display:none;
-  }
-  input, select, textarea{
-    border:none;
-    font-size:12px;
-  }
-  h3{
-    font-size:14px;
-    margin-top:8px;
-  }
-  .page1{
-    page-break-after:always;
-  }
-  @page{
-    size:A4;
-    margin:10mm;
-  }
-}
-</style>
-<!-- ===== سكربت التحكم ===== -->
-<script>
-/* حفظ النموذج */
-function saveForm(){
-  localStorage.setItem('farmFormData', document.body.innerHTML);
-  alert('تم حفظ النموذج بنجاح');
-}
-/* حذف النموذج */
-function clearForm(){
-  if(confirm('هل أنت متأكد من حذف النموذج؟')){
-    localStorage.removeItem('farmFormData');
-    location.reload();
-  }
-}
-/* نموذج جديد */
-function newForm(){
-  if(confirm('سيتم تفريغ جميع الحقول، هل تريد المتابعة؟')){
-    document.querySelectorAll('input, select, textarea')
-      .forEach(el => el.value = '');
-  }
-}
-/* طباعة PDF */
-function printPDF(){
-  window.print();
-}
-/* استرجاع تلقائي */
-window.onload = function(){
-  const saved = localStorage.getItem('farmFormData');
-  if(saved){
-    document.body.innerHTML = saved;
-  }
-};
 </script>
+
+</body>
+</html>
