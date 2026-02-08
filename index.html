@@ -1,16 +1,64 @@
-<!-- ===== 4- حدود الأرض ===== -->
-<h3>4- حدود الأرض</h3>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>حدود الأرض – حساب المساحة WGS84</title>
 
-<div id="points-container">
-  <div class="point">
+<style>
+body {
+  font-family: Tahoma, Arial;
+  background: #fff;
+  padding: 20px;
+}
+
+h2 {
+  margin-bottom: 15px;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+input {
+  width: 100%;
+  padding: 8px;
+  font-size: 15px;
+}
+
+button {
+  padding: 10px 16px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+#results {
+  margin-top: 20px;
+  font-size: 22px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>4- حدود الأرض</h2>
+
+<div id="points">
+  <div class="row">
     <input type="number" step="any" placeholder="Latitude">
     <input type="number" step="any" placeholder="Longitude">
   </div>
-  <div class="point">
+  <div class="row">
     <input type="number" step="any" placeholder="Latitude">
     <input type="number" step="any" placeholder="Longitude">
   </div>
-  <div class="point">
+  <div class="row">
+    <input type="number" step="any" placeholder="Latitude">
+    <input type="number" step="any" placeholder="Longitude">
+  </div>
+  <div class="row">
     <input type="number" step="any" placeholder="Latitude">
     <input type="number" step="any" placeholder="Longitude">
   </div>
@@ -19,71 +67,72 @@
 <button onclick="addPoint()">➕ إضافة زاوية</button>
 <button onclick="calcArea()">📐 حساب المساحة</button>
 
-<div id="result"></div>
+<div id="results"></div>
 
 <script>
-function addPoint(){
-  const d=document.createElement('div');
-  d.className='point';
-  d.innerHTML=`
+const R = 6378137; // نصف قطر الأرض WGS84 بالمتر
+
+function addPoint() {
+  const row = document.createElement("div");
+  row.className = "row";
+  row.innerHTML = `
     <input type="number" step="any" placeholder="Latitude">
     <input type="number" step="any" placeholder="Longitude">
   `;
-  document.getElementById('points-container').appendChild(d);
+  document.getElementById("points").appendChild(row);
 }
 
-/* ترتيب النقاط حول المركز */
-function sortClockwise(pts){
-  let cx=0,cy=0;
-  pts.forEach(p=>{cx+=p.x;cy+=p.y;});
-  cx/=pts.length; cy/=pts.length;
-  return pts.sort((a,b)=>
-    Math.atan2(a.y-cy,a.x-cx)-Math.atan2(b.y-cy,b.x-cx)
-  );
+function toRad(d) {
+  return d * Math.PI / 180;
 }
 
-/* تحويل WGS84 إلى متر (ثابت للجوال) */
-function project(lat,lon){
-  const R=6378137;
-  return {
-    x:R*lon*Math.PI/180,
-    y:R*Math.log(Math.tan(Math.PI/4+lat*Math.PI/360))
-  };
+// حساب مساحة مضلع جيوذيسي (صح للجوال واللابتوب)
+function polygonArea(coords) {
+  let area = 0;
+  for (let i = 0; i < coords.length; i++) {
+    const p1 = coords[i];
+    const p2 = coords[(i + 1) % coords.length];
+
+    const lat1 = toRad(p1.lat);
+    const lat2 = toRad(p2.lat);
+    const lon1 = toRad(p1.lon);
+    const lon2 = toRad(p2.lon);
+
+    area += (lon2 - lon1) * (2 + Math.sin(lat1) + Math.sin(lat2));
+  }
+  area = area * R * R / 2;
+  return Math.abs(area);
 }
 
-/* حساب المساحة */
-function calcArea(){
-  const rows=document.querySelectorAll('.point');
-  let pts=[];
+function calcArea() {
+  const rows = document.querySelectorAll("#points .row");
+  let coords = [];
 
-  rows.forEach(r=>{
-    const lat=parseFloat(r.children[0].value);
-    const lon=parseFloat(r.children[1].value);
-    if(!isNaN(lat)&&!isNaN(lon)){
-      const p=project(lat,lon);
-      pts.push(p);
+  rows.forEach(r => {
+    const lat = parseFloat(r.children[0].value);
+    const lon = parseFloat(r.children[1].value);
+    if (!isNaN(lat) && !isNaN(lon)) {
+      coords.push({ lat, lon });
     }
   });
 
-  if(pts.length<3){
-    alert('أدخل 3 زوايا على الأقل');
+  if (coords.length < 3) {
+    alert("أدخل 3 نقاط على الأقل");
     return;
   }
 
-  pts=sortClockwise(pts);
+  const area_m2 = polygonArea(coords);
+  const dunum = area_m2 / 1000;
+  const hectare = area_m2 / 10000;
 
-  let area=0;
-  for(let i=0;i<pts.length;i++){
-    const j=(i+1)%pts.length;
-    area+=pts[i].x*pts[j].y-pts[j].x*pts[i].y;
-  }
-  area=Math.abs(area)/2;
-
-  document.getElementById('result').innerHTML=`
-    <h4>المساحة:</h4>
-    ${area.toFixed(2)} م²<br>
-    ${(area/1000).toFixed(2)} دونم<br>
-    ${(area/10000).toFixed(2)} هكتار
+  document.getElementById("results").innerHTML = `
+    <b>المساحة:</b><br><br>
+    ${area_m2.toFixed(2)} م²<br>
+    ${dunum.toFixed(2)} دونم<br>
+    ${hectare.toFixed(2)} هكتار
   `;
 }
 </script>
+
+</body>
+</html>
