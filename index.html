@@ -1,121 +1,128 @@
-<!DOCTYPE html>
-<html lang="ar">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>حساب حدود الأرض</title>
+<!-- ===== بند 4 : حدود الأرض ===== -->
+<div class="section">
+  <div class="section-title">4️⃣ حدود الأرض</div>
+  <div class="section-body">
+
+    <div id="pointsContainer"></div>
+
+    <button type="button" onclick="addPoint()">➕ إضافة زاوية</button>
+    <button type="button" onclick="calculateArea()">📐 حساب المساحة</button>
+
+    <div id="areaResult" style="margin-top:12px;font-weight:bold;"></div>
+
+  </div>
+</div>
 
 <style>
-body {
-  font-family: Tahoma, Arial;
-  background:#f5f7f5;
-  padding:15px;
+.point-row{
+  display:flex;
+  gap:10px;
+  align-items:flex-end;
+  margin-bottom:8px;
 }
-h2 { color:#1b5e20; }
-textarea {
-  width:100%;
-  height:140px;
-  font-size:14px;
+.point-row .num{
+  width:40px;
+  text-align:center;
+  font-weight:bold;
 }
-button {
-  background:#2e7d32;
-  color:white;
-  border:none;
-  padding:10px 15px;
-  margin-top:10px;
-  font-size:15px;
-  border-radius:5px;
+.point-row input{
+  flex:1;
+  padding:6px;
 }
-.result {
-  margin-top:15px;
-  background:#fff;
-  padding:10px;
-  border:1px solid #ccc;
+.point-row button{
+  padding:6px 10px;
 }
 </style>
-</head>
-
-<body>
-
-<h2>حدود الأرض – حساب المساحة</h2>
-
-<p>ألصق الإحداثيات (Latitude Longitude) كل نقطة بسطر:</p>
-
-<textarea id="coords"></textarea>
-
-<button onclick="calculate()">حساب المساحة</button>
-
-<div class="result" id="output"></div>
 
 <script>
-const R = 6378137;
+let pointCount = 0;
 
-// تحويل درجات إلى راديان
-function rad(d){ return d * Math.PI / 180; }
-
-// إسقاط تقريبي إلى أمتار
-function project(lat, lon, lat0){
-  return {
-    x: rad(lon) * R * Math.cos(rad(lat0)),
-    y: rad(lat) * R
-  };
+// إضافة زاوية
+function addPoint(lat='', lon=''){
+  pointCount++;
+  document.getElementById('pointsContainer').insertAdjacentHTML('beforeend',`
+    <div class="point-row">
+      <div class="num">${pointCount}</div>
+      <input type="number" step="any" placeholder="Latitude" value="${lat}">
+      <input type="number" step="any" placeholder="Longitude" value="${lon}">
+      <button type="button" onclick="removePoint(this)">➖</button>
+    </div>
+  `);
 }
 
-// Shoelace
-function polygonArea(points){
-  let area = 0;
-  for(let i=0;i<points.length;i++){
-    let j = (i+1)%points.length;
-    area += points[i].x * points[j].y;
-    area -= points[j].x * points[i].y;
-  }
-  return Math.abs(area)/2;
+// حذف زاوية
+function removePoint(btn){
+  btn.parentElement.remove();
+  renumberPoints();
 }
 
-// مسافة
-function dist(a,b){
-  return Math.hypot(b.x-a.x, b.y-a.y);
+// إعادة الترقيم
+function renumberPoints(){
+  pointCount = 0;
+  document.querySelectorAll('.point-row .num').forEach(n=>{
+    n.textContent = ++pointCount;
+  });
 }
 
-function calculate(){
-  const lines = document.getElementById("coords").value.trim().split("\n");
-  if(lines.length < 3){
-    alert("أدخل 3 نقاط على الأقل");
+// ===== تحويل WGS84 إلى UTM =====
+function latLonToUTM(lat, lon){
+  const a = 6378137;
+  const f = 1/298.257223563;
+  const k0 = 0.9996;
+  const e = Math.sqrt(f*(2-f));
+  const zone = Math.floor((lon + 180)/6) + 1;
+  const λ0 = ((zone - 1)*6 - 180 + 3) * Math.PI/180;
+
+  lat *= Math.PI/180;
+  lon *= Math.PI/180;
+
+  const N = a / Math.sqrt(1 - e*e*Math.sin(lat)**2);
+  const T = Math.tan(lat)**2;
+  const C = (e*e/(1-e*e)) * Math.cos(lat)**2;
+  const A = Math.cos(lat)*(lon - λ0);
+
+  const M = a*((1 - e*e/4 - 3*e**4/64 - 5*e**6/256)*lat
+    - (3*e*e/8 + 3*e**4/32 + 45*e**6/1024)*Math.sin(2*lat)
+    + (15*e**4/256 + 45*e**6/1024)*Math.sin(4*lat)
+    - (35*e**6/3072)*Math.sin(6*lat));
+
+  const x = k0*N*(A + (1-T+C)*A**3/6 + (5-18*T+T*T+72*C)*A**5/120);
+  const y = k0*(M + N*Math.tan(lat)*(A*A/2 + (5-T+9*C)*A**4/24));
+
+  return {x, y};
+}
+
+// ===== حساب المساحة =====
+function calculateArea(){
+  const rows = document.querySelectorAll('.point-row');
+  if(rows.length < 3){
+    alert('أدخل 3 زوايا على الأقل');
     return;
   }
 
-  let raw = [];
-  for(let l of lines){
-    let p = l.trim().split(/\s+/);
-    if(p.length !== 2) continue;
-    raw.push({lat:parseFloat(p[0]), lon:parseFloat(p[1])});
-  }
+  let pts = [];
+  rows.forEach(r=>{
+    const lat = parseFloat(r.children[1].value);
+    const lon = parseFloat(r.children[2].value);
+    if(!isNaN(lat) && !isNaN(lon)){
+      pts.push(latLonToUTM(lat, lon));
+    }
+  });
 
-  const lat0 = raw.reduce((s,p)=>s+p.lat,0)/raw.length;
-  const pts = raw.map(p=>project(p.lat,p.lon,lat0));
-
-  let html = "<b>أطوال الأضلاع:</b><br>";
-  let per = 0;
+  let area = 0;
   for(let i=0;i<pts.length;i++){
-    let j=(i+1)%pts.length;
-    let d = dist(pts[i],pts[j]);
-    per += d;
-    html += `P${i+1} → P${j+1}: ${d.toFixed(2)} م<br>`;
+    let j = (i+1)%pts.length;
+    area += pts[i].x*pts[j].y - pts[j].x*pts[i].y;
   }
+  area = Math.abs(area/2);
 
-  const area = polygonArea(pts);
-  const dunum = area/1000;
-  const hectare = area/10000;
-
-  html += "<hr>";
-  html += `<b>المساحة:</b><br>`;
-  html += `${area.toFixed(2)} م²<br>`;
-  html += `${dunum.toFixed(2)} دونم<br>`;
-  html += `${hectare.toFixed(2)} هكتار`;
-
-  document.getElementById("output").innerHTML = html;
+  document.getElementById('areaResult').innerHTML = `
+    المساحة:<br>
+    ${area.toFixed(2)} م²<br>
+    ${(area/1000).toFixed(2)} دونم<br>
+    ${(area/10000).toFixed(2)} هكتار
+  `;
 }
-</script>
 
-</body>
-</html>
+// بداية بدون خانات
+</script>
