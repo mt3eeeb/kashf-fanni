@@ -1,3 +1,30 @@
+Skip to content
+mt3eeeb
+kashf-fanni
+Repository navigation
+الشيفرة
+Issues
+Pull requests
+Actions
+Projects
+Wiki
+Security
+Insights
+Settings
+kashf-fanni
+/index.html
+اذهب إلى الملف
+t
+mt3eeeb
+mt3eeeb
+تحديث index.html
+733c0a7
+ · 
+قبل 9 دقائق
+
+الشيفرة
+
+اللوم
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -212,7 +239,7 @@ function getGateLocation(){
 
     <br>
     <button type="button" onclick="addPoint()">➕ إضافة زاوية</button>
-    <button type="button" onclick="calculateArea()">📐 حساب المساحة</button>
+    <button type="button" onclick="calculate()">📐 حساب المساحة</button>
 
     <div id="result" style="margin-top:15px;"></div>
 
@@ -222,27 +249,31 @@ function getGateLocation(){
 <script>
 const R = 6378137;
 
-function toRad(d){
-  return d * Math.PI / 180;
-}
+/* درجات → راديان */
+function toRad(d){ return d * Math.PI / 180; }
 
-function latLonToXY(lat, lon, lat0){
-  return {
-    x: toRad(lon) * R * Math.cos(toRad(lat0)),
-    y: toRad(lat) * R
-  };
+/* مسافة جيوذيسية دقيقة */
+function haversine(lat1, lon1, lat2, lon2){
+  const dLat = toRad(lat2-lat1);
+  const dLon = toRad(lon2-lon1);
+  const a =
+    Math.sin(dLat/2)**2 +
+    Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*
+    Math.sin(dLon/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(a));
 }
 
 function addPoint(){
   const c = document.getElementById("points-container");
+  const index = c.children.length + 1;
   c.insertAdjacentHTML("beforeend", `
     <div class="row point-row" style="margin-bottom:8px;">
       <div class="field">
-        <label>Latitude</label>
+        <label>P${index} Latitude</label>
         <input type="number" step="any" class="lat">
       </div>
       <div class="field">
-        <label>Longitude</label>
+        <label>P${index} Longitude</label>
         <input type="number" step="any" class="lon">
       </div>
       <div class="field" style="flex:0;">
@@ -255,55 +286,46 @@ function addPoint(){
 
 function removePoint(btn){
   btn.closest(".point-row").remove();
+  renumber();
 }
 
-function distance(p1, p2){
-  return Math.hypot(p2.x - p1.x, p2.y - p1.y);
+function renumber(){
+  document.querySelectorAll(".point-row").forEach((row,i)=>{
+    row.querySelector("label").innerText = `P${i+1} Latitude`;
+    row.querySelectorAll("label")[1].innerText = `P${i+1} Longitude`;
+  });
 }
 
-function polygonArea(points){
-  let area = 0;
-  for(let i=0;i<points.length;i++){
-    let j = (i+1)%points.length;
-    area += points[i].x * points[j].y;
-    area -= points[j].x * points[i].y;
-  }
-  return Math.abs(area/2);
-}
+function calculate(){
+  const lats = [...document.querySelectorAll(".lat")];
+  const lons = [...document.querySelectorAll(".lon")];
 
-function calculateArea(){
-  const lats = document.querySelectorAll(".lat");
-  const lons = document.querySelectorAll(".lon");
-
-  if(lats.length < 3){
-    alert("أدخل ثلاث زوايا على الأقل");
+  if(lats.length < 4){
+    alert("أدخل 4 زوايا على الأقل");
     return;
   }
 
-  let lat0 = parseFloat(lats[0].value);
-  let pts = [];
-
+  let dists = [];
   for(let i=0;i<lats.length;i++){
-    if(!lats[i].value || !lons[i].value){
-      alert("أدخل جميع الإحداثيات");
-      return;
-    }
-    pts.push(
-      latLonToXY(
-        parseFloat(lats[i].value),
-        parseFloat(lons[i].value),
-        lat0
+    let j = (i+1)%lats.length;
+    dists.push(
+      haversine(
+        +lats[i].value, +lons[i].value,
+        +lats[j].value, +lons[j].value
       )
     );
   }
 
-  let html = "<strong>أطوال الأضلاع:</strong><br>";
-  for(let i=0;i<pts.length;i++){
-    let j = (i+1)%pts.length;
-    html += `P${i+1} → P${j+1}: ${distance(pts[i],pts[j]).toFixed(2)} م<br>`;
-  }
+  /* نفترض مستطيل: ضلعين قصار + ضلعين طوال */
+  const sorted = [...dists].sort((a,b)=>a-b);
+  const width  = (sorted[0] + sorted[1]) / 2;
+  const length = (sorted[2] + sorted[3]) / 2;
+  const area = width * length;
 
-  const area = polygonArea(pts);
+  let html = "<strong>أطوال الأضلاع:</strong><br>";
+  dists.forEach((d,i)=>{
+    html += `P${i+1} → P${(i+2>lats.length)?1:i+2}: ${d.toFixed(2)} م<br>`;
+  });
 
   html += `
     <br><strong>المساحة:</strong><br>
