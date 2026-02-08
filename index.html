@@ -1,128 +1,89 @@
-<!-- ===== بند 4 : حدود الأرض ===== -->
-<div class="section">
-  <div class="section-title">4️⃣ حدود الأرض</div>
-  <div class="section-body">
+<!-- ===== 4- حدود الأرض ===== -->
+<h3>4- حدود الأرض</h3>
 
-    <div id="pointsContainer"></div>
-
-    <button type="button" onclick="addPoint()">➕ إضافة زاوية</button>
-    <button type="button" onclick="calculateArea()">📐 حساب المساحة</button>
-
-    <div id="areaResult" style="margin-top:12px;font-weight:bold;"></div>
-
+<div id="points-container">
+  <div class="point">
+    <input type="number" step="any" placeholder="Latitude">
+    <input type="number" step="any" placeholder="Longitude">
+  </div>
+  <div class="point">
+    <input type="number" step="any" placeholder="Latitude">
+    <input type="number" step="any" placeholder="Longitude">
+  </div>
+  <div class="point">
+    <input type="number" step="any" placeholder="Latitude">
+    <input type="number" step="any" placeholder="Longitude">
   </div>
 </div>
 
-<style>
-.point-row{
-  display:flex;
-  gap:10px;
-  align-items:flex-end;
-  margin-bottom:8px;
-}
-.point-row .num{
-  width:40px;
-  text-align:center;
-  font-weight:bold;
-}
-.point-row input{
-  flex:1;
-  padding:6px;
-}
-.point-row button{
-  padding:6px 10px;
-}
-</style>
+<button onclick="addPoint()">➕ إضافة زاوية</button>
+<button onclick="calcArea()">📐 حساب المساحة</button>
+
+<div id="result"></div>
 
 <script>
-let pointCount = 0;
-
-// إضافة زاوية
-function addPoint(lat='', lon=''){
-  pointCount++;
-  document.getElementById('pointsContainer').insertAdjacentHTML('beforeend',`
-    <div class="point-row">
-      <div class="num">${pointCount}</div>
-      <input type="number" step="any" placeholder="Latitude" value="${lat}">
-      <input type="number" step="any" placeholder="Longitude" value="${lon}">
-      <button type="button" onclick="removePoint(this)">➖</button>
-    </div>
-  `);
+function addPoint(){
+  const d=document.createElement('div');
+  d.className='point';
+  d.innerHTML=`
+    <input type="number" step="any" placeholder="Latitude">
+    <input type="number" step="any" placeholder="Longitude">
+  `;
+  document.getElementById('points-container').appendChild(d);
 }
 
-// حذف زاوية
-function removePoint(btn){
-  btn.parentElement.remove();
-  renumberPoints();
+/* ترتيب النقاط حول المركز */
+function sortClockwise(pts){
+  let cx=0,cy=0;
+  pts.forEach(p=>{cx+=p.x;cy+=p.y;});
+  cx/=pts.length; cy/=pts.length;
+  return pts.sort((a,b)=>
+    Math.atan2(a.y-cy,a.x-cx)-Math.atan2(b.y-cy,b.x-cx)
+  );
 }
 
-// إعادة الترقيم
-function renumberPoints(){
-  pointCount = 0;
-  document.querySelectorAll('.point-row .num').forEach(n=>{
-    n.textContent = ++pointCount;
+/* تحويل WGS84 إلى متر (ثابت للجوال) */
+function project(lat,lon){
+  const R=6378137;
+  return {
+    x:R*lon*Math.PI/180,
+    y:R*Math.log(Math.tan(Math.PI/4+lat*Math.PI/360))
+  };
+}
+
+/* حساب المساحة */
+function calcArea(){
+  const rows=document.querySelectorAll('.point');
+  let pts=[];
+
+  rows.forEach(r=>{
+    const lat=parseFloat(r.children[0].value);
+    const lon=parseFloat(r.children[1].value);
+    if(!isNaN(lat)&&!isNaN(lon)){
+      const p=project(lat,lon);
+      pts.push(p);
+    }
   });
-}
 
-// ===== تحويل WGS84 إلى UTM =====
-function latLonToUTM(lat, lon){
-  const a = 6378137;
-  const f = 1/298.257223563;
-  const k0 = 0.9996;
-  const e = Math.sqrt(f*(2-f));
-  const zone = Math.floor((lon + 180)/6) + 1;
-  const λ0 = ((zone - 1)*6 - 180 + 3) * Math.PI/180;
-
-  lat *= Math.PI/180;
-  lon *= Math.PI/180;
-
-  const N = a / Math.sqrt(1 - e*e*Math.sin(lat)**2);
-  const T = Math.tan(lat)**2;
-  const C = (e*e/(1-e*e)) * Math.cos(lat)**2;
-  const A = Math.cos(lat)*(lon - λ0);
-
-  const M = a*((1 - e*e/4 - 3*e**4/64 - 5*e**6/256)*lat
-    - (3*e*e/8 + 3*e**4/32 + 45*e**6/1024)*Math.sin(2*lat)
-    + (15*e**4/256 + 45*e**6/1024)*Math.sin(4*lat)
-    - (35*e**6/3072)*Math.sin(6*lat));
-
-  const x = k0*N*(A + (1-T+C)*A**3/6 + (5-18*T+T*T+72*C)*A**5/120);
-  const y = k0*(M + N*Math.tan(lat)*(A*A/2 + (5-T+9*C)*A**4/24));
-
-  return {x, y};
-}
-
-// ===== حساب المساحة =====
-function calculateArea(){
-  const rows = document.querySelectorAll('.point-row');
-  if(rows.length < 3){
+  if(pts.length<3){
     alert('أدخل 3 زوايا على الأقل');
     return;
   }
 
-  let pts = [];
-  rows.forEach(r=>{
-    const lat = parseFloat(r.children[1].value);
-    const lon = parseFloat(r.children[2].value);
-    if(!isNaN(lat) && !isNaN(lon)){
-      pts.push(latLonToUTM(lat, lon));
-    }
-  });
+  pts=sortClockwise(pts);
 
-  let area = 0;
+  let area=0;
   for(let i=0;i<pts.length;i++){
-    let j = (i+1)%pts.length;
-    area += pts[i].x*pts[j].y - pts[j].x*pts[i].y;
+    const j=(i+1)%pts.length;
+    area+=pts[i].x*pts[j].y-pts[j].x*pts[i].y;
   }
-  area = Math.abs(area/2);
+  area=Math.abs(area)/2;
 
-  document.getElementById('areaResult').innerHTML = `
-    المساحة:<br>
+  document.getElementById('result').innerHTML=`
+    <h4>المساحة:</h4>
     ${area.toFixed(2)} م²<br>
     ${(area/1000).toFixed(2)} دونم<br>
     ${(area/10000).toFixed(2)} هكتار
   `;
 }
-
-// بداية بدون خانات
 </script>
