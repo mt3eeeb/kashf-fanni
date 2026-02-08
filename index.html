@@ -207,22 +207,35 @@ function getGateLocation(){
 
 <div id="points-container"></div>
 
-<button type="button" onclick="addPoint()">+ إضافة زاوية</button>
-<button type="button" onclick="calculate()">حساب الأطوال والمساحة</button>
+<div style="margin:8px 0;">
+  <button type="button" onclick="addPoint()">+ إضافة زاوية</button>
+  <button type="button" onclick="calculate()">حساب الأطوال والمساحة</button>
+</div>
 
 <div id="result"></div>
 
 <style>
+/* ===== بند 4 فقط ===== */
+#points-container {
+  max-width: 100%;
+}
+
 .point {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr 42px;
   gap: 6px;
   margin-bottom: 6px;
+  direction: rtl;
 }
+
 .point input {
-  width: 45%;
+  width: 100%;
+  box-sizing: border-box;
 }
+
 .point button {
-  width: 40px;
+  width: 42px;
+  height: 100%;
 }
 </style>
 
