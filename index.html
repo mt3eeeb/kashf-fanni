@@ -203,125 +203,160 @@ function getGateLocation(){
     }
   );
 }
-</script><!-- بند 4 : حدود الأرض -->
-<h3 style="color:green;">4- حدود الأرض</h3>
+</script><!-- ===================== -->
+<!-- 4- حدود الأرض -->
+<!-- ===================== -->
+
+<h3 style="color:#2e7d32">4- حدود الأرض</h3>
+
+<div id="points-container"></div>
+
+<button class="add-btn" onclick="addPoint()">➕ إضافة زاوية</button>
+<button class="calc-btn" onclick="calculateArea()">📐 حساب المساحة</button>
+
+<div id="result" style="margin-top:15px"></div>
 
 <style>
-.point-row{
-  display:flex;
-  gap:10px;
-  align-items:flex-end;
-  margin-bottom:8px;
+.point {
+  margin-bottom: 12px;
 }
-.point-row strong{
-  width:35px;
+.coord-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
 }
-.coord{
-  flex:1;
+.coord {
+  display: flex;
+  flex-direction: column;
+  width: 45%;
+}
+.coord label {
+  font-size: 13px;
+  color: #2e7d32;
+}
+.coord input {
+  padding: 6px;
+  font-size: 14px;
+}
+.remove-btn {
+  height: 36px;
+  padding: 0 12px;
+  font-size: 18px;
+  cursor: pointer;
+  background: #2e7d32;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+}
+.add-btn, .calc-btn {
+  margin-top: 10px;
+  margin-left: 5px;
 }
 </style>
 
-<div id="points"></div>
-
-<button type="button" onclick="addPoint()">➕ إضافة زاوية</button>
-<button type="button" onclick="calculateLand()">📐 حساب المساحة</button>
-
-<div id="landResult" style="margin-top:10px;"></div>
-
 <script>
-/* نصف قطر الأرض */
-const R = 6378137;
+const R = 6378137; // نصف قطر الأرض بالمتر
+let pointCount = 0;
 
-/* درجات → راديان */
-function toRad(d){
+// إضافة نقطة جديدة
+function addPoint(lon = '', lat = '') {
+  pointCount++;
+  const div = document.createElement('div');
+  div.className = 'point';
+  div.innerHTML = `
+    <div class="coord-row">
+      <div class="coord">
+        <label>Longitude (P${pointCount})</label>
+        <input type="number" step="any" class="lon" value="${lon}">
+      </div>
+      <div class="coord">
+        <label>Latitude</label>
+        <input type="number" step="any" class="lat" value="${lat}">
+      </div>
+      <button class="remove-btn" onclick="removePoint(this)">−</button>
+    </div>
+  `;
+  document.getElementById('points-container').appendChild(div);
+}
+
+// حذف نقطة
+function removePoint(btn) {
+  btn.closest('.point').remove();
+  renumberPoints();
+}
+
+// إعادة ترقيم النقاط
+function renumberPoints() {
+  pointCount = 0;
+  document.querySelectorAll('.point').forEach(p => {
+    pointCount++;
+    p.querySelector('label').innerText = `Longitude (P${pointCount})`;
+  });
+}
+
+// تحويل درجة → راديان
+function toRad(d) {
   return d * Math.PI / 180;
 }
 
-/* تحويل Lat/Lng إلى نظام مسطح محلي (رفع مساحي) */
-function project(lat, lng, refLat){
+// تحويل Lat/Lon إلى إحداثيات مترية
+function project(lat, lon, lat0) {
   return {
-    x: toRad(lng) * R * Math.cos(toRad(refLat)),
+    x: toRad(lon) * R * Math.cos(toRad(lat0)),
     y: toRad(lat) * R
   };
 }
 
-/* إضافة زاوية */
-function addPoint(){
-  const c = document.getElementById("points");
-  const n = c.children.length + 1;
+// حساب المساحة والأطوال
+function calculateArea() {
+  const lons = [...document.querySelectorAll('.lon')].map(i => +i.value);
+  const lats = [...document.querySelectorAll('.lat')].map(i => +i.value);
 
-  c.insertAdjacentHTML("beforeend", `
-    <div class="point-row">
-      <strong>P${n}</strong>
-      <div class="coord">
-        <label>Latitude</label>
-        <input type="number" step="any" class="lat">
-      </div>
-      <div class="coord">
-        <label>Longitude</label>
-        <input type="number" step="any" class="lng">
-      </div>
-      <button onclick="this.parentElement.remove()">➖</button>
-    </div>
-  `);
-}
-
-/* مسافة بين نقطتين */
-function dist(a,b){
-  return Math.hypot(b.x-a.x, b.y-a.y);
-}
-
-/* معادلة رباط الحذاء */
-function polygonArea(p){
-  let s1=0, s2=0;
-  for(let i=0;i<p.length;i++){
-    let j=(i+1)%p.length;
-    s1 += p[i].x * p[j].y;
-    s2 += p[i].y * p[j].x;
-  }
-  return Math.abs(s1 - s2) / 2;
-}
-
-/* الحساب */
-function calculateLand(){
-  const lats = document.querySelectorAll(".lat");
-  const lngs = document.querySelectorAll(".lng");
-
-  if(lats.length < 3){
-    alert("يجب إدخال 3 زوايا على الأقل");
+  if (lons.length < 3) {
+    alert('أدخل 3 نقاط على الأقل');
     return;
   }
 
-  const refLat = parseFloat(lats[0].value);
-  let pts = [];
+  const lat0 = lats.reduce((a,b)=>a+b,0) / lats.length;
+  const pts = lats.map((lat,i)=>project(lat,lons[i],lat0));
 
-  for(let i=0;i<lats.length;i++){
-    pts.push(
-      project(
-        parseFloat(lats[i].value),
-        parseFloat(lngs[i].value),
-        refLat
-      )
+  // أطوال الأضلاع
+  let edges = '';
+  let perimeter = 0;
+  for (let i=0;i<pts.length;i++){
+    const j = (i+1)%pts.length;
+    const d = Math.hypot(
+      pts[j].x - pts[i].x,
+      pts[j].y - pts[i].y
     );
+    perimeter += d;
+    edges += `P${i+1} → P${j+1}: ${d.toFixed(2)} م<br>`;
   }
 
-  let html = "<h4>أطوال الأضلاع:</h4>";
-  for(let i=0;i<pts.length;i++){
-    let j=(i+1)%pts.length;
-    html += `P${i+1} → P${j+1}: ${dist(pts[i],pts[j]).toFixed(2)} م<br>`;
+  // Shoelace
+  let area = 0;
+  for (let i=0;i<pts.length;i++){
+    const j = (i+1)%pts.length;
+    area += pts[i].x * pts[j].y - pts[j].x * pts[i].y;
   }
+  area = Math.abs(area)/2;
 
-  const area = polygonArea(pts);
+  const donum = area / 1000;
+  const hectare = area / 10000;
 
-  html += `
-    <h4>المساحة:</h4>
+  document.getElementById('result').innerHTML = `
+    <b>أطوال الأضلاع:</b><br>${edges}<br>
+    <b>المساحة:</b><br>
     ${area.toFixed(2)} م²<br>
-    ${(area/1000).toFixed(2)} دونم<br>
-    ${(area/10000).toFixed(2)} هكتار
+    ${donum.toFixed(2)} دونم<br>
+    ${hectare.toFixed(2)} هكتار
   `;
-
-  document.getElementById("landResult").innerHTML = html;
 }
+
+// نقطة مبدئية فاضية
+addPoint();
+addPoint();
+addPoint();
 </script><!-- بند 5 : إحداثيات الآبار -->
 <h3 style="color:green;">5- إحداثيات الآبار</h3>
 <div id="wells-container"></div>
