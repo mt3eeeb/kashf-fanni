@@ -203,123 +203,142 @@ function getGateLocation(){
     }
   );
 }
-</script><!-- 4- حدود الأرض وحساب المساحة -->
-<section id="band4">
-  <h3>4- حدود الأرض وحساب المساحة</h3>
+</script><!-- بند 4 : حدود الأرض وحساب الأطوال والمساحة -->
+<h3 style="color:green;">4- حدود الأرض وحساب المساحة</h3>
 
-  <div id="pointsContainer"></div>
+<div id="points-container">
+  <!-- يبدأ فاضي -->
+</div>
 
-  <button type="button" class="btn btn-add" onclick="addPoint()">+ إضافة زاوية</button>
-  <button type="button" class="btn btn-calc" onclick="calculate()">حساب الأطوال والمساحة</button>
+<button type="button" onclick="addPoint()">+ إضافة زاوية</button>
+<button type="button" onclick="calculate()">حساب الأطوال والمساحة</button>
 
-  <div id="results"></div>
-</section>
-
-<style>
-#band4 {
-  margin-top: 20px;
-}
-.point-row {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 6px;
-}
-.point-row input {
-  width: 120px;
-  padding: 4px;
-}
-.point-row button {
-  background: #1f7a1f;
-  color: #fff;
-  border: none;
-  width: 32px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.btn {
-  margin-top: 8px;
-  padding: 6px 12px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.btn-add {
-  background: #1f7a1f;
-  color: #fff;
-}
-.btn-calc {
-  background: #155d15;
-  color: #fff;
-}
-</style>
+<div id="result"></div>
 
 <script>
-function addPoint(lat = "", lon = "") {
-  const div = document.createElement("div");
-  div.className = "point-row";
+/* =========================
+   UTM (Zone تلقائي) + تصحيح الجوال
+   ========================= */
+const a = 6378137;
+const f = 1 / 298.257223563;
+const k0 = 0.9996;
+const e = Math.sqrt(f * (2 - f));
 
-  div.innerHTML = `
-    <button type="button" onclick="this.parentElement.remove()">-</button>
-    <input type="number" step="any" class="lon" placeholder="Longitude" value="${lon}">
-    <input type="number" step="any" class="lat" placeholder="Latitude" value="${lat}">
-  `;
-  document.getElementById("pointsContainer").appendChild(div);
+function latLonToUTM(lat, lon) {
+  const zone = Math.floor((lon + 180) / 6) + 1;
+  const λ0 = ((zone - 1) * 6 - 180 + 3) * Math.PI / 180;
+
+  const φ = lat * Math.PI / 180;
+  const λ = lon * Math.PI / 180;
+
+  const N = a / Math.sqrt(1 - e * e * Math.sin(φ) ** 2);
+  const T = Math.tan(φ) ** 2;
+  const C = (e * e / (1 - e * e)) * Math.cos(φ) ** 2;
+  const A = Math.cos(φ) * (λ - λ0);
+
+  const M =
+    a * (
+      (1 - e * e / 4 - 3 * e ** 4 / 64 - 5 * e ** 6 / 256) * φ
+      - (3 * e ** 2 / 8 + 3 * e ** 4 / 32 + 45 * e ** 6 / 1024) * Math.sin(2 * φ)
+      + (15 * e ** 4 / 256 + 45 * e ** 6 / 1024) * Math.sin(4 * φ)
+      - (35 * e ** 6 / 3072) * Math.sin(6 * φ)
+    );
+
+  const x =
+    k0 * N * (
+      A +
+      (1 - T + C) * A ** 3 / 6 +
+      (5 - 18 * T + T ** 2 + 72 * C - 58 * e ** 2) * A ** 5 / 120
+    ) + 500000;
+
+  let y =
+    k0 * (
+      M +
+      N * Math.tan(φ) * (
+        A ** 2 / 2 +
+        (5 - T + 9 * C + 4 * C ** 2) * A ** 4 / 24 +
+        (61 - 58 * T + T ** 2 + 600 * C - 330 * e ** 2) * A ** 6 / 720
+      )
+    );
+
+  if (lat < 0) y += 10000000;
+  return { x, y, zone };
 }
 
+/* =========================
+   إضافة / حذف النقاط
+   ========================= */
+function addPoint() {
+  document.getElementById('points-container')
+    .insertAdjacentHTML('beforeend', `
+      <div class="point">
+        <input type="number" step="any" class="lat" placeholder="Latitude">
+        <input type="number" step="any" class="lon" placeholder="Longitude">
+        <button type="button" onclick="removePoint(this)">−</button>
+      </div>
+    `);
+}
+
+function removePoint(btn) {
+  btn.parentElement.remove();
+}
+
+/* =========================
+   الحساب (نفس الشكل القديم)
+   ========================= */
 function calculate() {
-  const rows = document.querySelectorAll(".point-row");
-  if (rows.length < 3) {
-    alert("أدخل 3 نقاط على الأقل");
+  const lats = document.querySelectorAll('.lat');
+  const lons = document.querySelectorAll('.lon');
+
+  if (lats.length < 3) {
+    alert('لا بد من إدخال 3 زوايا على الأقل');
     return;
   }
 
-  let points = [];
+  let pts = [];
+  let zoneUsed = null;
 
-  rows.forEach(row => {
-    let lat = parseFloat(row.querySelector(".lat").value);
-    let lon = parseFloat(row.querySelector(".lon").value);
+  for (let i = 0; i < lats.length; i++) {
+    let lat = parseFloat(lats[i].value);
+    let lon = parseFloat(lons[i].value);
 
-    if (isNaN(lat) || isNaN(lon)) return;
+    if (isNaN(lat) || isNaN(lon)) {
+      alert('تأكد من إدخال جميع الإحداثيات');
+      return;
+    }
 
-    // 🔁 تصحيح تلقائي لو انقلبت القيم (مشكلة الجوال)
+    // 🔁 تصحيح تلقائي لو انعكس الإدخال بالجوال
     if (Math.abs(lat) > 90 && Math.abs(lon) <= 90) {
       [lat, lon] = [lon, lat];
     }
 
-    const utm = latLonToUTM(lat, lon);
-    points.push(utm);
-  });
-
-  if (points.length < 3) {
-    alert("تأكد من إدخال جميع الإحداثيات");
-    return;
+    const p = latLonToUTM(lat, lon);
+    zoneUsed = p.zone;
+    pts.push(p);
   }
 
-  let perimeter = 0;
+  let out = '<h4>أطوال الأضلاع:</h4>';
+  for (let i = 0; i < pts.length; i++) {
+    let j = (i + 1) % pts.length;
+    out += `الضلع ${i+1}-${j+1}: ${Math.hypot(
+      pts[j].x - pts[i].x,
+      pts[j].y - pts[i].y
+    ).toFixed(2)} م<br>`;
+  }
+
   let area = 0;
-
-  for (let i = 0; i < points.length; i++) {
-    let j = (i + 1) % points.length;
-
-    let dx = points[j].x - points[i].x;
-    let dy = points[j].y - points[i].y;
-
-    let dist = Math.sqrt(dx * dx + dy * dy);
-    perimeter += dist;
-
-    area += (points[i].x * points[j].y - points[j].x * points[i].y);
+  for (let i = 0; i < pts.length; i++) {
+    let j = (i + 1) % pts.length;
+    area += pts[i].x * pts[j].y - pts[j].x * pts[i].y;
   }
-
   area = Math.abs(area / 2);
 
-  document.getElementById("results").innerHTML = `
-    <hr>
-    <p><strong>المحيط:</strong> ${perimeter.toFixed(2)} م</p>
-    <p><strong>المساحة:</strong></p>
-    <p>${area.toFixed(2)} م²</p>
-    <p>${(area / 10000).toFixed(2)} هكتار</p>
-    <p>${(area / 1000).toFixed(2)} دونم</p>
-  `;
+  out += `<h4>المساحة:</h4>
+          ${area.toFixed(2)} م²<br>
+          ${(area / 10000).toFixed(2)} هكتار<br>
+          ${(area / 1000).toFixed(2)} دونم`;
+
+  document.getElementById('result').innerHTML = out;
 }
 </script><!-- بند 5 : إحداثيات الآبار -->
 <h3 style="color:green;">5- إحداثيات الآبار</h3>
