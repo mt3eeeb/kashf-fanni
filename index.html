@@ -3,114 +3,120 @@
 <head>
 <meta charset="UTF-8">
 <title>كشف فني</title>
+
 <style>
+/* ===== الأساس ===== */
 body{
   font-family: Tahoma, Arial;
   background:#f2f5f3;
   margin:0;
-  padding:20px;
+  padding:15px;
+  font-size:11.5px;
 }
 .container{
-  max-width:900px;
+  max-width:850px;
   margin:auto;
 }
+
 /* ===== العنوان ===== */
 .header{
   text-align:center;
-  margin-bottom:25px;
+  margin-bottom:15px;
   border:2px solid #2e7d32;
-  padding:15px;
+  padding:12px;
   border-radius:6px;
   background:#fff;
 }
 .header h1{
   margin:0;
-  font-size:20px;
+  font-size:18px;
   color:#2e7d32;
 }
 .header h2{
-  margin:5px 0 0;
-  font-size:15px;
+  margin:4px 0 0;
+  font-size:14px;
   color:#2e7d32;
 }
+
+/* ===== الصفحات ===== */
+.page{
+  margin-bottom:15px;
+}
+
 /* ===== الصناديق ===== */
 .section{
   background:#fff;
   border-radius:6px;
-  margin-bottom:15px;
+  margin-bottom:10px;
   border:2px solid #2e7d32;
 }
 .section-title{
   background:#e8f5e9;
   color:#2e7d32;
-  padding:8px 12px;
-  font-size:14px;
+  padding:6px 10px;
+  font-size:13px;
   font-weight:bold;
   border-bottom:2px solid #2e7d32;
 }
 .section-body{
-  padding:12px;
+  padding:10px;
 }
+
 /* ===== الحقول ===== */
 .row{
   display:flex;
-  gap:10px;
+  gap:8px;
   flex-wrap:wrap;
 }
 .field{
   flex:1;
-  min-width:150px;
+  min-width:140px;
 }
 label{
-  font-size:13px;
+  font-size:12px;
   display:block;
-  margin-bottom:4px;
+  margin-bottom:3px;
   color:#2e7d32;
 }
-input, select, textarea{
+input, select{
   width:100%;
-  padding:6px;
-  box-sizing:border-box;
-  font-size:13px;
+  padding:5px;
+  font-size:12px;
   border:1px solid #2e7d32;
   border-radius:4px;
 }
 button{
-  padding:6px 10px;
-  font-size:13px;
+  padding:5px 9px;
+  font-size:12px;
   cursor:pointer;
   background:#2e7d32;
   color:#fff;
   border:none;
   border-radius:4px;
 }
-button:hover{
-  opacity:0.9;
-}
+button:hover{ opacity:0.9 }
+
 /* ===== الطباعة ===== */
 @media print{
-  body{
-    background:#fff;
-    padding:0;
-  }
-  button{
-    display:none;
-  }
+  body{ background:#fff; padding:0 }
+  button{ display:none }
+  .page{ page-break-after:always }
+  .page:last-child{ page-break-after:auto }
 }
 </style>
 </head>
+
 <body>
 <div class="container">
+
 <!-- ===== العنوان ===== -->
 <div class="header">
   <h1>صندوق التنمية الزراعية</h1>
   <h2>مكتب محافظة قرية العليا</h2>
   <h2>كشف فني</h2>
 </div>
-<!-- البنود تضاف هنا -->
-</div>
-</body>
-</html><!-- ===== بند 1 : البيانات العامة ===== -->
+
+<!-- ===== بند 1 : البيانات العامة ===== -->
 <div class="section">
   <div class="section-title">1️⃣ البيانات العامة</div>
   <div class="section-body">
@@ -694,22 +700,61 @@ function addOtherAsset() {
     </div>
   `);
 }
-</script><!-- بند 9 : بيانات الباحث -->
-<div class="section">
-  <div class="section-title">9️⃣ بيانات الباحث</div>
-  <div class="section-body">
+</script><!-- ===== بند 9 ===== -->
+  <div class="section">
+    <div class="section-title">9️⃣ بيانات الباحث</div>
+    <div class="section-body">
+      <label>اسم الباحث</label>
+      <input id="researcherName">
 
-    <label>اسم الباحث</label>
-    <input type="text" id="researcherName" placeholder="اكتب اسم الباحث">
+      <hr>
 
-    <hr>
-
-    <div class="actions">
-      <button onclick="saveForm()">💾 حفظ النموذج</button>
-      <button onclick="clearForm()">🗑 حذف النموذج</button>
-      <button onclick="newForm()">➕ نموذج جديد</button>
-      <button onclick="printPDF()">🖨 طباعة PDF</button>
+      <button onclick="saveForm()">💾 حفظ</button>
+      <button onclick="clearForm()">🗑 حذف</button>
+      <button onclick="newForm()">➕ جديد</button>
+      <button onclick="printPDF()">🖨 طباعة</button>
     </div>
-
   </div>
+
 </div>
+
+</div>
+
+<!-- ================= السكربت ================= -->
+<script>
+function openMap(latId,lngId){
+  const lat=document.getElementById(latId).value;
+  const lng=document.getElementById(lngId).value;
+  if(!lat||!lng){alert("أدخل الإحداثيات");return;}
+  window.open(`https://www.google.com/maps?q=${lat},${lng}`,'_blank');
+}
+
+function printPDF(){window.print();}
+
+function saveForm(){
+  localStorage.setItem("farmForm",document.body.innerHTML);
+  alert("تم الحفظ");
+}
+
+function clearForm(){
+  if(confirm("حذف النموذج؟")){
+    localStorage.removeItem("farmForm");
+    location.reload();
+  }
+}
+
+function newForm(){
+  if(confirm("تفريغ الحقول؟")){
+    document.querySelectorAll("input,select,textarea")
+    .forEach(e=>e.value="");
+  }
+}
+
+window.onload=function(){
+  const d=localStorage.getItem("farmForm");
+  if(d) document.body.innerHTML=d;
+}
+</script>
+
+</body>
+</html>
