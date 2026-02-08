@@ -203,143 +203,127 @@ function getGateLocation(){
     }
   );
 }
-</script><h3 style="color:green;">4- حدود الأرض وحساب المساحة</h3>
-
-<div id="points-container"></div>
-
-<div style="margin:8px 0;">
-  <button type="button" onclick="addPoint()">+ إضافة زاوية</button>
-  <button type="button" onclick="calculate()">حساب الأطوال والمساحة</button>
-</div>
-
-<div id="result"></div>
+</script><!-- بند 4 : حدود الأرض (كروكي) -->
+<h3 style="color:green;">4- حدود الأرض (الكروكي)</h3>
 
 <style>
-/* ===== بند 4 فقط ===== */
-#points-container {
-  max-width: 100%;
+.point-row{
+  display:flex;
+  gap:10px;
+  align-items:flex-end;
+  margin-bottom:8px;
 }
-
-.point {
-  display: grid;
-  grid-template-columns: 1fr 1fr 42px;
-  gap: 6px;
-  margin-bottom: 6px;
-  direction: rtl;
+.point-row span{
+  font-weight:bold;
+  min-width:20px;
 }
-
-.point input {
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.point button {
-  width: 42px;
-  height: 100%;
+.coord{
+  flex:1;
 }
 </style>
 
+<div id="points"></div>
+
+<button type="button" onclick="addPoint()">➕ إضافة نقطة</button>
+<button type="button" onclick="calcArea()">📐 حساب المساحة</button>
+
+<div id="areaResult" style="margin-top:10px;"></div>
+
 <script>
-const a = 6378137;
-const f = 1 / 298.257223563;
-const k0 = 0.9996;
-const e = Math.sqrt(f * (2 - f));
+/* ===== إعدادات ===== */
+const R = 6378137; // نصف قطر الأرض بالمتر
 
-function latLonToUTM(lat, lon) {
-  const zone = Math.floor((lon + 180) / 6) + 1;
-  const λ0 = ((zone - 1) * 6 - 180 + 3) * Math.PI / 180;
-  const φ = lat * Math.PI / 180;
-  const λ = lon * Math.PI / 180;
-
-  const N = a / Math.sqrt(1 - e * e * Math.sin(φ) ** 2);
-  const T = Math.tan(φ) ** 2;
-  const C = (e * e / (1 - e * e)) * Math.cos(φ) ** 2;
-  const A = Math.cos(φ) * (λ - λ0);
-
-  const M =
-    a * (
-      (1 - e * e / 4 - 3 * e ** 4 / 64 - 5 * e ** 6 / 256) * φ
-      - (3 * e ** 2 / 8 + 3 * e ** 4 / 32 + 45 * e ** 6 / 1024) * Math.sin(2 * φ)
-      + (15 * e ** 4 / 256 + 45 * e ** 6 / 1024) * Math.sin(4 * φ)
-      - (35 * e ** 6 / 3072) * Math.sin(6 * φ)
-    );
-
-  const x =
-    k0 * N * (
-      A +
-      (1 - T + C) * A ** 3 / 6 +
-      (5 - 18 * T + T ** 2 + 72 * C - 58 * e ** 2) * A ** 5 / 120
-    ) + 500000;
-
-  let y =
-    k0 * (
-      M +
-      N * Math.tan(φ) * (
-        A ** 2 / 2 +
-        (5 - T + 9 * C + 4 * C ** 2) * A ** 4 / 24 +
-        (61 - 58 * T + T ** 2 + 600 * C - 330 * e ** 2) * A ** 6 / 720
-      )
-    );
-
-  if (lat < 0) y += 10000000;
-  return { x, y };
+function toRad(d){
+  return d * Math.PI / 180;
 }
 
-function addPoint() {
-  document.getElementById('points-container').insertAdjacentHTML(
-    'beforeend',
-    `<div class="point">
-      <input type="number" step="any" class="lat" placeholder="Latitude">
-      <input type="number" step="any" class="lon" placeholder="Longitude">
-      <button type="button" onclick="this.parentElement.remove()">−</button>
-    </div>`
-  );
+/* تحويل Lat/Lng إلى متر (XY) */
+function latLngToXY(lat, lng, refLat){
+  return {
+    x: toRad(lng) * R * Math.cos(toRad(refLat)),
+    y: toRad(lat) * R
+  };
 }
 
-function calculate() {
-  const lats = document.querySelectorAll('.lat');
-  const lons = document.querySelectorAll('.lon');
+/* ===== إضافة نقطة ===== */
+function addPoint(){
+  const c = document.getElementById("points");
+  const idx = c.children.length + 1;
 
-  if (lats.length < 3) {
-    alert('أدخل 3 زوايا على الأقل');
+  c.insertAdjacentHTML("beforeend",`
+    <div class="point-row">
+      <span>${idx}</span>
+      <div class="coord">
+        <label>Latitude</label>
+        <input type="number" step="any" class="lat">
+      </div>
+      <div class="coord">
+        <label>Longitude</label>
+        <input type="number" step="any" class="lng">
+      </div>
+      <button onclick="this.parentElement.remove()">➖</button>
+    </div>
+  `);
+}
+
+/* ===== حساب المسافات ===== */
+function distance(p1, p2){
+  return Math.hypot(p2.x - p1.x, p2.y - p1.y);
+}
+
+/* ===== معادلة رباط الحذاء (Shoelace) ===== */
+function shoelaceArea(pts){
+  let sum1 = 0, sum2 = 0;
+  for(let i=0;i<pts.length;i++){
+    let j = (i + 1) % pts.length;
+    sum1 += pts[i].x * pts[j].y;
+    sum2 += pts[i].y * pts[j].x;
+  }
+  return Math.abs(sum1 - sum2) / 2;
+}
+
+/* ===== الحساب النهائي ===== */
+function calcArea(){
+  const lats = document.querySelectorAll(".lat");
+  const lngs = document.querySelectorAll(".lng");
+
+  if(lats.length < 3){
+    alert("أدخل 3 نقاط على الأقل");
     return;
   }
 
+  const refLat = parseFloat(lats[0].value);
   let pts = [];
 
-  for (let i = 0; i < lats.length; i++) {
-    let lat = parseFloat(lats[i].value);
-    let lon = parseFloat(lons[i].value);
-
-    if (Math.abs(lat) > 90 && Math.abs(lon) <= 90) {
-      [lat, lon] = [lon, lat];
-    }
-
-    pts.push(latLonToUTM(lat, lon));
+  for(let i=0;i<lats.length;i++){
+    pts.push(
+      latLngToXY(
+        parseFloat(lats[i].value),
+        parseFloat(lngs[i].value),
+        refLat
+      )
+    );
   }
 
-  let out = '<h4>أطوال الأضلاع:</h4>';
-  for (let i = 0; i < pts.length; i++) {
-    let j = (i + 1) % pts.length;
-    out += `الضلع ${i+1}-${j+1}: ${Math.hypot(
-      pts[j].x - pts[i].x,
-      pts[j].y - pts[i].y
-    ).toFixed(2)} م<br>`;
+  /* أطوال الأضلاع */
+  let html = "<h4>أطوال الأضلاع:</h4>";
+  for(let i=0;i<pts.length;i++){
+    let j = (i+1) % pts.length;
+    html += `من ${i+1} إلى ${j+1}: ${distance(pts[i],pts[j]).toFixed(2)} م<br>`;
   }
 
-  let area = 0;
-  for (let i = 0; i < pts.length; i++) {
-    let j = (i + 1) % pts.length;
-    area += pts[i].x * pts[j].y - pts[j].x * pts[i].y;
-  }
-  area = Math.abs(area / 2);
+  /* المساحة */
+  const area = shoelaceArea(pts);
 
-  out += `<h4>المساحة:</h4>
-          ${area.toFixed(2)} م²<br>
-          ${(area / 10000).toFixed(2)} هكتار<br>
-          ${(area / 1000).toFixed(2)} دونم`;
+  html += `
+    <h4>المساحة:</h4>
+    ${area.toFixed(2)} م²<br>
+    ${(area/1000).toFixed(2)} دونم<br>
+    ${(area/10000).toFixed(2)} هكتار<br>
+    ${(area/4200).toFixed(2)} فدان
+  `;
 
-  document.getElementById('result').innerHTML = out;
+  document.getElementById("areaResult").innerHTML = html;
 }
 </script><!-- بند 5 : إحداثيات الآبار -->
 <h3 style="color:green;">5- إحداثيات الآبار</h3>
@@ -712,6 +696,7 @@ function addOtherAsset() {
   <div style="margin-top:10px;">
     <button onclick="saveForm()">💾 حفظ النموذج</button>
     <button onclick="clearForm()">🗑 حذف النموذج</button>
+    <button onclick="newForm()">➕ نموذج جديد</button>
     <button onclick="printPDF()">🖨 طباعة PDF</button>
   </div>
 </div>
@@ -756,7 +741,13 @@ function clearForm(){
     localStorage.removeItem('farmFormData');
     location.reload();
   }
-
+}
+/* نموذج جديد */
+function newForm(){
+  if(confirm('سيتم تفريغ جميع الحقول، هل تريد المتابعة؟')){
+    document.querySelectorAll('input, select, textarea')
+      .forEach(el => el.value = '');
+  }
 }
 /* طباعة PDF */
 function printPDF(){
