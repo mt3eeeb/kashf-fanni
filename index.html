@@ -218,9 +218,7 @@ function getGateLocation(){
   }
 </style>
 
-<div id="points-container">
-  <!-- يبدأ فاضي -->
-</div>
+<div id="points-container"></div>
 
 <button onclick="addPoint()">+ إضافة زاوية</button>
 <button onclick="calculate()">حساب الأطوال والمساحة</button>
@@ -228,19 +226,59 @@ function getGateLocation(){
 <div id="result"></div>
 
 <script>
-const R = 6378137;
+// ==================
+// WGS84 → UTM (Zone تلقائي)
+// ==================
+const a = 6378137.0;
+const f = 1 / 298.257223563;
+const k0 = 0.9996;
+const e = Math.sqrt(f * (2 - f));
 
-function toRad(d) {
-  return d * Math.PI / 180;
+function latLonToUTM(lat, lon) {
+  const zone = Math.floor((lon + 180) / 6) + 1;
+  const λ0 = ((zone - 1) * 6 - 180 + 3) * Math.PI / 180;
+
+  const φ = lat * Math.PI / 180;
+  const λ = lon * Math.PI / 180;
+
+  const N = a / Math.sqrt(1 - e * e * Math.sin(φ) ** 2);
+  const T = Math.tan(φ) ** 2;
+  const C = (e * e / (1 - e * e)) * Math.cos(φ) ** 2;
+  const A = Math.cos(φ) * (λ - λ0);
+
+  const M =
+    a * (
+      (1 - e * e / 4 - 3 * e ** 4 / 64 - 5 * e ** 6 / 256) * φ
+      - (3 * e ** 2 / 8 + 3 * e ** 4 / 32 + 45 * e ** 6 / 1024) * Math.sin(2 * φ)
+      + (15 * e ** 4 / 256 + 45 * e ** 6 / 1024) * Math.sin(4 * φ)
+      - (35 * e ** 6 / 3072) * Math.sin(6 * φ)
+    );
+
+  const x =
+    k0 * N * (
+      A +
+      (1 - T + C) * A ** 3 / 6 +
+      (5 - 18 * T + T ** 2 + 72 * C - 58 * e ** 2) * A ** 5 / 120
+    ) + 500000;
+
+  let y =
+    k0 * (
+      M +
+      N * Math.tan(φ) * (
+        A ** 2 / 2 +
+        (5 - T + 9 * C + 4 * C ** 2) * A ** 4 / 24 +
+        (61 - 58 * T + T ** 2 + 600 * C - 330 * e ** 2) * A ** 6 / 720
+      )
+    );
+
+  if (lat < 0) y += 10000000;
+
+  return { x, y, zone };
 }
 
-function latLonToXY(lat, lon, lat0) {
-  return {
-    x: toRad(lon) * R * Math.cos(toRad(lat0)),
-    y: toRad(lat) * R
-  };
-}
-
+// ==================
+// حساب المسافات والمساحة
+// ==================
 function distance(p1, p2) {
   return Math.hypot(p2.x - p1.x, p2.y - p1.y);
 }
@@ -255,6 +293,9 @@ function polygonArea(points) {
   return Math.abs(area / 2);
 }
 
+// ==================
+// UI Logic
+// ==================
 function addPoint() {
   document.getElementById('points-container')
     .insertAdjacentHTML('beforeend', `
@@ -280,23 +321,22 @@ function calculate() {
   }
 
   let pts = [];
-  let lat0 = parseFloat(lats[0].value);
+  let zoneUsed = null;
 
   for (let i = 0; i < lats.length; i++) {
     if (!lats[i].value || !lons[i].value) {
       alert('تأكد من إدخال جميع الإحداثيات');
       return;
     }
-    pts.push(
-      latLonToXY(
-        parseFloat(lats[i].value),
-        parseFloat(lons[i].value),
-        lat0
-      )
+    const p = latLonToUTM(
+      parseFloat(lats[i].value),
+      parseFloat(lons[i].value)
     );
+    zoneUsed = p.zone;
+    pts.push(p);
   }
 
-  let out = '<h4>أطوال الأضلاع:</h4>';
+  let out = `<h4>أطوال الأضلاع (UTM Zone ${zoneUsed}):</h4>`;
   for (let i = 0; i < pts.length; i++) {
     let j = (i + 1) % pts.length;
     out += `الضلع ${i+1}-${j+1}: ${distance(pts[i], pts[j]).toFixed(2)} م<br>`;
