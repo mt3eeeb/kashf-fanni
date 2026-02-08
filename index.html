@@ -203,22 +203,30 @@ function getGateLocation(){
     }
   );
 }
-</script><!-- بند 4 : حدود الأرض وحساب الأطوال والمساحة -->
-<h3 style="color:green;">4- حدود الأرض وحساب المساحة</h3>
+</script><h3 style="color:green;">4- حدود الأرض وحساب المساحة</h3>
 
-<div id="points-container">
-  <!-- يبدأ فاضي -->
-</div>
+<div id="points-container"></div>
 
 <button type="button" onclick="addPoint()">+ إضافة زاوية</button>
 <button type="button" onclick="calculate()">حساب الأطوال والمساحة</button>
 
 <div id="result"></div>
 
+<style>
+.point {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.point input {
+  width: 45%;
+}
+.point button {
+  width: 40px;
+}
+</style>
+
 <script>
-/* =========================
-   UTM (Zone تلقائي) + تصحيح الجوال
-   ========================= */
 const a = 6378137;
 const f = 1 / 298.257223563;
 const k0 = 0.9996;
@@ -227,7 +235,6 @@ const e = Math.sqrt(f * (2 - f));
 function latLonToUTM(lat, lon) {
   const zone = Math.floor((lon + 180) / 6) + 1;
   const λ0 = ((zone - 1) * 6 - 180 + 3) * Math.PI / 180;
-
   const φ = lat * Math.PI / 180;
   const λ = lon * Math.PI / 180;
 
@@ -262,59 +269,40 @@ function latLonToUTM(lat, lon) {
     );
 
   if (lat < 0) y += 10000000;
-  return { x, y, zone };
+  return { x, y };
 }
 
-/* =========================
-   إضافة / حذف النقاط
-   ========================= */
 function addPoint() {
-  document.getElementById('points-container')
-    .insertAdjacentHTML('beforeend', `
-      <div class="point">
-        <input type="number" step="any" class="lat" placeholder="Latitude">
-        <input type="number" step="any" class="lon" placeholder="Longitude">
-        <button type="button" onclick="removePoint(this)">−</button>
-      </div>
-    `);
+  document.getElementById('points-container').insertAdjacentHTML(
+    'beforeend',
+    `<div class="point">
+      <input type="number" step="any" class="lat" placeholder="Latitude">
+      <input type="number" step="any" class="lon" placeholder="Longitude">
+      <button type="button" onclick="this.parentElement.remove()">−</button>
+    </div>`
+  );
 }
 
-function removePoint(btn) {
-  btn.parentElement.remove();
-}
-
-/* =========================
-   الحساب (نفس الشكل القديم)
-   ========================= */
 function calculate() {
   const lats = document.querySelectorAll('.lat');
   const lons = document.querySelectorAll('.lon');
 
   if (lats.length < 3) {
-    alert('لا بد من إدخال 3 زوايا على الأقل');
+    alert('أدخل 3 زوايا على الأقل');
     return;
   }
 
   let pts = [];
-  let zoneUsed = null;
 
   for (let i = 0; i < lats.length; i++) {
     let lat = parseFloat(lats[i].value);
     let lon = parseFloat(lons[i].value);
 
-    if (isNaN(lat) || isNaN(lon)) {
-      alert('تأكد من إدخال جميع الإحداثيات');
-      return;
-    }
-
-    // 🔁 تصحيح تلقائي لو انعكس الإدخال بالجوال
     if (Math.abs(lat) > 90 && Math.abs(lon) <= 90) {
       [lat, lon] = [lon, lat];
     }
 
-    const p = latLonToUTM(lat, lon);
-    zoneUsed = p.zone;
-    pts.push(p);
+    pts.push(latLonToUTM(lat, lon));
   }
 
   let out = '<h4>أطوال الأضلاع:</h4>';
