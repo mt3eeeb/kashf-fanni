@@ -203,8 +203,8 @@ function getGateLocation(){
     }
   );
 }
-</script><!-- بند 4 : حدود الأرض (كروكي) -->
-<h3 style="color:green;">4- حدود الأرض (الكروكي)</h3>
+</script><!-- بند 4 : حدود الأرض -->
+<h3 style="color:green;">4- حدود الأرض</h3>
 
 <style>
 .point-row{
@@ -213,9 +213,8 @@ function getGateLocation(){
   align-items:flex-end;
   margin-bottom:8px;
 }
-.point-row span{
-  font-weight:bold;
-  min-width:20px;
+.point-row strong{
+  width:35px;
 }
 .coord{
   flex:1;
@@ -224,35 +223,36 @@ function getGateLocation(){
 
 <div id="points"></div>
 
-<button type="button" onclick="addPoint()">➕ إضافة نقطة</button>
-<button type="button" onclick="calcArea()">📐 حساب المساحة</button>
+<button type="button" onclick="addPoint()">➕ إضافة زاوية</button>
+<button type="button" onclick="calculateLand()">📐 حساب المساحة</button>
 
-<div id="areaResult" style="margin-top:10px;"></div>
+<div id="landResult" style="margin-top:10px;"></div>
 
 <script>
-/* ===== إعدادات ===== */
-const R = 6378137; // نصف قطر الأرض بالمتر
+/* نصف قطر الأرض */
+const R = 6378137;
 
+/* درجات → راديان */
 function toRad(d){
   return d * Math.PI / 180;
 }
 
-/* تحويل Lat/Lng إلى متر (XY) */
-function latLngToXY(lat, lng, refLat){
+/* تحويل Lat/Lng إلى نظام مسطح محلي (رفع مساحي) */
+function project(lat, lng, refLat){
   return {
     x: toRad(lng) * R * Math.cos(toRad(refLat)),
     y: toRad(lat) * R
   };
 }
 
-/* ===== إضافة نقطة ===== */
+/* إضافة زاوية */
 function addPoint(){
   const c = document.getElementById("points");
-  const idx = c.children.length + 1;
+  const n = c.children.length + 1;
 
-  c.insertAdjacentHTML("beforeend",`
+  c.insertAdjacentHTML("beforeend", `
     <div class="point-row">
-      <span>${idx}</span>
+      <strong>P${n}</strong>
       <div class="coord">
         <label>Latitude</label>
         <input type="number" step="any" class="lat">
@@ -266,29 +266,29 @@ function addPoint(){
   `);
 }
 
-/* ===== حساب المسافات ===== */
-function distance(p1, p2){
-  return Math.hypot(p2.x - p1.x, p2.y - p1.y);
+/* مسافة بين نقطتين */
+function dist(a,b){
+  return Math.hypot(b.x-a.x, b.y-a.y);
 }
 
-/* ===== معادلة رباط الحذاء (Shoelace) ===== */
-function shoelaceArea(pts){
-  let sum1 = 0, sum2 = 0;
-  for(let i=0;i<pts.length;i++){
-    let j = (i + 1) % pts.length;
-    sum1 += pts[i].x * pts[j].y;
-    sum2 += pts[i].y * pts[j].x;
+/* معادلة رباط الحذاء */
+function polygonArea(p){
+  let s1=0, s2=0;
+  for(let i=0;i<p.length;i++){
+    let j=(i+1)%p.length;
+    s1 += p[i].x * p[j].y;
+    s2 += p[i].y * p[j].x;
   }
-  return Math.abs(sum1 - sum2) / 2;
+  return Math.abs(s1 - s2) / 2;
 }
 
-/* ===== الحساب النهائي ===== */
-function calcArea(){
+/* الحساب */
+function calculateLand(){
   const lats = document.querySelectorAll(".lat");
   const lngs = document.querySelectorAll(".lng");
 
   if(lats.length < 3){
-    alert("أدخل 3 نقاط على الأقل");
+    alert("يجب إدخال 3 زوايا على الأقل");
     return;
   }
 
@@ -297,7 +297,7 @@ function calcArea(){
 
   for(let i=0;i<lats.length;i++){
     pts.push(
-      latLngToXY(
+      project(
         parseFloat(lats[i].value),
         parseFloat(lngs[i].value),
         refLat
@@ -305,25 +305,22 @@ function calcArea(){
     );
   }
 
-  /* أطوال الأضلاع */
   let html = "<h4>أطوال الأضلاع:</h4>";
   for(let i=0;i<pts.length;i++){
-    let j = (i+1) % pts.length;
-    html += `من ${i+1} إلى ${j+1}: ${distance(pts[i],pts[j]).toFixed(2)} م<br>`;
+    let j=(i+1)%pts.length;
+    html += `P${i+1} → P${j+1}: ${dist(pts[i],pts[j]).toFixed(2)} م<br>`;
   }
 
-  /* المساحة */
-  const area = shoelaceArea(pts);
+  const area = polygonArea(pts);
 
   html += `
     <h4>المساحة:</h4>
     ${area.toFixed(2)} م²<br>
     ${(area/1000).toFixed(2)} دونم<br>
-    ${(area/10000).toFixed(2)} هكتار<br>
-    ${(area/4200).toFixed(2)} فدان
+    ${(area/10000).toFixed(2)} هكتار
   `;
 
-  document.getElementById("areaResult").innerHTML = html;
+  document.getElementById("landResult").innerHTML = html;
 }
 </script><!-- بند 5 : إحداثيات الآبار -->
 <h3 style="color:green;">5- إحداثيات الآبار</h3>
