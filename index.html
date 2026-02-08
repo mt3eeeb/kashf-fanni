@@ -205,39 +205,47 @@ function getGateLocation(){
 }
 </script><!-- بند 4 : حدود الأرض وحساب الأطوال والمساحة -->
 <h3 style="color:green;">4- حدود الأرض وحساب المساحة</h3>
+
+<style>
+  .point{
+    display:flex;
+    gap:6px;
+    margin-bottom:6px;
+    align-items:center;
+  }
+  .point input{
+    width:160px;
+  }
+</style>
+
 <div id="points-container">
   <div class="point">
-    <label>Latitude</label>
-    <input type="number" step="any" class="lat" value="27.9067062622577">
-    <label>Longitude</label>
-    <input type="number" step="any" class="lon" value="47.6573794635725">
+    <input type="number" step="any" class="lat" placeholder="Latitude" value="27.9067062622577">
+    <input type="number" step="any" class="lon" placeholder="Longitude" value="47.6573794635725">
     <button onclick="removePoint(this)">−</button>
   </div>
   <div class="point">
-    <label>Latitude</label>
-    <input type="number" step="any" class="lat" value="27.8953949896574">
-    <label>Longitude</label>
-    <input type="number" step="any" class="lon" value="47.6309444646944">
+    <input type="number" step="any" class="lat" placeholder="Latitude" value="27.8953949896574">
+    <input type="number" step="any" class="lon" placeholder="Longitude" value="47.6309444646944">
     <button onclick="removePoint(this)">−</button>
   </div>
   <div class="point">
-    <label>Latitude</label>
-    <input type="number" step="any" class="lat" value="27.8759187770115">
-    <label>Longitude</label>
-    <input type="number" step="any" class="lon" value="47.6440173862045">
+    <input type="number" step="any" class="lat" placeholder="Latitude" value="27.8759187770115">
+    <input type="number" step="any" class="lon" placeholder="Longitude" value="47.6440173862045">
     <button onclick="removePoint(this)">−</button>
   </div>
   <div class="point">
-    <label>Latitude</label>
-    <input type="number" step="any" class="lat" value="27.8832309350795">
-    <label>Longitude</label>
-    <input type="number" step="any" class="lon" value="47.6741783244199">
+    <input type="number" step="any" class="lat" placeholder="Latitude" value="27.8832309350795">
+    <input type="number" step="any" class="lon" placeholder="Longitude" value="47.6741783244199">
     <button onclick="removePoint(this)">−</button>
   </div>
 </div>
+
 <button onclick="addPoint()">+ إضافة زاوية</button>
 <button onclick="calculate()">حساب الأطوال والمساحة</button>
+
 <div id="result"></div>
+
 <script>
 const R = 6378137;
 function toRad(d) {
@@ -291,10 +299,8 @@ function addPoint() {
   const c = document.getElementById('points-container');
   c.insertAdjacentHTML('beforeend', `
     <div class="point">
-      <label>Latitude</label>
-      <input type="number" step="any" class="lat">
-      <label>Longitude</label>
-      <input type="number" step="any" class="lon">
+      <input type="number" step="any" class="lat" placeholder="Latitude">
+      <input type="number" step="any" class="lon" placeholder="Longitude">
       <button onclick="removePoint(this)">−</button>
     </div>
   `);
