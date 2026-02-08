@@ -309,70 +309,62 @@ function calculate(){
 
   document.getElementById("result").innerHTML = html;
 }
-</script><!-- بند 5 : إحداثيات الآبار -->
-<h3 style="color:green;">5- إحداثيات الآبار</h3>
-<div id="wells-container"></div>
-<button onclick="addWell()">➕ إضافة بئر</button>
+</script><!-- ===== بند 5 : إحداثيات الآبار ===== -->
+<div class="section">
+  <div class="section-title">5️⃣ إحداثيات الآبار</div>
+  <div class="section-body">
+
+    <div id="wellsContainer"></div>
+
+    <button type="button" onclick="addWell()">➕ إضافة بئر</button>
+
+  </div>
+</div>
+
 <script>
-let wells = [];
-function saveWells() {
-  localStorage.setItem("wells", JSON.stringify(wells));
-}
-function loadWells() {
-  const data = localStorage.getItem("wells");
-  if (data) {
-    wells = JSON.parse(data);
-    renderWells();
-  }
-}
-function renderWells() {
-  const c = document.getElementById("wells-container");
-  c.innerHTML = "";
-  wells.forEach((w, i) => {
-    c.insertAdjacentHTML("beforeend", `
-      <div class="well" style="border:1px solid #ccc;padding:10px;margin:10px 0;">
+function addWell(){
+  const c = document.getElementById("wellsContainer");
+  c.insertAdjacentHTML("beforeend", `
+    <div class="row" style="margin-bottom:12px; align-items:end;">
+
+      <div class="field">
         <label>Latitude</label>
-        <input type="number" step="any" value="${w.lat || ""}" 
-               onchange="updateWell(${i}, 'lat', this.value)">
-        <label>Longitude</label>
-        <input type="number" step="any" value="${w.lon || ""}" 
-               onchange="updateWell(${i}, 'lon', this.value)">
-        <br><br>
-        <button onclick="locateWell(${i})">📍 تحديد الموقع</button>
-        <button onclick="openMap(${i})">🗺️ الوصول للموقع</button>
-        <button onclick="removeWell(${i})">➖ حذف</button>
+        <input type="number" step="any" class="wellLat" placeholder="مثال: 27.906700">
       </div>
-    `);
-  });
+
+      <div class="field">
+        <label>Longitude</label>
+        <input type="number" step="any" class="wellLng" placeholder="مثال: 47.657370">
+      </div>
+
+      <div class="field" style="flex:0; display:flex; gap:5px;">
+        <button type="button" onclick="locateWell(this)">📍</button>
+        <button type="button" onclick="openWellMap(this)">🗺️</button>
+        <button type="button" onclick="removeWell(this)">➖</button>
+      </div>
+
+    </div>
+  `);
 }
-function addWell() {
-  wells.push({ lat: "", lon: "" });
-  saveWells();
-  renderWells();
+
+function removeWell(btn){
+  btn.closest('.row').remove();
 }
-function removeWell(i) {
-  wells.splice(i, 1);
-  saveWells();
-  renderWells();
-}
-function updateWell(i, key, value) {
-  wells[i][key] = value;
-  saveWells();
-}
-function locateWell(i) {
-  if (!navigator.geolocation) {
+
+function locateWell(btn){
+  if(!navigator.geolocation){
     alert("المتصفح لا يدعم تحديد الموقع");
     return;
   }
+
   navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      wells[i].lat = pos.coords.latitude.toFixed(6);
-      wells[i].lon = pos.coords.longitude.toFixed(6);
-      saveWells();
-      renderWells();
+    pos => {
+      const row = btn.closest('.row');
+      row.querySelector('.wellLat').value = pos.coords.latitude.toFixed(6);
+      row.querySelector('.wellLng').value = pos.coords.longitude.toFixed(6);
     },
     () => {
-      alert("تعذر تحديد الموقع، تأكد من تفعيل GPS");
+      alert("لم يتم السماح بتحديد الموقع");
     },
     {
       enableHighAccuracy: true,
@@ -381,17 +373,22 @@ function locateWell(i) {
     }
   );
 }
-function openMap(i) {
-  if (!wells[i].lat || !wells[i].lon) {
+
+function openWellMap(btn){
+  const row = btn.closest('.row');
+  const lat = row.querySelector('.wellLat').value.trim();
+  const lng = row.querySelector('.wellLng').value.trim();
+
+  if(!lat || !lng){
     alert("أدخل الإحداثيات أولاً");
     return;
   }
+
   window.open(
-    `https://www.google.com/maps?q=${wells[i].lat},${wells[i].lon}`,
+    `https://www.google.com/maps?q=${lat},${lng}`,
     "_blank"
   );
 }
-loadWells();
 </script><!-- بند 6 : نظام الري -->
 <h3 style="color:green;">6- نظام الري</h3>
 <div id="irrigationContainer">
