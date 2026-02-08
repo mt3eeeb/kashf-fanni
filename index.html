@@ -219,26 +219,7 @@ function getGateLocation(){
 </style>
 
 <div id="points-container">
-  <div class="point">
-    <input type="number" step="any" class="lat" placeholder="Latitude" value="27.9067062622577">
-    <input type="number" step="any" class="lon" placeholder="Longitude" value="47.6573794635725">
-    <button onclick="removePoint(this)">−</button>
-  </div>
-  <div class="point">
-    <input type="number" step="any" class="lat" placeholder="Latitude" value="27.8953949896574">
-    <input type="number" step="any" class="lon" placeholder="Longitude" value="47.6309444646944">
-    <button onclick="removePoint(this)">−</button>
-  </div>
-  <div class="point">
-    <input type="number" step="any" class="lat" placeholder="Latitude" value="27.8759187770115">
-    <input type="number" step="any" class="lon" placeholder="Longitude" value="47.6440173862045">
-    <button onclick="removePoint(this)">−</button>
-  </div>
-  <div class="point">
-    <input type="number" step="any" class="lat" placeholder="Latitude" value="27.8832309350795">
-    <input type="number" step="any" class="lon" placeholder="Longitude" value="47.6741783244199">
-    <button onclick="removePoint(this)">−</button>
-  </div>
+  <!-- يبدأ فاضي -->
 </div>
 
 <button onclick="addPoint()">+ إضافة زاوية</button>
@@ -248,18 +229,22 @@ function getGateLocation(){
 
 <script>
 const R = 6378137;
+
 function toRad(d) {
   return d * Math.PI / 180;
 }
+
 function latLonToXY(lat, lon, lat0) {
   return {
     x: toRad(lon) * R * Math.cos(toRad(lat0)),
     y: toRad(lat) * R
   };
 }
+
 function distance(p1, p2) {
   return Math.hypot(p2.x - p1.x, p2.y - p1.y);
 }
+
 function polygonArea(points) {
   let area = 0;
   for (let i = 0; i < points.length; i++) {
@@ -269,12 +254,39 @@ function polygonArea(points) {
   }
   return Math.abs(area / 2);
 }
+
+function addPoint() {
+  document.getElementById('points-container')
+    .insertAdjacentHTML('beforeend', `
+      <div class="point">
+        <input type="number" step="any" class="lat" placeholder="Latitude">
+        <input type="number" step="any" class="lon" placeholder="Longitude">
+        <button onclick="removePoint(this)">−</button>
+      </div>
+    `);
+}
+
+function removePoint(btn) {
+  btn.parentElement.remove();
+}
+
 function calculate() {
   const lats = document.querySelectorAll('.lat');
   const lons = document.querySelectorAll('.lon');
-  let lat0 = parseFloat(lats[0].value);
+
+  if (lats.length < 3) {
+    alert('لا بد من إدخال 3 زوايا على الأقل');
+    return;
+  }
+
   let pts = [];
+  let lat0 = parseFloat(lats[0].value);
+
   for (let i = 0; i < lats.length; i++) {
+    if (!lats[i].value || !lons[i].value) {
+      alert('تأكد من إدخال جميع الإحداثيات');
+      return;
+    }
     pts.push(
       latLonToXY(
         parseFloat(lats[i].value),
@@ -283,30 +295,20 @@ function calculate() {
       )
     );
   }
+
   let out = '<h4>أطوال الأضلاع:</h4>';
   for (let i = 0; i < pts.length; i++) {
     let j = (i + 1) % pts.length;
     out += `الضلع ${i+1}-${j+1}: ${distance(pts[i], pts[j]).toFixed(2)} م<br>`;
   }
+
   const area = polygonArea(pts);
   out += `<h4>المساحة:</h4>
           ${area.toFixed(2)} م²<br>
           ${(area / 10000).toFixed(2)} هكتار<br>
           ${(area / 1000).toFixed(2)} دونم`;
+
   document.getElementById('result').innerHTML = out;
-}
-function addPoint() {
-  const c = document.getElementById('points-container');
-  c.insertAdjacentHTML('beforeend', `
-    <div class="point">
-      <input type="number" step="any" class="lat" placeholder="Latitude">
-      <input type="number" step="any" class="lon" placeholder="Longitude">
-      <button onclick="removePoint(this)">−</button>
-    </div>
-  `);
-}
-function removePoint(btn) {
-  btn.parentElement.remove();
 }
 </script><!-- بند 5 : إحداثيات الآبار -->
 <h3 style="color:green;">5- إحداثيات الآبار</h3>
@@ -679,7 +681,6 @@ function addOtherAsset() {
   <div style="margin-top:10px;">
     <button onclick="saveForm()">💾 حفظ النموذج</button>
     <button onclick="clearForm()">🗑 حذف النموذج</button>
-    <button onclick="newForm()">➕ نموذج جديد</button>
     <button onclick="printPDF()">🖨 طباعة PDF</button>
   </div>
 </div>
@@ -724,13 +725,7 @@ function clearForm(){
     localStorage.removeItem('farmFormData');
     location.reload();
   }
-}
-/* نموذج جديد */
-function newForm(){
-  if(confirm('سيتم تفريغ جميع الحقول، هل تريد المتابعة؟')){
-    document.querySelectorAll('input, select, textarea')
-      .forEach(el => el.value = '');
-  }
+
 }
 /* طباعة PDF */
 function printPDF(){
