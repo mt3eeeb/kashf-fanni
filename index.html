@@ -625,6 +625,41 @@ window.onload=function(){
   const d=localStorage.getItem("farmForm");
   if(d) document.body.innerHTML=d;
 }
+</script>‏
+<script>
+‏function saveAuto(){
+‏  const data = {};
+‏  document.querySelectorAll("input, select, textarea").forEach(el=>{
+‏    if(el.id){
+‏      data[el.id] = el.value;
+    }
+  });
+‏  localStorage.setItem("kashfFanniData", JSON.stringify(data));
+}
+
+// حفظ تلقائي عند أي تغيير
+‏document.addEventListener("input", saveAuto);
+‏document.addEventListener("change", saveAuto);
+‏</script> <script>
+window.addEventListener("load", ()=>{
+  const saved = localStorage.getItem("kashfFanniData");
+  if(!saved) return;
+
+  const data = JSON.parse(saved);
+  Object.keys(data).forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.value = data[id];
+  });
+});
+</script> <button onclick="clearAll()">🗑 حذف النموذج</button>
+
+<script>
+function clearAll(){
+  if(confirm("متأكد تحذف كل البيانات؟")){
+    localStorage.removeItem("kashfFanniData");
+    location.reload();
+  }
+}
 </script>
 </body>
 </html>
