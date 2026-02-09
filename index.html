@@ -587,10 +587,6 @@ function addOtherAsset() {
     <div class="section-body">
       <label>اسم الباحث</label>
       <input id="researcherName">
-      <hr>
-      <button onclick="saveForm()">💾 حفظ</button>
-      <button onclick="clearForm()">🗑 حذف</button>
-      <button onclick="newForm()">➕ جديد</button>
       <button onclick="printPDF()">🖨 طباعة</button>
     </div>
   </div>
@@ -631,7 +627,9 @@ document.addEventListener("change", saveAuto);
 // حفظ تلقائي عند أي تغيير
 ‏document.addEventListener("input", saveAuto);
 ‏document.addEventListener("change", saveAuto);
-‏</script> <script>
+‏</script>
+
+<script>
 window.addEventListener("load", ()=>{
   const saved = localStorage.getItem("kashfFanniData");
   if(!saved) return;
