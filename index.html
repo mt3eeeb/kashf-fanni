@@ -604,28 +604,20 @@ function openMap(latId,lngId){
   if(!lat||!lng){alert("أدخل الإحداثيات");return;}
   window.open(`https://www.google.com/maps?q=${lat},${lng}`,'_blank');
 }
-function printPDF(){window.print();}
-function saveForm(){
-  localStorage.setItem("farmForm",document.body.innerHTML);
-  alert("تم الحفظ");
+function saveAuto(){
+  const data = {};
+  document.querySelectorAll("input, select, textarea").forEach(el=>{
+    if(el.id){
+      data[el.id] = el.value;
+    }
+  });
+  localStorage.setItem("kashfFanniData", JSON.stringify(data));
 }
-function clearForm(){
-  if(confirm("حذف النموذج؟")){
-    localStorage.removeItem("farmForm");
-    location.reload();
-  }
-}
-function newForm(){
-  if(confirm("تفريغ الحقول؟")){
-    document.querySelectorAll("input,select,textarea")
-    .forEach(e=>e.value="");
-  }
-}
-window.onload=function(){
-  const d=localStorage.getItem("farmForm");
-  if(d) document.body.innerHTML=d;
-}
-</script>‏<script>
+
+// حفظ تلقائي عند أي تغيير
+document.addEventListener("input", saveAuto);
+document.addEventListener("change", saveAuto);
+</script><script>
 ‏function saveAuto(){
 ‏  const data = {};
 ‏  document.querySelectorAll("input, select, textarea").forEach(el=>{
