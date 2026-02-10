@@ -543,6 +543,12 @@ function addBuilding() {
         <option>حظار اغنام</option>
         <option>مستودع</option>
         <option>خزان ماء</option>
+        <option value="other">آخر</option>
+      </select>
+      <div class="plantNote" style="display:none; margin-top:8px;">
+        <label>وصف المزروع</label>
+        <input type="text">
+      </div>
       </select>
       <div class="assetNote" style="display:none; margin-top:8px;">
         <label>وصف / ملاحظات</label>
@@ -562,11 +568,11 @@ function addWellAsset() {
         <option>رأس كهرب</option>
         <option>غطاس</option>
         <option>مكينة + طرمبة</option>
+        <option value="other">لا يوجد معدات على البئر</option>
       </select>
       <div class="assetNote" style="display:none; margin-top:8px;">
         <label>وصف / ملاحظات</label>
         <input type="text" placeholder="مثال: القدرة، العمق، الحالة">
-      </div>
       <button type="button" onclick="removeBox(this)">➖ حذف</button>
     </div>
   `);
@@ -600,36 +606,28 @@ function openMap(latId,lngId){
   if(!lat||!lng){alert("أدخل الإحداثيات");return;}
   window.open(`https://www.google.com/maps?q=${lat},${lng}`,'_blank');
 }
-function saveAuto(){
-  const data = {};
-  document.querySelectorAll("input, select, textarea").forEach(el=>{
-    if(el.id){
-      data[el.id] = el.value;
-    }
-  });
-  localStorage.setItem("kashfFanniData", JSON.stringify(data));
+function printPDF(){window.print();}
+function saveForm(){
+  localStorage.setItem("farmForm",document.body.innerHTML);
+  alert("تم الحفظ");
 }
-
-// حفظ تلقائي عند أي تغيير
-document.addEventListener("input", saveAuto);
-document.addEventListener("change", saveAuto);
+function clearForm(){
+  if(confirm("حذف النموذج؟")){
+    localStorage.removeItem("farmForm");
+    location.reload();
+  }
+}
+function newForm(){
+  if(confirm("تفريغ الحقول؟")){
+    document.querySelectorAll("input,select,textarea")
+    .forEach(e=>e.value="");
+  }
+}
+window.onload=function(){
+  const d=localStorage.getItem("farmForm");
+  if(d) document.body.innerHTML=d;
+}
 </script><script>
-‏function saveAuto(){
-‏  const data = {};
-‏  document.querySelectorAll("input, select, textarea").forEach(el=>{
-‏    if(el.id){
-‏      data[el.id] = el.value;
-    }
-  });
-‏  localStorage.setItem("kashfFanniData", JSON.stringify(data));
-}
-
-// حفظ تلقائي عند أي تغيير
-‏document.addEventListener("input", saveAuto);
-‏document.addEventListener("change", saveAuto);
-‏</script>
-
-<script>
 window.addEventListener("load", ()=>{
   const saved = localStorage.getItem("kashfFanniData");
   if(!saved) return;
@@ -650,5 +648,7 @@ function clearAll(){
   }
 }
 </script>
+</body>
+</html>
 </body>
 </html>
