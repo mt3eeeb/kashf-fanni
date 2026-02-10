@@ -563,38 +563,95 @@ function handleAsset(select) {
 /* ===== الموجودات===== */
 function addBuilding() {
   document.getElementById('buildingsContainer').insertAdjacentHTML('beforeend', `
-    <div class="assetBox" style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
-      <label> </label>
-      <select onchange="handleAsset(this)">
-        <option value="">اختر</option>
-        <option>سكن عمال</option>
-        <option>حظائر اغنام</option>
-        <option>مستودع</option>
-        <option>خزان ماء</option>
-        <option value="other">آخر</option>
-      </select>
-      <div class="plantNote" style="display:none; margin-top:8px;">
-        <label>وصف المزروع</label>
-        <input type="text">
-      </div>
-      </select>
-      <div class="assetNote" style="display:none; margin-top:8px;">
-        <label>وصف / ملاحظات</label>
-        <input type="text" placeholder="مثال: عدد الغرف، السعة، الحالة">
-      </div>
-      <button type="button" onclick="removeBox(this)">➖ حذف</button>
-    </div>
+    <div class="section">
+  <div class="section-title">8️⃣ الموجودات</div>
+
+  <div class="assetBox" style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+
+    <label>الموجود</label>
+<select onchange="handleAsset(this)">
+  <option value="">اختر</option>
+  <option value="housing">سكن عمال</option>
+  <option value="barn">حظائر انعام</option>
+  <option value="store">مستودع</option>
+  <option value="tank">خزان ماء</option>
+  <option value="other">آخر</option>
+</select>
+<label>وصف الموجود</label>
+      <input type="text" placeholder="اكتب الموجود بالتفصيل">
+<label>
+  <input type="checkbox" onchange="toggleAreaCalc(this)">
+  حساب المساحة
+</label>
+
+<div class="areaCalc" style="display:none;">
+  <label>الطول (متر)</label>
+  <input type="number" class="len" step="0.01">
+
+  <label>العرض (متر)</label>
+  <input type="number" class="wid" step="0.01">
+
+  <button type="button" onclick="calcArea(this)">احسب المساحة</button>
+  <div class="areaResult"></div>
+</div>
+
+<!-- حاسبة الخزان -->
+<div class="tankCalc" style="display:none;">
+  <label>نصف القطر (متر)</label>
+  <input type="number" class="tankR" step="0.01">
+
+  <label>الارتفاع (متر)</label>
+  <input type="number" class="tankH" step="0.01">
+
+  <button type="button" onclick="calcTank(this)">احسب السعة</button>
+  <div class="tankResult"></div>
+</div>
+  </div>
   `);
 }
-/* ===== أخرى ===== */
-function addOtherAsset() {
-  document.getElementById('otherAssetsContainer').insertAdjacentHTML('beforeend', `
-    <div class="assetBox" style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
-      <label>وصف الموجود</label>
-      <input type="text" placeholder="اكتب الموجود بالتفصيل">
-      <button type="button" onclick="removeBox(this)">➖ حذف</button>
-    </div>
-  `);
+function handleAsset(select){
+  const box = select.closest('.assetBox');
+  const area = box.querySelector('.areaCalc');
+  const tank = box.querySelector('.tankCalc');
+
+  area.style.display = "none";
+  tank.style.display = "none";
+
+  if(select.value === "tank"){
+    tank.style.display = "block";
+  }
+}
+function toggleAreaCalc(cb){
+  const box = cb.closest('.assetBox');
+  const area = box.querySelector('.areaCalc');
+  area.style.display = cb.checked ? "block" : "none";
+}function calcArea(btn){
+  const box = btn.closest('.areaCalc');
+  const l = parseFloat(box.querySelector('.len').value);
+  const w = parseFloat(box.querySelector('.wid').value);
+
+  if(!l || !w){
+    alert("أدخل الطول والعرض");
+    return;
+  }
+
+  const area = l * w;
+  box.querySelector('.areaResult').innerHTML =
+    `المساحة = <b>${area.toFixed(2)}</b> م²`;
+}
+function calcTank(btn){
+  const box = btn.closest('.tankCalc');
+  const r = parseFloat(box.querySelector('.tankR').value);
+  const h = parseFloat(box.querySelector('.tankH').value);
+
+  if(!r || !h){
+    alert("أدخل القيم");
+    return;
+  }
+
+  const v = Math.PI * r * r * h;
+  box.querySelector('.tankResult').innerHTML =
+    `السعة = <b>${v.toFixed(2)}</b> م³`;
 }
 </script><!-- ===== بند 9 ===== -->
   <div class="section">
@@ -657,6 +714,3 @@ function clearAll(){
 </html>
 </body>
 </html>
-
-
-
