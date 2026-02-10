@@ -356,6 +356,7 @@ function openWellMap(btn){
         <input type="text" placeholder=>
         </select>
       <button type="button" onclick="removeBox(this)">➖ حذف</button>
+     </div>
     </div>
   `);
 }
@@ -580,32 +581,6 @@ function addBuilding() {
         <label>وصف / ملاحظات</label>
         <input type="text" placeholder="مثال: عدد الغرف، السعة، الحالة">
       </div>
-      <button type="button" onclick="removeBox(this)">➖ حذف</button>
-    </div>
-  `);
-}
-/* ===== موجودات البئر ===== */
-function addWellAsset() {
-  document.getElementById('wellAssetsContainer').insertAdjacentHTML('beforeend', `
-    <div class="assetBox" style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
-      <label>الموجود</label>
-      <select onchange="handleAsset(this)">
-        <option value="">اختر</option>
-        <option>رأس كهرب</option>
-        <option>غطاس</option>
-        <option>مكينة + طرمبة</option>
-        <option value="other">لا توجد معدات على البئر</option>
-      </select>
-      <div class="assetNote" style="display:none; margin-top:8px;">
-        <label>العمق(قدم)</label>
-        <input type="text" placeholder=>
-        <label>الهواء(قدم)</label>
-        <input type="text" placeholder=>
-        <label>القطر(بوصة)</label>
-        <input type="text" placeholder=>
-        <label>حالة البئر</label>
-        <input type="text" placeholder=>
-        </select>
       <button type="button" onclick="removeBox(this)">➖ حذف</button>
     </div>
   `);
