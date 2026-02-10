@@ -279,25 +279,45 @@ function calculate(){
 <script>
 function addWell(){
   const c = document.getElementById("wellsContainer");
+
   c.insertAdjacentHTML("beforeend", `
-    <div class="row" style="margin-bottom:12px; align-items:end;">
-      <div class="field">
-        <label>Latitude</label>
-        <input type="number" step="any" class="wellLat" placeholder="مثال: 27.906700">
+    <div class="wellBox" style="border:1px solid #ccc; padding:10px; margin-bottom:12px;">
+
+      <h4 class="wellTitle">بئر رقم</h4>
+
+      <div class="row" style="align-items:end;">
+        <div class="field">
+          <label>Latitude</label>
+          <input type="number" step="any" class="wellLat">
+        </div>
+
+        <div class="field">
+          <label>Longitude</label>
+          <input type="number" step="any" class="wellLng">
+        </div>
+
+        <div class="field" style="flex:0; display:flex; gap:5px;">
+          <button type="button" onclick="locateWell(this)">📍</button>
+          <button type="button" onclick="openWellMap(this)">🗺️</button>
+          <button type="button" onclick="removeWell(this)">➖</button>
+        </div>
       </div>
-      <div class="field">
-        <label>Longitude</label>
-        <input type="number" step="any" class="wellLng" placeholder="مثال: 47.657370">
-      </div>
-      <div class="field" style="flex:0; display:flex; gap:5px;">
-        <button type="button" onclick="locateWell(this)">📍</button>
-        <button type="button" onclick="openWellMap(this)">🗺️</button>
-        <button type="button" onclick="removeWell(this)">➖</button>
-      </div>
+
     </div>
   `);
+
+  renumberWells(); // ← مهم
 }
 function removeWell(btn){
+  btn.closest('.wellBox').remove();
+  renumberWells();
+}
+function renumberWells(){
+  document.querySelectorAll("#wellsContainer .wellBox")
+    .forEach((box, i)=>{
+      box.querySelector(".wellTitle").innerText = `بئر رقم ${i+1}`;
+    });
+}function removeWell(btn){
   btn.closest('.row').remove();
 }
 function locateWell(btn){
