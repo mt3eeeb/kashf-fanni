@@ -261,13 +261,20 @@ function calculate(){
   `;
   document.getElementById("result").innerHTML = html;
 }
-</script><!-- ===== بند 5 : إحداثيات الآبار ===== -->
+</script><!-- ===== بند 5 : الآبار ===== -->
 <div class="section">
-  <div class="section-title">5️⃣ إحداثيات الآبار</div>
+  <div class="section-title">5️⃣ الآبار</div>
   <div class="section-body">
     <div id="wellsContainer"></div>
-    <button type="button" onclick="addWell()">➕ إضافة بئر</button>
-  </div>
+    <button type="button" onclick="addWell()">➕ إضافة </button>
+  <hr>
+<!-- ================= الموجودات على البئر ================= -->
+  <h4><!DOCTYPE html>
+  </html>الموجودات على البئر</h4>
+    <div id="wellAssetsContainer"></div>
+    <button type="button" onclick="addWellAsset()">➕ إضافة موجود على البئر</button>
+  <hr>
+  </dv>
 </div>
 <script>
 function addWell(){
@@ -326,6 +333,31 @@ function openWellMap(btn){
     `https://www.google.com/maps?q=${lat},${lng}`,
     "_blank"
   );
+}
+  function addWellAsset() {
+  document.getElementById('wellAssetsContainer').insertAdjacentHTML('beforeend', `
+    <div class="assetBox" style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+      <label>الموجود</label>
+      <select onchange="handleAsset(this)">
+        <option value="">اختر</option>
+        <option>رأس كهرب</option>
+        <option>غطاس</option>
+        <option>مكينة + طرمبة</option>
+        <option value="other">لا توجد معدات على البئر</option>
+      </select>
+      <div class="assetNote" style="display:none; margin-top:8px;">
+        <label>العمق(قدم)</label>
+        <input type="text" placeholder=>
+        <label>الهواء(قدم)</label>
+        <input type="text" placeholder=>
+        <label>القطر(بوصة)</label>
+        <input type="text" placeholder=>
+        <label>حالة البئر</label>
+        <input type="text" placeholder=>
+        </select>
+      <button type="button" onclick="removeBox(this)">➖ حذف</button>
+    </div>
+  `);
 }
 </script><!-- بند 6 : نظام الري -->
 <div class="section">
@@ -488,6 +520,10 @@ function addPlant() {
       <label>مسافة الزراعة</label>
       <select class="plantSpacing" onchange="calcPlant(this)">
         <option value="">اختر</option>
+        <option value="49">1 × 1 متر</option>
+        <option value="49">3 × 3 متر</option>
+        <option value="49">4 × 4 متر</option>
+        <option value="49">5 × 5 متر</option>
         <option value="49">7 × 7 متر</option>
         <option value="64">8 × 8 متر</option>
         <option value="100">10 × 10 متر</option>
@@ -506,20 +542,10 @@ function removePlant(btn) {
 <div class="section">
   <div class="section-title">8️⃣ الموجودات</div>
   <div class="section-body">
-    <!-- ================= المباني الثابته ================= -->
-    <h4>1- المباني الثابته </h4>
+    <!-- ================= الموجودات ================= -->
     <div id="buildingsContainer"></div>
-    <button type="button" onclick="addBuilding()">➕ إضافة مبنى</button>
+    <button type="button" onclick="addBuilding()">➕ إضافة </button>
     <hr>
-    <!-- ================= الموجودات على البئر ================= -->
-    <h4>2- الموجودات على البئر</h4>
-    <div id="wellAssetsContainer"></div>
-    <button type="button" onclick="addWellAsset()">➕ إضافة موجود على البئر</button>
-    <hr>
-    <!-- ================= أخرى ================= -->
-    <h4>3- أخرى</h4>
-    <div id="otherAssetsContainer"></div>
-    <button type="button" onclick="addOtherAsset()">➕ إضافة آخر</button>
   </div>
 </div>
 <script>
@@ -532,11 +558,11 @@ function handleAsset(select) {
   const note = box.querySelector('.assetNote');
   if (note) note.style.display = select.value ? 'block' : 'none';
 }
-/* ===== المباني الثابته ===== */
+/* ===== الموجودات===== */
 function addBuilding() {
   document.getElementById('buildingsContainer').insertAdjacentHTML('beforeend', `
     <div class="assetBox" style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
-      <label>نوع المبنى</label>
+      <label> </label>
       <select onchange="handleAsset(this)">
         <option value="">اختر</option>
         <option>سكن عمال</option>
