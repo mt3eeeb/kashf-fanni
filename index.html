@@ -568,11 +568,18 @@ function addWellAsset() {
         <option>رأس كهرب</option>
         <option>غطاس</option>
         <option>مكينة + طرمبة</option>
-        <option value="other">لا يوجد معدات على البئر</option>
+        <option value="other">لا توجد معدات على البئر</option>
       </select>
       <div class="assetNote" style="display:none; margin-top:8px;">
-        <label>وصف / ملاحظات</label>
-        <input type="text" placeholder="مثال: القدرة، العمق، الحالة">
+        <label>العمق(قدم)</label>
+        <input type="text" placeholder=>
+        <label>الهواء(قدم)</label>
+        <input type="text" placeholder=>
+        <label>القطر(بوصة)</label>
+        <input type="text" placeholder=>
+        <label>حالة البئر</label>
+        <input type="text" placeholder=>
+        </select>
       <button type="button" onclick="removeBox(this)">➖ حذف</button>
     </div>
   `);
@@ -622,10 +629,6 @@ function newForm(){
     document.querySelectorAll("input,select,textarea")
     .forEach(e=>e.value="");
   }
-}
-window.onload=function(){
-  const d=localStorage.getItem("farmForm");
-  if(d) document.body.innerHTML=d;
 }
 </script><script>
 window.addEventListener("load", ()=>{
