@@ -268,12 +268,6 @@ function calculate(){
     <div id="wellsContainer"></div>
     <button type="button" onclick="addWell()">➕ إضافة </button>
   <hr>
-<!-- ================= الموجودات على البئر ================= -->
-  <h4><!DOCTYPE html>
-  </html>الموجودات على البئر</h4>
-    <div id="wellAssetsContainer"></div>
-    <button type="button" onclick="addWellAsset()">➕ إضافة موجود على البئر</button>
-  <hr>
   </dv>
 </div>
 <script>
@@ -282,7 +276,7 @@ function addWell(){
 
   c.insertAdjacentHTML("beforeend", `
     <div class="wellBox" style="border:1px solid #ccc; padding:10px; margin-bottom:12px;">
-
+      <div class="assetBox" style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
       <h4 class="wellTitle">بئر رقم</h4>
 
       <div class="row" style="align-items:end;">
@@ -290,23 +284,38 @@ function addWell(){
           <label>Latitude</label>
           <input type="number" step="any" class="wellLat">
         </div>
-
         <div class="field">
           <label>Longitude</label>
           <input type="number" step="any" class="wellLng">
         </div>
 
+      <div class="wellAssetsContainer"></div>
+      <select onchange="handleAsset(this)">
+        <option value="">اختر</option>
+        <option>رأس كهرب+مضخه</option>
+        <option>غطاس</option>
+        <option>مكينة+مضخه</option>
+        <option value="other">لا توجد معدات على البئر</option>
+      </select>
+      <div class="assetNote" style="display:none; margin-top:8px;">
+        <label>العمق(قدم)</label>
+        <input type="text" placeholder=>
+        <label>الهواء(قدم)</label>
+        <input type="text" placeholder=>
+        <label>القطر(بوصة)</label>
+        <input type="text" placeholder=>
+        <label>حالة البئر</label>
+        <input type="text" placeholder=>
+        </div>
         <div class="field" style="flex:0; display:flex; gap:5px;">
           <button type="button" onclick="locateWell(this)">📍</button>
           <button type="button" onclick="openWellMap(this)">🗺️</button>
           <button type="button" onclick="removeWell(this)">➖</button>
         </div>
-      </div>
-
     </div>
   `);
 
-  renumberWells(); // ← مهم
+  renumberWells(); // ← هذا مهم جدًا
 }
 function removeWell(btn){
   btn.closest('.wellBox').remove();
@@ -317,8 +326,6 @@ function renumberWells(){
     .forEach((box, i)=>{
       box.querySelector(".wellTitle").innerText = `بئر رقم ${i+1}`;
     });
-}function removeWell(btn){
-  btn.closest('.row').remove();
 }
 function locateWell(btn){
   if(!navigator.geolocation){
@@ -353,32 +360,6 @@ function openWellMap(btn){
     `https://www.google.com/maps?q=${lat},${lng}`,
     "_blank"
   );
-}
-  function addWellAsset() {
-  document.getElementById('wellAssetsContainer').insertAdjacentHTML('beforeend', `
-    <div class="assetBox" style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
-      <label>الموجود</label>
-      <select onchange="handleAsset(this)">
-        <option value="">اختر</option>
-        <option>رأس كهرب+مضخه</option>
-        <option>غطاس</option>
-        <option>مكينة+مضخه</option>
-        <option value="other">لا توجد معدات على البئر</option>
-      </select>
-      <div class="assetNote" style="display:none; margin-top:8px;">
-        <label>العمق(قدم)</label>
-        <input type="text" placeholder=>
-        <label>الهواء(قدم)</label>
-        <input type="text" placeholder=>
-        <label>القطر(بوصة)</label>
-        <input type="text" placeholder=>
-        <label>حالة البئر</label>
-        <input type="text" placeholder=>
-        </select>
-      <button type="button" onclick="removeBox(this)">➖ حذف</button>
-     </div>
-    </div>
-  `);
 }
 </script><!-- بند 6 : نظام الري -->
 <div class="section">
@@ -676,3 +657,6 @@ function clearAll(){
 </html>
 </body>
 </html>
+
+
+
