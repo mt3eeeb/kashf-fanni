@@ -62,32 +62,11 @@ button{
   cursor:pointer;
 }
 /* ===== الطباعة ===== */
-@media print {
-
-  body {
-    margin: 0;
-    padding: 0;
-  }
-
-  .page {
-    page-break-after: always;
-  }
-
-  .page:last-child {
-    page-break-after: auto;
-  }
-
-  /* يمنع تكسير البند */
-  .section, .wellBox {
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-
-  /* إخفاء الأزرار */
-  button {
-    display: none !important;
-  }
-
+@media print{
+  body{ padding:0; background:#fff; }
+  button{ display:none !important; }
+  .page{ page-break-after:always; }
+  .page:last-child{ page-break-after:auto; }
 }
 </style>
 </head>
@@ -287,17 +266,17 @@ function calculate(){
   <div class="section-title">5️⃣ الآبار</div>
   <div class="section-body">
     <div id="wellsContainer"></div>
-    <button type="button" onclick="addWell()">➕ إضافة </button>
-  <hr>
-  </dv>
+    <button type="button" onclick="addWell()">➕ إضافة</button>
+  </div>
 </div>
+
 <script>
 function addWell(){
   const c = document.getElementById("wellsContainer");
 
   c.insertAdjacentHTML("beforeend", `
     <div class="wellBox" style="border:1px solid #ccc; padding:10px; margin-bottom:12px;">
-      <div class="assetBox" style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+
       <h4 class="wellTitle">بئر رقم</h4>
 
       <div class="row" style="align-items:end;">
@@ -305,49 +284,68 @@ function addWell(){
           <label>Latitude</label>
           <input type="number" step="any" class="wellLat">
         </div>
+
         <div class="field">
           <label>Longitude</label>
           <input type="number" step="any" class="wellLng">
         </div>
-        
-      <div class="wellAssetsContainer"></div>
-      <select onchange="handleAsset(this)">
-        <option value="">اختر</option>
-        <option>رأس كهرب+مضخه</option>
-        <option>غطاس</option>
-        <option>مكينة+مضخه</option>
-        <option value="other">لا توجد معدات على البئر</option>
-      <select>
-      <div class="assetNote" style="display:none; margin-top:8px;"></div>
-        <label>العمق(قدم)</label>
-        <input type="text" placeholder=>
-        <label>الهواء(قدم)</label>
-        <input type="text" placeholder=>
-        <label>القطر(بوصة)</label>
-        <input type="text" placeholder=>
-        <label>حالة البئر</label>
-        <input type="text" placeholder=>
-        </div>
+
         <div class="field" style="flex:0; display:flex; gap:5px;">
           <button type="button" onclick="locateWell(this)">📍</button>
           <button type="button" onclick="openWellMap(this)">🗺️</button>
           <button type="button" onclick="removeWell(this)">➖</button>
         </div>
+      </div>
+
+      <div class="assetBox" style="border:1px solid #ccc; padding:10px; margin-top:10px;">
+        <label>الموجود</label>
+        <select onchange="handleWellAsset(this)">
+          <option value="">اختر</option>
+          <option value="electric">رأس كهرب+مضخه</option>
+          <option value="submersible">غطاس</option>
+          <option value="engine">مكينة+مضخه</option>
+          <option value="none">لا توجد معدات على البئر</option>
+        </select>
+
+        <div class="assetNote" style="display:none; margin-top:8px;">
+          <label>العمق (قدم)</label>
+          <input type="text" placeholder="أدخل العمق">
+
+          <label>الهواء (قدم)</label>
+          <input type="text" placeholder="أدخل الهواء">
+
+          <label>القطر (بوصة)</label>
+          <input type="text" placeholder="أدخل القطر">
+
+          <label>حالة البئر</label>
+          <input type="text" placeholder="مثال: جيد">
+        </div>
+      </div>
+
     </div>
   `);
 
-  renumberWells(); // ← هذا مهم جدًا
+  renumberWells();
 }
+
+function handleWellAsset(select){
+  const box = select.closest('.assetBox');
+  const note = box.querySelector('.assetNote');
+  note.style.display = select.value === "none" ? "none" : "block";
+}
+
 function removeWell(btn){
   btn.closest('.wellBox').remove();
   renumberWells();
 }
+
 function renumberWells(){
   document.querySelectorAll("#wellsContainer .wellBox")
     .forEach((box, i)=>{
       box.querySelector(".wellTitle").innerText = `بئر رقم ${i+1}`;
     });
 }
+
 function locateWell(btn){
   if(!navigator.geolocation){
     alert("المتصفح لا يدعم تحديد الموقع");
@@ -369,6 +367,7 @@ function locateWell(btn){
     }
   );
 }
+
 function openWellMap(btn){
   const row = btn.closest('.row');
   const lat = row.querySelector('.wellLat').value.trim();
@@ -565,114 +564,115 @@ function removePlant(btn) {
 <div class="section">
   <div class="section-title">8️⃣ الموجودات</div>
   <div class="section-body">
-    <!-- ================= الموجودات ================= -->
     <div id="buildingsContainer"></div>
-    <button type="button" onclick="addBuilding()">➕ إضافة </button>
-    <hr>
+    <button type="button" onclick="addBuilding()">➕ إضافة</button>
   </div>
 </div>
+
 <script>
-/* ===== عناصر مشتركة ===== */
-function removeBox(btn) {
-  btn.closest('.assetBox').remove();
-}
-function handleAsset(select) {
-  const box = select.closest('.assetBox');
-  const note = box.querySelector('.assetNote');
-  if (note) note.style.display = select.value ? 'block' : 'none';
-}
-/* ===== الموجودات===== */
 function addBuilding() {
   document.getElementById('buildingsContainer').insertAdjacentHTML('beforeend', `
-    <div class="section">
-  <div class="section-title">8️⃣ الموجودات</div>
+    <div class="assetBox" style="border:1px solid #ccc; padding:12px; margin-bottom:12px; border-radius:8px;">
 
-  <div class="assetBox" style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+      <label style="font-weight:bold;">الموجود</label>
+      <select onchange="handleAsset(this)" style="width:100%; padding:6px; margin-bottom:8px;">
+        <option value="">اختر</option>
+        <option value="housing">سكن عمال</option>
+        <option value="barn">حظائر انعام</option>
+        <option value="store">مستودع</option>
+        <option value="tank">خزان ماء</option>
+        <option value="other">آخر</option>
+      </select>
 
-    <label>الموجود</label>
-<select onchange="handleAsset(this)">
-  <option value="">اختر</option>
-  <option value="housing">سكن عمال</option>
-  <option value="barn">حظائر انعام</option>
-  <option value="store">مستودع</option>
-  <option value="tank">خزان ماء</option>
-  <option value="other">آخر</option>
-</select>
-<label>وصف الموجود</label>
-      <input type="text" placeholder="اكتب الموجود بالتفصيل">
-<label>
-  <input type="checkbox" onchange="toggleAreaCalc(this)">
-  حساب المساحة
-</label>
+      <!-- الملاحظات (مخفية بالبداية) -->
+      <div class="noteBox" style="display:none;">
+        <label style="font-weight:bold;">ملاحظة / وصف</label>
+        <textarea rows="2" style="width:100%; padding:6px;"></textarea>
+      </div>
 
-<div class="areaCalc" style="display:none;">
-  <label>الطول (متر)</label>
-  <input type="number" class="len" step="0.01">
+      <!-- خيار حساب المساحة واضح وكبير -->
+      <div class="areaToggle" style="display:none; margin-top:10px;">
+        <label style="font-weight:bold; font-size:16px;">
+          <input type="checkbox" 
+                 style="width:18px; height:18px;"
+                 onchange="toggleAreaCalc(this)">
+          حساب المساحة
+        </label>
+      </div>
 
-  <label>العرض (متر)</label>
-  <input type="number" class="wid" step="0.01">
+      <div class="areaCalc" style="display:none; margin-top:10px;">
+        <label>الطول (متر)</label>
+        <input type="number" class="len" step="0.01" style="width:100%; margin-bottom:6px;">
 
-  <button type="button" onclick="calcArea(this)">احسب المساحة</button>
-  <div class="areaResult"></div>
-</div>
+        <label>العرض (متر)</label>
+        <input type="number" class="wid" step="0.01" style="width:100%; margin-bottom:6px;">
 
-<!-- حاسبة الخزان -->
-<div class="tankCalc" style="display:none;">
-  <label>نصف القطر (متر)</label>
-  <input type="number" class="tankR" step="0.01">
+        <button type="button" onclick="calcArea(this)" style="width:100%; margin-top:6px;">
+          احسب المساحة
+        </button>
 
-  <label>الارتفاع (متر)</label>
-  <input type="number" class="tankH" step="0.01">
+        <div class="areaResult" style="margin-top:6px; font-weight:bold;"></div>
+      </div>
 
-  <button type="button" onclick="calcTank(this)">احسب السعة</button>
-  <div class="tankResult"></div>
-</div>
-  </div>
+      <div class="tankCalc" style="display:none; margin-top:10px;">
+        <label>نصف القطر</label>
+        <input type="number" class="tankR" step="0.01" style="width:100%; margin-bottom:6px;">
+
+        <label>الارتفاع</label>
+        <input type="number" class="tankH" step="0.01" style="width:100%; margin-bottom:6px;">
+
+        <button type="button" onclick="calcTank(this)" style="width:100%; margin-top:6px;">
+          احسب السعة
+        </button>
+
+        <div class="tankResult" style="margin-top:6px; font-weight:bold;"></div>
+      </div>
+
+    </div>
   `);
 }
+
 function handleAsset(select){
   const box = select.closest('.assetBox');
-  const area = box.querySelector('.areaCalc');
-  const tank = box.querySelector('.tankCalc');
 
-  area.style.display = "none";
-  tank.style.display = "none";
+  // إظهار الملاحظات إذا اختار صنف
+  box.querySelector('.noteBox').style.display =
+    select.value ? "block" : "none";
 
-  if(select.value === "tank"){
-    tank.style.display = "block";
-  }
+  // إظهار خيار حساب المساحة إلا إذا خزان
+  box.querySelector('.areaToggle').style.display =
+    (select.value && select.value !== "tank") ? "block" : "none";
+
+  // إظهار حساب الخزان فقط إذا اختار خزان
+  box.querySelector('.tankCalc').style.display =
+    select.value === "tank" ? "block" : "none";
+
+  // إخفاء المساحة عند تغيير الصنف
+  box.querySelector('.areaCalc').style.display = "none";
 }
+
 function toggleAreaCalc(cb){
   const box = cb.closest('.assetBox');
-  const area = box.querySelector('.areaCalc');
-  area.style.display = cb.checked ? "block" : "none";
-}function calcArea(btn){
+  box.querySelector('.areaCalc').style.display =
+    cb.checked ? "block" : "none";
+}
+
+function calcArea(btn){
   const box = btn.closest('.areaCalc');
   const l = parseFloat(box.querySelector('.len').value);
   const w = parseFloat(box.querySelector('.wid').value);
-
-  if(!l || !w){
-    alert("أدخل الطول والعرض");
-    return;
-  }
-
-  const area = l * w;
+  if(!l || !w) return alert("أدخل القيم");
   box.querySelector('.areaResult').innerHTML =
-    `المساحة = <b>${area.toFixed(2)}</b> م²`;
+    `المساحة = ${(l*w).toFixed(2)} م²`;
 }
+
 function calcTank(btn){
   const box = btn.closest('.tankCalc');
   const r = parseFloat(box.querySelector('.tankR').value);
   const h = parseFloat(box.querySelector('.tankH').value);
-
-  if(!r || !h){
-    alert("أدخل القيم");
-    return;
-  }
-
-  const v = Math.PI * r * r * h;
+  if(!r || !h) return alert("أدخل القيم");
   box.querySelector('.tankResult').innerHTML =
-    `السعة = <b>${v.toFixed(2)}</b> م³`;
+    `السعة = ${(Math.PI*r*r*h).toFixed(2)} م³`;
 }
 </script><!-- ===== بند 9 ===== -->
   <div class="section">
@@ -681,22 +681,9 @@ function calcTank(btn){
       <label>اسم الباحث</label>
       <input id="researcherName">
       <button onclick="printPDF()">🖨 طباعة</button>
-      <div class="page">
-  <!-- بند 1 -->
-  <!-- بند 2 -->
-  <!-- بند 3 -->
-  <!-- بند 4 -->
-<div class="page">
-  <!-- بند 5 -->
-  <!-- بند 6 -->
-  <!-- بند 7 -->
-  <!-- بند 8 -->
-  <!-- بند 9 -->
-<div class="page">
-   <!-- بند 8 -->
-  <!-- بند 9 -->
-  <!-- ملاحق / صور / توقيع -->
+    </div>
   </div>
+</div>
 </div>
 <!-- ================= السكربت ================= -->
 <script>
