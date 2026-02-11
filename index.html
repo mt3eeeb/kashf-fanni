@@ -62,11 +62,32 @@ button{
   cursor:pointer;
 }
 /* ===== الطباعة ===== */
-@media print{
-  body{ padding:0; background:#fff; }
-  button{ display:none !important; }
-  .page{ page-break-after:always; }
-  .page:last-child{ page-break-after:auto; }
+@media print {
+
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  .page {
+    page-break-after: always;
+  }
+
+  .page:last-child {
+    page-break-after: auto;
+  }
+
+  /* يمنع تكسير البند */
+  .section, .wellBox {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* إخفاء الأزرار */
+  button {
+    display: none !important;
+  }
+
 }
 </style>
 </head>
@@ -288,7 +309,7 @@ function addWell(){
           <label>Longitude</label>
           <input type="number" step="any" class="wellLng">
         </div>
-
+        
       <div class="wellAssetsContainer"></div>
       <select onchange="handleAsset(this)">
         <option value="">اختر</option>
@@ -296,8 +317,8 @@ function addWell(){
         <option>غطاس</option>
         <option>مكينة+مضخه</option>
         <option value="other">لا توجد معدات على البئر</option>
-      </select>
-      <div class="assetNote" style="display:none; margin-top:8px;">
+      <select>
+      <div class="assetNote" style="display:none; margin-top:8px;"></div>
         <label>العمق(قدم)</label>
         <input type="text" placeholder=>
         <label>الهواء(قدم)</label>
@@ -660,9 +681,22 @@ function calcTank(btn){
       <label>اسم الباحث</label>
       <input id="researcherName">
       <button onclick="printPDF()">🖨 طباعة</button>
-    </div>
+      <div class="page">
+  <!-- بند 1 -->
+  <!-- بند 2 -->
+  <!-- بند 3 -->
+  <!-- بند 4 -->
+<div class="page">
+  <!-- بند 5 -->
+  <!-- بند 6 -->
+  <!-- بند 7 -->
+  <!-- بند 8 -->
+  <!-- بند 9 -->
+<div class="page">
+   <!-- بند 8 -->
+  <!-- بند 9 -->
+  <!-- ملاحق / صور / توقيع -->
   </div>
-</div>
 </div>
 <!-- ================= السكربت ================= -->
 <script>
