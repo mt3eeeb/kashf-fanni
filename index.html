@@ -578,28 +578,29 @@ function addBuilding() {
       <select onchange="handleAsset(this)" style="width:100%; padding:6px; margin-bottom:8px;">
         <option value="">اختر</option>
         <option value="housing">سكن عمال</option>
-        <option value="barn">حظائر انعام</option>
+        <option value="barn">حظائر اغنام</option>
         <option value="store">مستودع</option>
         <option value="tank">خزان ماء</option>
         <option value="other">آخر</option>
       </select>
 
-      <!-- الملاحظات (مخفية بالبداية) -->
+      <!-- الملاحظات -->
       <div class="noteBox" style="display:none;">
         <label style="font-weight:bold;">ملاحظة / وصف</label>
         <textarea rows="2" style="width:100%; padding:6px;"></textarea>
       </div>
 
-      <!-- خيار حساب المساحة واضح وكبير -->
+      <!-- خيار حساب المساحة -->
       <div class="areaToggle" style="display:none; margin-top:10px;">
         <label style="font-weight:bold; font-size:16px;">
-          <input type="checkbox" 
+          <input type="checkbox"
                  style="width:18px; height:18px;"
                  onchange="toggleAreaCalc(this)">
           حساب المساحة
         </label>
       </div>
 
+      <!-- حساب المساحة -->
       <div class="areaCalc" style="display:none; margin-top:10px;">
         <label>الطول (متر)</label>
         <input type="number" class="len" step="0.01" style="width:100%; margin-bottom:6px;">
@@ -614,6 +615,7 @@ function addBuilding() {
         <div class="areaResult" style="margin-top:6px; font-weight:bold;"></div>
       </div>
 
+      <!-- حساب الخزان -->
       <div class="tankCalc" style="display:none; margin-top:10px;">
         <label>نصف القطر</label>
         <input type="number" class="tankR" step="0.01" style="width:100%; margin-bottom:6px;">
@@ -628,26 +630,33 @@ function addBuilding() {
         <div class="tankResult" style="margin-top:6px; font-weight:bold;"></div>
       </div>
 
+      <!-- زر الحذف -->
+      <button type="button"
+              onclick="deleteAsset(this)"
+              style="margin-top:10px;">
+        حذف
+      </button>
+
     </div>
   `);
+}
+
+function deleteAsset(btn){
+  btn.closest('.assetBox').remove();
 }
 
 function handleAsset(select){
   const box = select.closest('.assetBox');
 
-  // إظهار الملاحظات إذا اختار صنف
   box.querySelector('.noteBox').style.display =
     select.value ? "block" : "none";
 
-  // إظهار خيار حساب المساحة إلا إذا خزان
   box.querySelector('.areaToggle').style.display =
     (select.value && select.value !== "tank") ? "block" : "none";
 
-  // إظهار حساب الخزان فقط إذا اختار خزان
   box.querySelector('.tankCalc').style.display =
     select.value === "tank" ? "block" : "none";
 
-  // إخفاء المساحة عند تغيير الصنف
   box.querySelector('.areaCalc').style.display = "none";
 }
 
